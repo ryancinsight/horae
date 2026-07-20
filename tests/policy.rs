@@ -38,6 +38,8 @@ fn adaptive_controller_accepts_and_rejects_by_mixed_tolerance() {
         .assess::<4>(step, 0.005, 1.0)
         .expect("invariant: finite observation");
     assert_eq!(accepted.decision(), StepDecision::Accept);
+    // One mixed-scale multiply/add and one normalization division contribute
+    // at most four first-order rounding units for these exact decimal inputs.
     assert!((accepted.normalized_error() - 5.0 / 11.0).abs() <= 4.0 * f64::EPSILON);
     assert!(accepted.scale() > 1.0);
 
@@ -45,6 +47,7 @@ fn adaptive_controller_accepts_and_rejects_by_mixed_tolerance() {
         .assess::<4>(step, 0.022, 1.0)
         .expect("invariant: finite observation");
     assert_eq!(rejected.decision(), StepDecision::Reject);
+    // The same mixed-scale evaluation and division use the bound above.
     assert!((rejected.normalized_error() - 2.0).abs() <= 4.0 * f64::EPSILON);
     assert!(rejected.scale() < 1.0);
 }
