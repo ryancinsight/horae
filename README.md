@@ -71,7 +71,14 @@ let report = step_into(
 )?;
 
 assert_eq!(report.evaluations(), 4);
-assert!((next[0] - (-0.1_f64).exp()).abs() < 1.0e-6);
+// RK4 matches exp(-h) through h⁴. For h=0.1 the alternating-series
+// remainder is bounded by h⁵/5!; the epsilon term covers evaluated rounding.
+let truncation_bound = 0.1_f64.powi(5) / 120.0;
+let rounding_bound = 32.0 * f64::EPSILON;
+assert!(
+    (next[0] - (-0.1_f64).exp()).abs()
+        <= truncation_bound + rounding_bound
+);
 # Ok(())
 # }
 ```
