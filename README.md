@@ -7,6 +7,11 @@ owns typed simulation time, explicit Runge--Kutta stepping, adaptive
 accept/reject policy, exact event clipping, and compile-time subcycle ratios.
 The name refers to the Horae, the Greek personifications of ordered time.
 
+Horae is independently versioned and consumed by the
+[Atlas multiphysics stack](https://github.com/ryancinsight/atlas). Its
+cross-repository ownership and migration boundary is recorded in
+[Atlas ADR 0022](https://github.com/ryancinsight/atlas/blob/main/docs/adr/0022-horae-athena-provider-extraction.md).
+
 ## Boundary
 
 Horae owns:
@@ -25,6 +30,11 @@ criteria, nonlinear or implicit solvers, coupling invocation, arrays, task
 scheduling, or device execution. Consumers supply equations through
 `ExplicitSystem`; Aequitas owns units, Eunomia owns scalar law, Leto owns CPU
 arrays, and Hephaestus owns GPU execution.
+
+Downstream domain and coupling packages implement `ExplicitSystem` and retain
+their equations, stability constraints, and state storage. They may consume
+Horae's typed time, event, and subcycle contracts without introducing a reverse
+dependency from Horae to a domain, scheduler, array, or device provider.
 
 ## Example
 
@@ -117,6 +127,11 @@ zero-sized. `StepWorkspace<T, STAGES>` allocates at construction and repeated
 `step_into` calls reuse it without allocation. Scalar arithmetic executes in
 the selected `T: eunomia::FloatElement`; coefficient metadata is converted at
 the kernel boundary.
+
+The crate is `no_std + alloc` in both feature configurations. Its default
+`std` feature only propagates standard-library support to Aequitas and
+Eunomia; `--no-default-features` keeps the same numerical and orchestration
+contracts without a standard-library dependency.
 
 The explicit recurrence follows the Butcher tableau formulation in
 Hairer, Nørsett, and Wanner,
