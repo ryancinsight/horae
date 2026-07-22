@@ -51,6 +51,9 @@ where
     /// strictly positive.
     #[inline]
     pub fn scaled(self, factor: T) -> Result<Self, TimeError> {
-        Self::new(self.0 * factor)
+        // Force the scalar `Mul<T> for Quantity<T, D>` dispatch; without the
+        // turbofish the multiplicative `Quantity × Quantity` impl captures
+        // inference and expects `factor: Quantity<T, _>`.
+        Self::new(<Time<T> as core::ops::Mul<T>>::mul(self.0, factor))
     }
 }

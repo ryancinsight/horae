@@ -8,6 +8,10 @@ All notable changes to Horae are documented in this file.
 
 - Align the direct Eunomia scalar dependency with Aequitas on the canonical
   `0.7.0` Git source, eliminating duplicate scalar type identities.
+- Force scalar `Mul<T>` dispatch in `StepSize::scaled` to disambiguate the
+  `Quantity × Quantity` and `Quantity × T` impl paths; the multiplicative impl
+  captured inference when both eunomia surfaces were in scope, producing a
+  `Quantity<T, _>` mismatch at `Self::new` (`step_size.rs:54`).
 
 ### Added
 
