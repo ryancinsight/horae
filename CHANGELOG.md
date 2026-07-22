@@ -4,6 +4,11 @@ All notable changes to Horae are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Align the direct Eunomia scalar dependency with Aequitas on the canonical
+  `0.7.0` Git source, eliminating duplicate scalar type identities.
+
 ### Added
 
 - Typed finite instants and positive step sizes over Aequitas time.
