@@ -1,0 +1,2 @@
+# horae -- Time Integration for Atlas
+`horae` advances caller-owned state through borrowed slice contracts using explicit/adaptive/subcycle stepping policies. Method markers and subcycle plans are zero-sized; stepping is allocation-free.

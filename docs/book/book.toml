@@ -1,0 +1,14 @@
+[book]
+title = "horae: Time Integration for Atlas"
+authors = ["Ryan Clanton"]
+src = "."
+language = "en"
+[build]
+build-dir = "../../target/book/horae"
+create-missing = false
+[output.html]
+no-section-label = false
+mathjax-support = true
+site-url = "/horae/"
+git-repository-url = "https://github.com/ryancinsight/horae"
+default-theme = "rust"

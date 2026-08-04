@@ -1,0 +1,3 @@
+# adaptive
+
+*Chapter prose deferred.*
