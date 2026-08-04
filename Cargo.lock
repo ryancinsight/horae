@@ -5,7 +5,7 @@ version = 4
 [[package]]
 name = "aequitas"
 version = "0.1.0"
-source = "git+https://github.com/ryancinsight/aequitas#262b3e09c19d844f57765d3e4ea6ab2336653d6d"
+source = "git+https://github.com/ryancinsight/aequitas#35fe13efa162d34f027083b12d76691cc54a52e1"
 dependencies = [
  "eunomia",
  "typenum",
@@ -76,8 +76,8 @@ dependencies = [
 
 [[package]]
 name = "eunomia"
-version = "0.7.0"
-source = "git+https://github.com/ryancinsight/eunomia#c65e32444324c9148921e5e99782cc865796da1f"
+version = "0.8.0"
+source = "git+https://github.com/ryancinsight/eunomia#c223fcf675d2fd6e84d723bfb707e47049e7a56a"
 dependencies = [
  "bytemuck",
  "libm",
