@@ -6,6 +6,13 @@ All notable changes to Horae are documented in this file.
 
 ### Changed
 
+- Document and pin the `EventSchedule` boundary semantics: `next_after`
+  skips events equal to the start instant (duplicate notifications cannot
+  cause a zero-length step or re-trigger), and `clip_step` reports an event
+  only when one lies strictly inside the proposed endpoint — otherwise the
+  original step is returned unchanged with no event. A value-semantic test
+  covers the duplicate-skips, no-clip-without-crossing, and empty-schedule
+  cases.
 - Align the direct Eunomia scalar dependency with Aequitas on the canonical
   `0.7.0` Git source, eliminating duplicate scalar type identities.
 - Force scalar `Mul<T>` dispatch in `StepSize::scaled` to disambiguate the

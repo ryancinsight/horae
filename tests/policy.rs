@@ -113,6 +113,33 @@ fn event_schedule_clips_to_exact_next_boundary() {
 }
 
 #[test]
+fn event_schedule_skips_duplicates_and_does_not_clip_without_crossing() {
+    let start = Instant::new(Time::from_base(1.0)).expect("invariant: finite fixture");
+    let events = [
+        start,
+        start,
+        Instant::new(Time::from_base(2.0)).expect("invariant: finite fixture"),
+    ];
+    let schedule = EventSchedule::new(&events).expect("duplicate events remain sorted");
+
+    assert_eq!(schedule.next_after(start), Some(events[2]));
+    let proposed = StepSize::new(Time::from_base(0.5)).expect("invariant: positive fixture");
+    let unchanged = schedule
+        .clip_step(start, proposed)
+        .expect("invariant: finite endpoint");
+    assert_eq!(unchanged.step(), proposed);
+    assert_eq!(unchanged.event(), None);
+    assert!(!unchanged.was_shortened());
+
+    let empty = EventSchedule::new(&[]).expect("empty schedule is valid");
+    let empty_result = empty
+        .clip_step(start, proposed)
+        .expect("invariant: finite endpoint");
+    assert_eq!(empty_result.step(), proposed);
+    assert_eq!(empty_result.event(), None);
+}
+
+#[test]
 fn event_schedule_rejects_decreasing_instants() {
     let events = [
         Instant::new(Time::from_base(2.0)).expect("invariant: finite fixture"),

@@ -39,6 +39,10 @@ where
     }
 
     /// Return the first event strictly later than `start`.
+    ///
+    /// Equal events are skipped, so duplicate notifications at the current
+    /// instant cannot cause a zero-length step or repeatedly re-trigger the
+    /// same boundary.
     #[must_use]
     pub fn next_after(&self, start: Instant<T>) -> Option<Instant<T>> {
         let mut low = 0;
@@ -57,7 +61,9 @@ where
     /// Clip `proposed` so its endpoint equals the next crossed event exactly.
     ///
     /// An event already equal to the proposed endpoint is reported but does
-    /// not count as shortening.
+    /// not count as shortening. If the next event lies after the proposed
+    /// endpoint, the original step is returned unchanged and no event is
+    /// reported.
     ///
     /// # Errors
     ///
