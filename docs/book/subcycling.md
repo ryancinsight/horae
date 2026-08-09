@@ -1,3 +1,112 @@
-# subcycling
+# Subcycle Plans
 
-*Chapter prose deferred.*
+Horae provides a const-generic contract for fixed-ratio subcycling: nested
+stepping at integer multiples of the parent step. Subcycle plans are
+zero-sized policy markers; they derive fine-step durations but invoke no
+coupled systems themselves.
+
+## Fixed-Ratio Subcycling
+
+A `SubcyclePlan<const RATIO: usize>` encodes a fixed subcycle ratio:
+
+```rust
+use horae::subcycling::SubcyclePlan;
+
+// Subdivide each parent step into 4 child steps
+let plan = SubcyclePlan::<4>::new()?;
+```
+
+The ratio is const-generic so it is known at compile time. Once constructed, the
+plan is zero-sized—no storage overhead.
+
+## Deriving the Child Step
+
+Given a parent step, the plan derives the child step:
+
+```rust
+use horae::time::StepSize;
+use aequitas::systems::si::quantities::Time;
+
+let parent = StepSize::new(Time::from_base(1.0))?;
+let child = plan.child_step(parent)?;
+
+// For RATIO=4, child is 0.25
+assert_eq!(plan.ratio(), 4);
+```
+
+The child step is guaranteed:
+- To be finite and positive (if parent is)
+- To divide evenly: `parent = RATIO * child`
+- To be representable in the chosen scalar type
+
+## Validation
+
+The plan rejects invalid ratios:
+
+```rust
+// Zero ratio is invalid
+let invalid = SubcyclePlan::<0>::new();
+assert_eq!(invalid, Err(SubcycleError::ZeroRatio));
+```
+
+## Typical Workflow
+
+A subcycling loop typically nests two integrators:
+
+```rust
+// Parent step
+let parent_report = step_into(
+    &system,
+    Rk4,
+    parent_time,
+    parent_step,
+    &parent_state,
+    &mut parent_next,
+    &mut parent_workspace,
+)?;
+
+// Subcycle with RATIO=4
+let plan = SubcyclePlan::<4>::new()?;
+let child_step = plan.child_step(parent_step)?;
+
+let mut child_state = parent_state.to_vec();
+for _ in 0..plan.ratio() {
+    let child_report = step_into(
+        &system,
+        Rk4,
+        child_time,
+        child_step,
+        &child_state,
+        &mut child_next,
+        &mut child_workspace,
+    )?;
+    child_time = child_report.end();
+    child_state.copy_from_slice(&child_next);
+}
+
+// Compare results for subcycling error estimation
+let subcycle_error = estimate_error(&parent_next, &child_state);
+```
+
+## Accuracy Implications
+
+Subcycling is most useful when:
+- The solution requires fine resolution in a subset of the domain
+- Local error scaling justifies the extra evaluations
+- The parent and child methods are the same order (to avoid degraded accuracy)
+
+A coarse parent step subdivided into `RATIO` fine steps (same method, same
+order) achieves higher accuracy than a single coarse step. The additional cost
+is `RATIO` system evaluations instead of one.
+
+## Use Cases
+
+**Multi-rate coupling**: Different subsystems evolve at different rates. A
+stiff system might take 1 large step while a fast system takes 4 small steps
+within the same parent interval.
+
+**Adaptive refinement**: An initial coarse step can be repeated at finer
+resolution as a fallback or to build an error estimator.
+
+**Convergence monitoring**: Compare coarse vs. fine results to monitor local
+truncation error without external error estimation.
