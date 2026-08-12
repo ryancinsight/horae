@@ -53,6 +53,32 @@ fn adaptive_controller_accepts_and_rejects_by_mixed_tolerance() {
 }
 
 #[test]
+fn adaptive_controller_monomorphizes_mixed_tolerance_for_f32() {
+    let controller = AdaptiveController::<f32>::new(1.0e-3, 1.0e-2, 0.9, 0.2, 5.0)
+        .expect("invariant: valid f32 controller");
+    let step = StepSize::new(Time::from_base(0.1_f32)).expect("invariant: positive f32 fixture");
+
+    let accepted = controller
+        .assess::<4>(step, 0.005_f32, 1.0_f32)
+        .expect("invariant: finite f32 observation");
+    assert_eq!(accepted.decision(), StepDecision::Accept);
+    assert!((accepted.normalized_error() - (5.0_f32 / 11.0_f32)).abs() <= 8.0 * f32::EPSILON);
+    assert!(accepted.scale() > 1.0_f32);
+
+    let rejected = controller
+        .assess::<4>(step, 0.022_f32, 1.0_f32)
+        .expect("invariant: finite f32 observation");
+    assert_eq!(rejected.decision(), StepDecision::Reject);
+    assert!((rejected.normalized_error() - 2.0_f32).abs() <= 8.0 * f32::EPSILON);
+    assert!(rejected.scale() < 1.0_f32);
+
+    assert_eq!(
+        controller.assess::<4>(step, f32::NAN, 1.0_f32),
+        Err(AdaptiveError::NonFiniteObservation)
+    );
+}
+
+#[test]
 fn adaptive_controller_reports_invalid_inputs() {
     assert_eq!(
         AdaptiveController::<f64>::new(0.0, 1.0e-2, 0.9, 0.2, 5.0),

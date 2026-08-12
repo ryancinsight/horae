@@ -1,24 +1,53 @@
-# Explicit systems
+# Explicit Systems
 
-Horae advances a caller-owned first-order system. The provider does not own an
-ODE, a mesh, or a state container; it asks an implementation of
-`system::ExplicitSystem<T>` to evaluate `dy/dt` into a caller-provided slice.
+Horae owns a reusable contract for first-order initial-value problems.
+The time-stepping machinery stays domain-agnostic by accepting a
+caller-supplied system through a thin seam: the `ExplicitSystem<T>` trait.
 
-The contract is deliberately small:
+## The ExplicitSystem Trait
 
-- `Instant<T>` carries the finite simulation time;
-- `state` is an immutable borrowed view of the trial state;
-- `derivative` is the mutable output buffer and must have the same dimension;
-- the associated `Error` lets a domain reject an evaluation without coupling
-  Horae to that domain's error vocabulary.
+An explicit system is a callable that evaluates a right-hand side (RHS) vector
+at a given time and state:
 
-A domain implementation can therefore retain its own equations and storage.
-The following is a focused, non-standalone API fragment:
+```rust
+pub trait ExplicitSystem<T> {
+    type Error;
 
-```rust,ignore
-use horae::{system::ExplicitSystem, time::Instant};
+    fn evaluate(
+        &self,
+        time: Instant<T>,
+        state: &[T],
+        derivative: &mut [T],
+    ) -> Result<(), Self::Error>;
+}
+```
 
-struct Decay { rate: f64 }
+The caller owns:
+- **State**: the solution vector `y` that progresses through time
+- **Derivatives**: storage for the system's evaluation `dy/dt = f(t, y)`
+- **Error handling**: the system's error type, preserved through Horae's API
+
+Horae owns:
+- **Time values**: the `Instant<T>` is guaranteed finite by its constructor
+- **Orchestration**: Horae decides when to evaluate the system and how many
+  times per step
+- **Storage**: the derivative and stage buffers are allocated and managed by
+  Horae through `StepWorkspace<T, STAGES>`
+
+This separation keeps Horae free from equation knowledge, spatial
+discretization, and domain-specific error handling.
+
+## Implementing ExplicitSystem
+
+Consider a simple exponential decay system: `dy/dt = -λ·y`.
+
+```rust
+use horae::system::ExplicitSystem;
+use horae::time::Instant;
+
+struct Decay {
+    rate: f64,
+}
 
 impl ExplicitSystem<f64> for Decay {
     type Error = core::convert::Infallible;
@@ -37,16 +66,62 @@ impl ExplicitSystem<f64> for Decay {
 }
 ```
 
-The implementation should enforce any domain-specific length checks; the
-trait itself cannot encode that relationship. `step_into` performs the
-structural checks it can see before the first evaluation and reports
-`StepError::DimensionMismatch` for an output or workspace mismatch. A system
-may still return its own error for semantic validation or a domain failure.
+The system object itself can hold parameters (like `rate: f64` above) or
+reference external state. Horae borrows it immutably and calls `evaluate`
+multiple times per step for higher-order methods.
 
-This boundary keeps integration policy reusable. Athena, Harmonia, and other
-consumers can implement the trait around their existing equations without
-moving CFL criteria, coupling, arrays, or device execution into Horae.
+## Scalar Types
 
-For a complete executable implementation, see
-[`examples/ordered_decay.rs`](../../examples/ordered_decay.rs), which uses
-the same contract with RK4, event clipping, adaptive control, and subcycling.
+Horae is generic over any `FloatElement` scalar: currently `f64` and `f32`.
+Both are supported with identical stability and error-handling semantics:
+
+```rust
+impl ExplicitSystem<f32> for Decay {
+    type Error = core::convert::Infallible;
+
+    fn evaluate(
+        &self,
+        _time: Instant<f32>,
+        state: &[f32],
+        derivative: &mut [f32],
+    ) -> Result<(), Self::Error> {
+        for (slope, value) in derivative.iter_mut().zip(state) {
+            *slope = -(self.rate as f32) * value;
+        }
+        Ok(())
+    }
+}
+```
+
+## Error Handling
+
+The system's error type is preserved through the step. If integration fails
+to produce a valid result, any system error is propagated back to the caller:
+
+```rust
+#[derive(Debug)]
+pub enum SystemError {
+    InvalidParameter,
+    ComputationFailed,
+}
+
+impl ExplicitSystem<f64> for MySystem {
+    type Error = SystemError;
+
+    fn evaluate(
+        &self,
+        time: Instant<f64>,
+        state: &[f64],
+        derivative: &mut [f64],
+    ) -> Result<(), Self::Error> {
+        if state.is_empty() {
+            return Err(SystemError::InvalidParameter);
+        }
+        // ... computation ...
+        Ok(())
+    }
+}
+```
+
+When `step_into` calls your system and receives an error, that error is
+returned immediately without consuming workspace allocations.
