@@ -80,4 +80,31 @@ proptest! {
         prop_assert_eq!(endpoint, event);
         prop_assert_eq!(clipped.event(), Some(event));
     }
+
+}
+
+#[test]
+fn event_clip_preserves_high_magnitude_small_offset() {
+    let start =
+        Instant::new(Time::from_base(1.0e8_f64)).expect("invariant: finite high-magnitude start");
+    let event = Instant::new(Time::from_base(1.0e8_f64 + 1.0e-6_f64))
+        .expect("invariant: representable event offset");
+    assert!(
+        event > start,
+        "invariant: high-magnitude offset is representable"
+    );
+    let events = [event];
+    let schedule = EventSchedule::new(&events).expect("invariant: singleton is sorted");
+    let proposed =
+        StepSize::new(Time::from_base(2.0e-6_f64)).expect("invariant: positive proposed step");
+
+    let clipped = schedule
+        .clip_step(start, proposed)
+        .expect("invariant: finite clipped endpoint");
+    let endpoint = start
+        .advance(clipped.step())
+        .expect("invariant: finite reconstructed endpoint");
+
+    assert_eq!(clipped.event(), Some(event));
+    assert_eq!(endpoint, event);
 }

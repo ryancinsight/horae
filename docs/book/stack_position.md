@@ -16,8 +16,8 @@ Horae is responsible for:
   allocates once and steps many times without further allocation.
 - **Error assessment**: Mixed absolute-relative adaptive control and
   accept/reject policy.
-- **Event clipping**: Exact endpoint detection for scheduled instants (no
-  overstepping, no interpolation).
+- **Event clipping**: No-overstep detection for scheduled instants; the event
+  value is returned as the authoritative endpoint (no interpolation).
 - **Subcycling**: Fixed-ratio nested stepping at integer multiples.
 - **Error propagation**: Every operation preserves the system's error type.
 

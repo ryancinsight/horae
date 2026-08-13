@@ -43,8 +43,9 @@ impl<const RATIO: usize> SubcyclePlan<RATIO> {
         T: FloatElement,
     {
         let ratio = validate_ratio::<RATIO>()?;
+        let divisor = T::from_f64(f64::from(ratio));
         parent
-            .scaled(T::from_f64(1.0 / f64::from(ratio)))
+            .scaled(divisor.recip())
             .map_err(SubcycleError::ChildStep)
     }
 }

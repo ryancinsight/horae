@@ -65,6 +65,13 @@ The clipped result contains:
 - **Duplicate skip**: Events equal to `current` are skipped and never returned
   by `clip_step`. This prevents a step of zero length after crossing an event.
 
+`EventClip::event()` is the authoritative scheduled endpoint. `EventClip::step()`
+stores the scalar difference from the current instant; floating-point consumers
+must not assume that adding the difference back is a general bit-exact identity.
+For positive, same-sign endpoints within a factor of two, Sterbenz's lemma
+provides the exact-subtraction precondition; use the returned event value when
+endpoint identity matters.
+
 ### Example
 
 ```rust
