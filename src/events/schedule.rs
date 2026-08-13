@@ -58,12 +58,14 @@ where
         self.events.get(low).copied()
     }
 
-    /// Clip `proposed` so its endpoint equals the next crossed event exactly.
+    /// Clip `proposed` so it reaches the next crossed event without overstepping.
     ///
     /// An event already equal to the proposed endpoint is reported but does
     /// not count as shortening. If the next event lies after the proposed
     /// endpoint, the original step is returned unchanged and no event is
-    /// reported.
+    /// reported. When a consumer needs the scheduled endpoint itself, it must
+    /// consume [`EventClip::event`](super::EventClip::event); the step is a
+    /// scalar difference and is not a general bit-exact reconstruction proof.
     ///
     /// # Errors
     ///

@@ -36,8 +36,12 @@ assert_eq!(plan.ratio(), 4);
 
 The child step is guaranteed:
 - To be finite and positive (if parent is)
-- To divide evenly: `parent = RATIO * child`
+- To approximate `parent / RATIO` in the selected scalar precision
 - To be representable in the chosen scalar type
+
+Reconstructing the parent from a non-binary ratio is subject to the selected
+scalar's rounding. The test suite exercises `RATIO = 3` for `f32` and `f64`
+against a bound of four first-order machine-epsilon units at the parent scale.
 
 ## Validation
 

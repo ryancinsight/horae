@@ -29,7 +29,13 @@ where
         self.step
     }
 
-    /// Event reached exactly at the clipped step endpoint, when present.
+    /// Scheduled event reached by the clipped step, when present.
+    ///
+    /// This value is the authoritative event endpoint. The accompanying
+    /// [`Self::step`] stores the scalar difference from the start; recomputing
+    /// `start + step` is bit-exact only when the subtraction and addition meet
+    /// the Sterbenz-style cancellation precondition for the selected scalar.
+    /// Consumers that require the scheduled value must use this event directly.
     #[must_use]
     pub const fn event(&self) -> Option<Instant<T>> {
         self.event
