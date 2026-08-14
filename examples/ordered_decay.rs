@@ -1,5 +1,7 @@
 //! Run an RK4 step clipped to an event and inspect follow-on policies.
 
+#![expect(clippy::print_stdout, reason = "example stdout is the deliverable")]
+
 use aequitas::systems::si::quantities::Time;
 use horae::{
     adaptive::AdaptiveController,

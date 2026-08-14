@@ -13,7 +13,7 @@ categories = ["no-std", "science"]
 publish = false
 
 [dependencies]
-aequitas = { version = "0.1.0", git = "https://github.com/ryancinsight/aequitas", default-features = false }
+aequitas = { version = "0.2.0", git = "https://github.com/ryancinsight/aequitas", default-features = false }
 eunomia = { version = "0.8.0", git = "https://github.com/ryancinsight/eunomia", default-features = false }
 
 [dev-dependencies]
@@ -29,8 +29,22 @@ missing_docs = "deny"
 unsafe_code = "forbid"
 
 [lints.clippy]
-pedantic = { level = "warn", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+
+# Pedantic floor: this crate is pedantic-clean. The census that established
+# this floor (`cargo clippy --all-targets`) found zero hits in every pedantic
+# class, so there is no allow-list and no ratchet -- every pedantic lint is a
+# hard error. A new hit is fixed, never allowed here.
+
+# --- Restriction floor ---
+# Zero production `unwrap()` sites, so `unwrap_used` is denied outright with no
+# per-file `expect` ratchet. Library output belongs to the caller's logging
+# layer, so the print/`dbg!` family is denied too; `examples/` carry a per-file
+# `#![expect(...)]` because a runnable example's stdout is its deliverable.
 unwrap_used = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+dbg_macro = "deny"
 
 [profile.dev]
 debug = "line-tables-only"
