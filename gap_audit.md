@@ -11,6 +11,9 @@ policy documents and tests the derived `gamma_4` bound for its four rounded
 operations. The root Atlas backlog owns the cross-repository integration
 record.
 
+The generated ADR index now records ADR 0001's existing `Accepted` status;
+the index is derived state and no decision content changed.
+
 ## Boundary
 
 Horae owns typed simulation time, explicit tableaus, adaptive control, event

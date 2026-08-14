@@ -19,6 +19,8 @@
       reported event instant authoritative, and test the large-magnitude case.
 - [x] Replace the subcycle bit-identity claim with the derived ratio-three
       `gamma_4` reconstruction bound in code, tests, and book text.
+- [x] Regenerate the ADR index from the existing canonical `Status: Accepted`
+      header for ADR 0001.
 
 ## Open (not locally actionable)
 

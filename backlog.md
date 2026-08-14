@@ -36,6 +36,9 @@ CFDrs, helios) and the domain layer.
   `gamma_4` bound. Evidence: large-magnitude event regression and policy
   rounding-bound test.
 
+- [x] [patch] Refresh the generated ADR index from ADR 0001's existing
+  canonical status header; no decision content changes.
+
 - [x] [minor] Subcycle policy: nested time refinement with a bounded
   subcycling budget and rounded parent/child time alignment. Evidence: `subcycling`
   suite.
