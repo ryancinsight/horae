@@ -6,11 +6,16 @@ All notable changes to Horae are documented in this file.
 
 ### Changed
 
+- Qualify event endpoint reconstruction with the Sterbenz exact-subtraction
+  condition and document `EventClip::event()` as the authoritative boundary;
+  add a large-magnitude regression case.
+- Replace the unconditional subcycle parent/child bit-identity claim with the
+  derived `gamma_4` rounding bound for the ratio-three `f64` contract.
 - Document and pin the `EventSchedule` boundary semantics: `next_after`
   skips events equal to the start instant (duplicate notifications cannot
-  cause a zero-length step or re-trigger), and `clip_step` reports an event
-  only when one lies strictly inside the proposed endpoint — otherwise the
-  original step is returned unchanged with no event. A value-semantic test
+  cause a zero-length step or re-trigger), and `clip_step` reports an event at
+  or before the proposed endpoint — otherwise the original step is returned
+  unchanged with no event. A value-semantic test
   covers the duplicate-skips, no-clip-without-crossing, and empty-schedule
   cases.
 - Align the direct Eunomia scalar dependency with Aequitas on the canonical
@@ -29,5 +34,5 @@ All notable changes to Horae are documented in this file.
 - Slice-based explicit-system evaluation with associated errors.
 - Const-generic Euler, midpoint, and RK4 tableaus with reusable workspaces.
 - Allocation-free fixed-step and adaptive reports.
-- Borrowed event scheduling with exact step clipping.
+- Borrowed event scheduling with authoritative event-boundary clipping.
 - Zero-sized const-generic subcycle-ratio plans.

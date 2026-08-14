@@ -1,4 +1,4 @@
-//! Borrowed event-time scheduling and exact step clipping.
+//! Borrowed event-time scheduling and authoritative event-boundary clipping.
 
 mod error;
 mod report;

@@ -46,7 +46,9 @@ Create Horae as one independent `no_std + alloc` crate.
   an equation-specific estimator.
 - `EventSchedule<'a, T>` validates and borrows sorted instants. Binary search
   finds the next event, and clipping returns its scalar difference together
-  with the event value required for exact endpoint identity.
+  with the event value required for endpoint identity. Exact reconstruction
+  from the scalar difference is guaranteed only under the documented Sterbenz
+  precondition.
 - `SubcyclePlan<const RATIO: usize>` is a zero-sized validated ratio. It
   derives a fine step in native scalar precision, subject to the scalar's
   rounding bound, but invokes no coupled systems.
@@ -96,7 +98,8 @@ than duplicate the algorithms.
 - value-semantic tests exercise Euler, midpoint, and RK4 against independent
   analytical or polynomial results;
 - a time-dependent system proves stage instants use the `C` coefficients;
-- property tests cover constant derivatives and exact event clipping;
+- property tests cover constant derivatives, Sterbenz-qualified event endpoint
+  reconstruction, and the derived ratio-three subcycle rounding bound;
 - negative tests cover invalid time, dimensions, controller parameters,
   ordering, and ratios;
 - layout tests pin zero-sized marker and transparent-newtype claims;

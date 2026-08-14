@@ -66,6 +66,11 @@ where
     /// reported. When a consumer needs the scheduled endpoint itself, it must
     /// consume [`EventClip::event`](super::EventClip::event); the step is a
     /// scalar difference and is not a general bit-exact reconstruction proof.
+    /// For finite same-sign endpoints whose magnitudes differ by at most a
+    /// factor of two, Sterbenz's theorem makes that subtraction exact and
+    /// endpoint reconstruction recovers the event. Outside that condition,
+    /// the duration remains correctly rounded but reconstruction is not an
+    /// exactness guarantee.
     ///
     /// # Errors
     ///

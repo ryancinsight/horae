@@ -4,7 +4,7 @@
 
 Horae is the Atlas time-integration policy and orchestration foundation. It
 owns typed simulation time, explicit Runge--Kutta stepping, adaptive
-accept/reject policy, exact event clipping, and compile-time subcycle ratios.
+accept/reject policy, event-boundary clipping, and compile-time subcycle ratios.
 The name refers to the Horae, the Greek personifications of ordered time.
 
 Horae is independently versioned and consumed by the

@@ -34,6 +34,18 @@ impl<const RATIO: usize> SubcyclePlan<RATIO> {
 
     /// Derive one fine step from a parent step.
     ///
+    /// The returned duration is the rounded product of `parent` and the
+    /// representable reciprocal of `RATIO`. Repeating it `RATIO` times is
+    /// therefore subject to the scalar's rounding error; callers must not
+    /// require bit-identical reconstruction of `parent` for ratios whose
+    /// reciprocal is not exactly representable. For example, for positive
+    /// `f64` values and `RATIO = 3`, the sequential reconstruction has the
+    /// bound `|reconstructed - parent| <= gamma_4 * |parent|`, where
+    /// `gamma_n = n * u / (1 - n * u)` and `u = f64::EPSILON / 2`. The four
+    /// rounded operations are reciprocal, scaling multiplication, and two
+    /// additions; the bound assumes round-to-nearest without overflow or
+    /// underflow.
+    ///
     /// # Errors
     ///
     /// Returns a ratio validation error or [`SubcycleError::ChildStep`] when

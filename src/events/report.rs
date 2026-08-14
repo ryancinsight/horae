@@ -24,6 +24,14 @@ where
     }
 
     /// Step ending no later than the next event.
+    ///
+    /// When [`Self::event`] is `Some`, this value is the rounded positive
+    /// duration from the clipping start to that event. The event instant is
+    /// the authoritative boundary: reconstructing it with
+    /// `start.advance(self.step())` is exact only when the subtraction that
+    /// produced the duration satisfies the Sterbenz condition for the scalar
+    /// (finite same-sign operands whose magnitudes differ by at most a factor
+    /// of two).
     #[must_use]
     pub const fn step(&self) -> StepSize<T> {
         self.step

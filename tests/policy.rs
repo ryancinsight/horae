@@ -139,6 +139,25 @@ fn event_schedule_clips_to_exact_next_boundary() {
 }
 
 #[test]
+fn event_clip_preserves_large_same_sign_endpoint_under_sterbenz() {
+    let start_value = 1.0e8_f64;
+    let start = Instant::new(Time::from_base(start_value)).expect("invariant: finite fixture");
+    let event =
+        Instant::new(Time::from_base(start_value + 1.0e-6)).expect("invariant: finite fixture");
+    assert!(event > start, "fixture must survive scalar quantization");
+    let schedule =
+        EventSchedule::new(core::slice::from_ref(&event)).expect("invariant: singleton is sorted");
+    let proposed = StepSize::new(Time::from_base(2.0e-6)).expect("invariant: positive fixture");
+
+    let clipped = schedule
+        .clip_step(start, proposed)
+        .expect("invariant: finite endpoint");
+
+    assert_eq!(clipped.event(), Some(event));
+    assert_eq!(start.advance(clipped.step()), Ok(event));
+}
+
+#[test]
 fn event_schedule_skips_duplicates_and_does_not_clip_without_crossing() {
     let start = Instant::new(Time::from_base(1.0)).expect("invariant: finite fixture");
     let events = [
@@ -188,6 +207,28 @@ fn subcycle_plan_derives_only_ratio_and_child_step() {
     assert_eq!(plan.ratio(), 4);
     assert_eq!((*child.as_time().as_base()).to_bits(), 0.25_f64.to_bits());
     assert_eq!(SubcyclePlan::<0>::new(), Err(SubcycleError::ZeroRatio));
+}
+
+#[test]
+fn subcycle_ratio_three_reconstructs_with_derived_rounding_bound() {
+    let plan = SubcyclePlan::<3>::new().expect("invariant: nonzero bounded ratio");
+    let parent_value = 0.7_f64;
+    let parent = StepSize::new(Time::from_base(parent_value)).expect("invariant: positive fixture");
+    let child = plan
+        .child_step(parent)
+        .expect("invariant: representable child");
+    let child_value = *child.as_time().as_base();
+    let reconstructed = (child_value + child_value) + child_value;
+
+    // Reciprocal, scaling multiplication, and two left-associated additions
+    // contribute four round-to-nearest operations. With unit roundoff
+    // u = epsilon / 2, the standard gamma_n bound is n*u/(1 - n*u).
+    let unit_roundoff = f64::EPSILON / 2.0;
+    let operation_count = 4.0_f64;
+    let gamma_four = operation_count * unit_roundoff / (1.0 - operation_count * unit_roundoff);
+    let bound = gamma_four * parent_value.abs();
+
+    assert!((reconstructed - parent_value).abs() <= bound);
 }
 
 fn assert_ratio_three_reconstruction<T>()
