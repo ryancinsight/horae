@@ -36,8 +36,17 @@ assert_eq!(plan.ratio(), 4);
 
 The child step is guaranteed:
 - To be finite and positive (if parent is)
-- To divide evenly: `parent = RATIO * child`
-- To be representable in the chosen scalar type
+- To use the representable reciprocal of `RATIO` in the chosen scalar type
+- To carry a bounded rounding error when repeated `RATIO` times
+
+The repeated child duration is not generally bit-identical to the parent.
+For positive `f64` values with `RATIO = 3`, the reciprocal, scaling
+multiplication, and two sequential additions give the derived bound
+`|reconstructed - parent| <= gamma_4 * |parent|`, where
+`gamma_n = n * u / (1 - n * u)` and `u = f64::EPSILON / 2`. This assumes
+round-to-nearest with no overflow or underflow. A coupling boundary should
+use its typed instant or event value rather than relying on bit identity of a
+reconstructed duration.
 
 ## Validation
 

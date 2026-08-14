@@ -15,9 +15,15 @@
       events, explicit systems, RK4, and subcycling chapters with runnable
       examples; mdBook build verified.
 - [x] Record the f32 adaptive-policy contract in the book prose (PR #7).
+- [x] Qualify event endpoint exactness with the Sterbenz condition, make the
+      reported event instant authoritative, and test the large-magnitude case.
+- [x] Replace the subcycle bit-identity claim with the derived ratio-three
+      `gamma_4` reconstruction bound in code, tests, and book text.
 
 ## Open (not locally actionable)
 
+- [ ] Hermetic `mdbook test docs/book` coverage for the existing book snippets;
+      the current failure is documented as H-004 in `gap_audit.md`.
 - [ ] Higher-order embedded adaptive tableaus (Dormand-Prince family) when a
       consumer need emerges.
 - [ ] Stiff/implicit integration policy.

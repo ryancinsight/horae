@@ -1,5 +1,16 @@
 # Horae ownership gap audit
 
+## ATLAS-HORAE-EXACTNESS-069 — resolved 2026-08-14
+
+The event contract now treats `EventClip::event()` as the authoritative
+boundary and states the Sterbenz precondition required for exact reconstruction
+from `start + step`. A regression at `start = 1e8` and a `1e-6` event offset
+passes under that precondition. The subcycle contract no longer claims
+bit-identical parent reconstruction for every ratio; the ratio-three `f64`
+policy documents and tests the derived `gamma_4` bound for its four rounded
+operations. The root Atlas backlog owns the cross-repository integration
+record.
+
 ## Boundary
 
 Horae owns typed simulation time, explicit tableaus, adaptive control, event
@@ -23,6 +34,8 @@ stiff/implicit stepping, or consumer solver policy.
 | H-002 | Stiff/implicit integration policy | Open — explicit-policy-only boundary today |
 | H-003 | Registry publication (`publish = false`, occupied name) | Open — owner-gated facade/publication follow-up |
 
-No source-level gaps remain in the delivered surface: no `TODO`/`FIXME`/
-`unimplemented!` markers exist in `src/`, and all gates are green at the
-audited revision.
+No delivered source-level gaps remain: no `TODO`/`FIXME`/`unimplemented!`
+markers exist in `src/`, and the Rust gates are green at the audited revision.
+The separate documentation gate H-004 remains open because the existing book
+contains standalone pseudocode, prose formulas, and cross-snippet declarations
+that `mdbook test` currently compiles as Rust without their surrounding context.

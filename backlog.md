@@ -30,8 +30,14 @@ CFDrs, helios) and the domain layer.
   deterministic time-ordered dispatch. Evidence: `events` suite
   (`b6fa57f docs(horae): Pin EventSchedule duplicate-skip and no-clip-without-crossing semantics`).
 
+- [x] [patch] Numerical boundary contracts: event identity is authoritative
+  through `EventClip::event()`, reconstruction is qualified by the Sterbenz
+  condition, and ratio-three subcycle reconstruction carries a derived
+  `gamma_4` bound. Evidence: large-magnitude event regression and policy
+  rounding-bound test.
+
 - [x] [minor] Subcycle policy: nested time refinement with a bounded
-  subcycling budget and parent/child time alignment. Evidence: `subcycling`
+  subcycling budget and rounded parent/child time alignment. Evidence: `subcycling`
   suite.
 
 - [x] [patch] Author and close the provider book (ATLAS-HORAE-PROVIDER-DOCS-001):
@@ -49,6 +55,10 @@ CFDrs, helios) and the domain layer.
 
 ## Deferred (documented boundary)
 
+- [ ] [patch] Make `mdbook test docs/book` hermetic. Existing book snippets
+  mix standalone pseudocode, prose formulas, and cross-snippet declarations;
+  the current command fails before reaching the changed event/subcycle text.
+  The Rust crate gates and `cargo test --doc` remain green.
 - [ ] [minor] Higher-order adaptive tableaus beyond the RK4 family (Dormand-
   Prince, etc.). The current explicit/adaptive surface satisfies existing
   consumers; a consumer need for embedded higher-order pairs would open this.
