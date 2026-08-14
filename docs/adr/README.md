@@ -6,4 +6,4 @@
 
 | ADR | Title | Status |
 | --- | ----- | ------ |
-| [0001](0001-time-integration-boundary.md) | Own time-integration policy in Horae | — |
+| [0001](0001-time-integration-boundary.md) | Own time-integration policy in Horae | Accepted |
