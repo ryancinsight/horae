@@ -13,7 +13,9 @@ smaller than a complete solver framework:
 - time values require physical units and ordering invariants;
 - explicit one-step methods share the Butcher-tableau recurrence;
 - stage storage must be reusable;
-- event endpoints must be reached exactly rather than crossed;
+- event endpoints must not be crossed; the scheduled event value is returned as
+  the authoritative endpoint because reconstructing it from a floating-point
+  duration is not generally bit-exact;
 - adaptive acceptance and subcycle ratios are policy, not equation ownership.
 
 The Runge--Kutta coefficient model and order terminology follow Hairer,
@@ -43,9 +45,13 @@ Create Horae as one independent `no_std + alloc` crate.
   scale. It returns an allocation-free accept/reject report and never computes
   an equation-specific estimator.
 - `EventSchedule<'a, T>` validates and borrows sorted instants. Binary search
-  finds the next event, and clipping uses the exact event difference.
+  finds the next event, and clipping returns its scalar difference together
+  with the event value required for endpoint identity. Exact reconstruction
+  from the scalar difference is guaranteed only under the documented Sterbenz
+  precondition.
 - `SubcyclePlan<const RATIO: usize>` is a zero-sized validated ratio. It
-  derives a fine step but invokes no coupled systems.
+  derives a fine step in native scalar precision, subject to the scalar's
+  rounding bound, but invokes no coupled systems.
 - Aequitas and Eunomia remain direct dependencies so unit and scalar ownership
   are visible. Horae defines neither vocabulary locally.
 
@@ -92,7 +98,8 @@ than duplicate the algorithms.
 - value-semantic tests exercise Euler, midpoint, and RK4 against independent
   analytical or polynomial results;
 - a time-dependent system proves stage instants use the `C` coefficients;
-- property tests cover constant derivatives and exact event clipping;
+- property tests cover constant derivatives, Sterbenz-qualified event endpoint
+  reconstruction, and the derived ratio-three subcycle rounding bound;
 - negative tests cover invalid time, dimensions, controller parameters,
   ordering, and ratios;
 - layout tests pin zero-sized marker and transparent-newtype claims;

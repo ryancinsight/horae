@@ -4,7 +4,7 @@
 
 Horae is the Atlas time-integration policy and orchestration foundation. It
 owns typed simulation time, explicit Runge--Kutta stepping, adaptive
-accept/reject policy, exact event clipping, and compile-time subcycle ratios.
+accept/reject policy, event-boundary clipping, and compile-time subcycle ratios.
 The name refers to the Horae, the Greek personifications of ordered time.
 
 Horae is independently versioned and consumed by the
@@ -22,7 +22,8 @@ Horae owns:
 - const-generic explicit tableaus and one backend-neutral stepping recurrence;
 - reusable stage workspaces;
 - error-based adaptive decisions and reports;
-- borrowed, sorted event schedules with exact endpoint clipping;
+- borrowed, sorted event schedules with no-overstep clipping and authoritative
+  event endpoints;
 - zero-sized, const-generic subcycle-ratio plans.
 
 Horae does not own equations, spatial discretization, stability or CFL
@@ -157,7 +158,8 @@ cargo deny check
 
 Behavioral tests compare all three method instantiations with independent
 closed-form or polynomial oracles. Property tests cover constant-rate
-integration and event clipping. Layout tests prove policy markers are
+integration, high-magnitude event clipping, and scalar-bounded ratio
+reconstruction. Layout tests prove policy markers are
 zero-sized and time newtypes remain transparent. A dedicated instrumented
 allocator test proves repeated `step_into` calls allocate, reallocate, and
 deallocate zero times after workspace construction.

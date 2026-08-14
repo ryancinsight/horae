@@ -24,12 +24,26 @@ where
     }
 
     /// Step ending no later than the next event.
+    ///
+    /// When [`Self::event`] is `Some`, this value is the rounded positive
+    /// duration from the clipping start to that event. The event instant is
+    /// the authoritative boundary: reconstructing it with
+    /// `start.advance(self.step())` is exact only when the subtraction that
+    /// produced the duration satisfies the Sterbenz condition for the scalar
+    /// (finite same-sign operands whose magnitudes differ by at most a factor
+    /// of two).
     #[must_use]
     pub const fn step(&self) -> StepSize<T> {
         self.step
     }
 
-    /// Event reached exactly at the clipped step endpoint, when present.
+    /// Scheduled event reached by the clipped step, when present.
+    ///
+    /// This value is the authoritative event endpoint. The accompanying
+    /// [`Self::step`] stores the scalar difference from the start; recomputing
+    /// `start + step` is bit-exact only when the subtraction and addition meet
+    /// the Sterbenz-style cancellation precondition for the selected scalar.
+    /// Consumers that require the scheduled value must use this event directly.
     #[must_use]
     pub const fn event(&self) -> Option<Instant<T>> {
         self.event

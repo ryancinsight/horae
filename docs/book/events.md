@@ -1,8 +1,8 @@
 # Event Schedules
 
-Horae provides exact event detection: when a proposed step would cross a
-scheduled event, the step is clipped exactly to the event's time. No
-overstepping, no interpolation artifacts.
+Horae provides event-boundary detection: when a proposed step would cross a
+scheduled event, the result carries the event instant and a positive duration
+to it. The returned event value is authoritative; no interpolation is used.
 
 ## Sorted Event Sequences
 
@@ -53,7 +53,7 @@ let clipped = schedule.clip_step(current, proposed)?;
 The clipped result contains:
 
 - **step**: the actual step taken (shortened if it hits an event)
-- **event**: `Some(instant)` if an event lies strictly inside `[current, current + step]`
+- **event**: the authoritative `Some(instant)` when an event is reached
 - **was_shortened**: a flag indicating whether the step was clipped
 
 ### Semantics
@@ -64,6 +64,13 @@ The clipped result contains:
   no shortening occurs (the step already reaches it exactly).
 - **Duplicate skip**: Events equal to `current` are skipped and never returned
   by `clip_step`. This prevents a step of zero length after crossing an event.
+
+`EventClip::event()` is the authoritative scheduled endpoint. `EventClip::step()`
+stores the scalar difference from the current instant; floating-point consumers
+must not assume that adding the difference back is a general bit-exact identity.
+For positive, same-sign endpoints within a factor of two, Sterbenz's lemma
+provides the exact-subtraction precondition; use the returned event value when
+endpoint identity matters.
 
 ### Example
 
@@ -129,5 +136,8 @@ if let Some(event) = clipped.event() {
 }
 ```
 
-This ensures that event times are reached exactly, enabling precise
-trigger-based logic without root-finding or dense output.
+This enables precise trigger-based logic without root-finding or dense output.
+The event value must be used for boundary identity. Reconstructing an endpoint
+from `current + step` is exact for finite same-sign endpoints within a factor
+of two in magnitude (Sterbenz's condition); outside that condition it is only
+a rounded arithmetic reconstruction.
