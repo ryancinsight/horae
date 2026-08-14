@@ -230,3 +230,29 @@ fn subcycle_ratio_three_reconstructs_with_derived_rounding_bound() {
 
     assert!((reconstructed - parent_value).abs() <= bound);
 }
+
+fn assert_ratio_three_reconstruction<T>()
+where
+    T: eunomia::RealField,
+{
+    let parent_value = T::from_f64(7.0);
+    let parent =
+        StepSize::new(Time::from_base(parent_value)).expect("invariant: positive parent step");
+    let child = SubcyclePlan::<3>::new()
+        .expect("invariant: nonzero ratio")
+        .child_step(parent)
+        .expect("invariant: representable child step");
+    let child_value = *child.as_time().as_base();
+    let reconstructed = child_value * T::from_f64(3.0);
+
+    // One reciprocal and one scaling multiply contribute at most four first-
+    // order rounding units at this fixed parent magnitude.
+    let bound = T::from_f64(4.0) * T::EPSILON * parent_value.abs();
+    assert!((reconstructed - parent_value).abs() <= bound);
+}
+
+#[test]
+fn subcycle_ratio_three_reconstructs_within_scalar_rounding_bound() {
+    assert_ratio_three_reconstruction::<f32>();
+    assert_ratio_three_reconstruction::<f64>();
+}

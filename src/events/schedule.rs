@@ -58,20 +58,18 @@ where
         self.events.get(low).copied()
     }
 
-    /// Clip `proposed` at the next crossed event boundary.
+    /// Clip `proposed` so it reaches the next crossed event without overstepping.
     ///
     /// An event already equal to the proposed endpoint is reported but does
     /// not count as shortening. If the next event lies after the proposed
     /// endpoint, the original step is returned unchanged and no event is
-    /// reported. When an event is reported, [`EventClip::event`] is the
-    /// authoritative instant; [`EventClip::step`] contains its rounded
-    /// positive duration from `start`.
-    ///
-    /// For finite same-sign `start` and event instants whose magnitudes differ
-    /// by at most a factor of two, Sterbenz's theorem makes the subtraction
-    /// exact, so adding the returned duration to `start` recovers the event.
-    /// Outside that condition, the duration remains the correctly rounded
-    /// result of the subtraction, but endpoint reconstruction is not an
+    /// reported. When a consumer needs the scheduled endpoint itself, it must
+    /// consume [`EventClip::event`](super::EventClip::event); the step is a
+    /// scalar difference and is not a general bit-exact reconstruction proof.
+    /// For finite same-sign endpoints whose magnitudes differ by at most a
+    /// factor of two, Sterbenz's theorem makes that subtraction exact and
+    /// endpoint reconstruction recovers the event. Outside that condition,
+    /// the duration remains correctly rounded but reconstruction is not an
     /// exactness guarantee.
     ///
     /// # Errors

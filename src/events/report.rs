@@ -37,12 +37,13 @@ where
         self.step
     }
 
-    /// Authoritative event instant reached by this clipped step, when present.
+    /// Scheduled event reached by the clipped step, when present.
     ///
-    /// Consumers handling a boundary should use this value rather than
-    /// reconstructing an endpoint from [`Self::step`]. The latter is an
-    /// arithmetic duration and can differ by a representable ulp outside the
-    /// Sterbenz exact-subtraction condition documented on [`Self::step`].
+    /// This value is the authoritative event endpoint. The accompanying
+    /// [`Self::step`] stores the scalar difference from the start; recomputing
+    /// `start + step` is bit-exact only when the subtraction and addition meet
+    /// the Sterbenz-style cancellation precondition for the selected scalar.
+    /// Consumers that require the scheduled value must use this event directly.
     #[must_use]
     pub const fn event(&self) -> Option<Instant<T>> {
         self.event

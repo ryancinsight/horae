@@ -48,6 +48,14 @@ round-to-nearest with no overflow or underflow. A coupling boundary should
 use its typed instant or event value rather than relying on bit identity of a
 reconstructed duration.
 
+For other ratios and scalar types, the same rule applies: reconstructing a
+parent from repeated rounded child durations is approximate, and the bound
+must use that scalar's machine epsilon and operation count.
+
+Reconstructing the parent from a non-binary ratio is subject to the selected
+scalar's rounding. The test suite exercises `RATIO = 3` for `f32` and `f64`
+against a bound of four first-order machine-epsilon units at the parent scale.
+
 ## Validation
 
 The plan rejects invalid ratios:
