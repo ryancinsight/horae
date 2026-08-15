@@ -26,6 +26,9 @@
 - [x] Remove all Atlas-overlay `[[patch.unused]]` records from the committed
       standalone lockfile; standalone offline locked metadata passes and the
       hosted locked book build is rerunning on PR #14.
+- [ ] Make the hosted book test invoke Cargo and rustdoc through the pinned
+      toolchain; the first rerun exposed an E0514 mismatch between Rust 1.97
+      build artifacts and Rust 1.95 mdBook doctest compilation.
 
 ## Open (consumer- or owner-gated)
 
