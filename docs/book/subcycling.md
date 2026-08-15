@@ -10,10 +10,15 @@ coupled systems themselves.
 A `SubcyclePlan<const RATIO: usize>` encodes a fixed subcycle ratio:
 
 ```rust
-use horae::subcycling::SubcyclePlan;
+# extern crate horae;
+# use horae::subcycling::SubcyclePlan;
+# fn main() -> Result<(), Box<dyn core::error::Error>> {
 
 // Subdivide each parent step into 4 child steps
 let plan = SubcyclePlan::<4>::new()?;
+# let _ = plan;
+# Ok(())
+# }
 ```
 
 The ratio is const-generic so it is known at compile time. Once constructed, the
@@ -24,14 +29,21 @@ plan is zero-sized—no storage overhead.
 Given a parent step, the plan derives the child step:
 
 ```rust
-use horae::time::StepSize;
-use aequitas::systems::si::quantities::Time;
+# extern crate aequitas;
+# extern crate horae;
+# use aequitas::systems::si::quantities::Time;
+# use horae::{subcycling::SubcyclePlan, time::StepSize};
+# fn main() -> Result<(), Box<dyn core::error::Error>> {
+# let plan = SubcyclePlan::<4>::new()?;
 
 let parent = StepSize::new(Time::from_base(1.0))?;
 let child = plan.child_step(parent)?;
 
 // For RATIO=4, child is 0.25
 assert_eq!(plan.ratio(), 4);
+# let _ = child;
+# Ok(())
+# }
 ```
 
 The child step is guaranteed:
@@ -61,9 +73,14 @@ against a bound of four first-order machine-epsilon units at the parent scale.
 The plan rejects invalid ratios:
 
 ```rust
+# extern crate horae;
+# use horae::subcycling::{SubcycleError, SubcyclePlan};
+# fn main() {
+
 // Zero ratio is invalid
 let invalid = SubcyclePlan::<0>::new();
 assert_eq!(invalid, Err(SubcycleError::ZeroRatio));
+# }
 ```
 
 ## Typical Workflow
@@ -71,6 +88,38 @@ assert_eq!(invalid, Err(SubcycleError::ZeroRatio));
 A subcycling loop typically nests two integrators:
 
 ```rust
+# extern crate aequitas;
+# extern crate horae;
+# use aequitas::systems::si::quantities::Time;
+# use horae::{
+#     integration::{step_into, tableau::Rk4, StepWorkspace},
+#     subcycling::SubcyclePlan,
+#     system::ExplicitSystem,
+#     time::{Instant, StepSize},
+# };
+# struct Decay;
+# impl ExplicitSystem<f64> for Decay {
+#     type Error = core::convert::Infallible;
+#     fn evaluate(
+#         &self,
+#         _time: Instant<f64>,
+#         state: &[f64],
+#         derivative: &mut [f64],
+#     ) -> Result<(), Self::Error> {
+#         for (slope, value) in derivative.iter_mut().zip(state) {
+#             *slope = -*value;
+#         }
+#         Ok(())
+#     }
+# }
+# fn main() -> Result<(), Box<dyn core::error::Error>> {
+# let system = Decay;
+# let parent_time = Instant::new(Time::from_base(0.0))?;
+# let parent_step = StepSize::new(Time::from_base(0.1))?;
+# let parent_state = [1.0];
+# let mut parent_next = [0.0];
+# let mut parent_workspace = StepWorkspace::<f64, 4>::new(1)?;
+
 // Parent step
 let parent_report = step_into(
     &system,
@@ -86,7 +135,10 @@ let parent_report = step_into(
 let plan = SubcyclePlan::<4>::new()?;
 let child_step = plan.child_step(parent_step)?;
 
-let mut child_state = parent_state.to_vec();
+let mut child_state = parent_state;
+let mut child_next = [0.0];
+let mut child_time = parent_time;
+let mut child_workspace = StepWorkspace::<f64, 4>::new(1)?;
 for _ in 0..plan.ratio() {
     let child_report = step_into(
         &system,
@@ -102,7 +154,10 @@ for _ in 0..plan.ratio() {
 }
 
 // Compare results for subcycling error estimation
-let subcycle_error = estimate_error(&parent_next, &child_state);
+let subcycle_error = (parent_next[0] - child_state[0]).abs();
+# let _ = (parent_report, subcycle_error);
+# Ok(())
+# }
 ```
 
 ## Accuracy Implications

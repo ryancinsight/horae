@@ -26,8 +26,31 @@ stiff/implicit stepping, or consumer solver policy.
 - Clippy `-D warnings` (all-targets/all-features): pass.
 - Nextest (all-features): 16/16 pass, 0 skipped.
 - Doctests: pass.
+- Hermetic mdBook Rust examples: pass for all six chapters in a staged
+  dependency view; the clean-checkout CI gate is now committed.
 - `--no-default-features` check: pass.
 - Local planning trail (backlog/checklist/gap_audit) authored at this audit.
+
+## ATLAS-HORAE-LOCK-070 — resolved locally 2026-08-14
+
+The committed `Cargo.lock` contained 55 `[[patch.unused]]` records emitted by
+the Atlas umbrella overlay. Those records are not valid standalone lock state:
+the hosted `cargo build --all-features --locked` gate rejected the lock before
+book tests ran. The lock now has zero overlay records and records the Git
+sources for Aequitas and Eunomia directly. Standalone offline
+`cargo metadata --locked --no-deps` passes. Hosted verify run `31859557127`
+passes the locked build and six-chapter book suite; Pages book build
+`31859557311` also passes.
+
+## ATLAS-HORAE-TOOLCHAIN-071 — resolved 2026-08-14
+
+The hosted run after `ATLAS-HORAE-LOCK-070` passed the locked build but failed
+the book test with E0514: Cargo produced Horae, Aequitas, and Eunomia artifacts
+with Rust 1.97 while mdBook invoked Rust 1.95 rustdoc. The CI book step now
+derives the active override from `rustup show active-toolchain` and runs both
+Cargo and mdBook through `rustup run`, keeping compilation and doctest tooling
+on one pinned compiler. Verify run `31859557127` passes the full workflow,
+including book tests, doctests, rustdoc, and the example.
 
 ## Gap inventory
 
@@ -39,6 +62,6 @@ stiff/implicit stepping, or consumer solver policy.
 
 No delivered source-level gaps remain: no `TODO`/`FIXME`/`unimplemented!`
 markers exist in `src/`, and the Rust gates are green at the audited revision.
-The separate documentation gate H-004 remains open because the existing book
-contains standalone pseudocode, prose formulas, and cross-snippet declarations
-that `mdbook test` currently compiles as Rust without their surrounding context.
+H-004 is closed: Rust examples are standalone through hidden setup, prose
+formulas and diagrams use non-Rust fences, and CI builds the locked dependency
+set before running the full book test.

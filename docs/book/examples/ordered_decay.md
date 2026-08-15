@@ -8,4 +8,6 @@ Runs an RK4 step on a first-order decay system, clips to an event, and inspects 
 
 ```rust
 {{#include ../../../examples/ordered_decay.rs}}
+# extern crate aequitas;
+# extern crate horae;
 ```

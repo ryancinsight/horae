@@ -38,7 +38,7 @@ Consumers own:
 
 ## Dependency Structure
 
-```
+```text
 ┌──────────────────────────────────────────┐
 │         Domain Code (CFDrs, etc.)        │
 │        implements ExplicitSystem<T>      │

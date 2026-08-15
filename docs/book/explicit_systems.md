@@ -10,6 +10,9 @@ An explicit system is a callable that evaluates a right-hand side (RHS) vector
 at a given time and state:
 
 ```rust
+# extern crate horae;
+# use horae::time::Instant;
+
 pub trait ExplicitSystem<T> {
     type Error;
 
@@ -42,6 +45,8 @@ discretization, and domain-specific error handling.
 Consider a simple exponential decay system: `dy/dt = -λ·y`.
 
 ```rust
+# extern crate horae;
+
 use horae::system::ExplicitSystem;
 use horae::time::Instant;
 
@@ -76,6 +81,13 @@ Horae is generic over any `FloatElement` scalar: currently `f64` and `f32`.
 Both are supported with identical stability and error-handling semantics:
 
 ```rust
+# extern crate horae;
+# use horae::system::ExplicitSystem;
+# use horae::time::Instant;
+# struct Decay {
+#     rate: f32,
+# }
+
 impl ExplicitSystem<f32> for Decay {
     type Error = core::convert::Infallible;
 
@@ -86,7 +98,7 @@ impl ExplicitSystem<f32> for Decay {
         derivative: &mut [f32],
     ) -> Result<(), Self::Error> {
         for (slope, value) in derivative.iter_mut().zip(state) {
-            *slope = -(self.rate as f32) * value;
+        *slope = -self.rate * value;
         }
         Ok(())
     }
@@ -99,6 +111,11 @@ The system's error type is preserved through the step. If integration fails
 to produce a valid result, any system error is propagated back to the caller:
 
 ```rust
+# extern crate horae;
+# use horae::system::ExplicitSystem;
+# use horae::time::Instant;
+# struct MySystem;
+
 #[derive(Debug)]
 pub enum SystemError {
     InvalidParameter,
