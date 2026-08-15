@@ -23,6 +23,9 @@
       header for ADR 0001.
 - [x] Close H-004: make every book Rust example standalone, classify formula and
       diagram fences as text, and add the hermetic mdBook test to CI.
+- [x] Remove all Atlas-overlay `[[patch.unused]]` records from the committed
+      standalone lockfile; standalone offline locked metadata passes and the
+      hosted locked book build is rerunning on PR #14.
 
 ## Open (consumer- or owner-gated)
 

@@ -31,6 +31,16 @@ stiff/implicit stepping, or consumer solver policy.
 - `--no-default-features` check: pass.
 - Local planning trail (backlog/checklist/gap_audit) authored at this audit.
 
+## ATLAS-HORAE-LOCK-070 — resolved locally 2026-08-14
+
+The committed `Cargo.lock` contained 55 `[[patch.unused]]` records emitted by
+the Atlas umbrella overlay. Those records are not valid standalone lock state:
+the hosted `cargo build --all-features --locked` gate rejected the lock before
+book tests ran. The lock now has zero overlay records and records the Git
+sources for Aequitas and Eunomia directly. Standalone offline
+`cargo metadata --locked --no-deps` passes. PR #14 must pass its hosted locked
+build and book-test gate before this item is fully integrated.
+
 ## Gap inventory
 
 | ID | Description | Status |

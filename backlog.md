@@ -52,6 +52,11 @@ CFDrs, helios) and the domain layer.
   `mdbook test docs/book` after building the locked all-feature dependency set.
   Evidence: the complete six-chapter book suite passes locally in a staged
   dependency view.
+- [x] [patch] Remove Atlas development-overlay `[[patch.unused]]` records from
+  the committed standalone `Cargo.lock`. Standalone offline metadata resolves
+  the Aequitas and Eunomia Git sources with `--locked`; the lock no longer
+  carries umbrella-only patch state that invalidates the hosted locked book
+  build. The exact hosted verification is tracked by PR #14.
 
 ## Gate evidence (2026-08-12 foundation audit)
 
