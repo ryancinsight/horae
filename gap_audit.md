@@ -38,17 +38,19 @@ the Atlas umbrella overlay. Those records are not valid standalone lock state:
 the hosted `cargo build --all-features --locked` gate rejected the lock before
 book tests ran. The lock now has zero overlay records and records the Git
 sources for Aequitas and Eunomia directly. Standalone offline
-`cargo metadata --locked --no-deps` passes. PR #14 must pass its hosted locked
-build and book-test gate before this item is fully integrated.
+`cargo metadata --locked --no-deps` passes. Hosted verify run `31859557127`
+passes the locked build and six-chapter book suite; Pages book build
+`31859557311` also passes.
 
-## ATLAS-HORAE-TOOLCHAIN-071 — open 2026-08-14
+## ATLAS-HORAE-TOOLCHAIN-071 — resolved 2026-08-14
 
 The hosted run after `ATLAS-HORAE-LOCK-070` passed the locked build but failed
 the book test with E0514: Cargo produced Horae, Aequitas, and Eunomia artifacts
 with Rust 1.97 while mdBook invoked Rust 1.95 rustdoc. The CI book step now
 derives the active override from `rustup show active-toolchain` and runs both
 Cargo and mdBook through `rustup run`, keeping compilation and doctest tooling
-on one pinned compiler. Hosted verification remains pending.
+on one pinned compiler. Verify run `31859557127` passes the full workflow,
+including book tests, doctests, rustdoc, and the example.
 
 ## Gap inventory
 

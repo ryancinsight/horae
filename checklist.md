@@ -25,10 +25,10 @@
       diagram fences as text, and add the hermetic mdBook test to CI.
 - [x] Remove all Atlas-overlay `[[patch.unused]]` records from the committed
       standalone lockfile; standalone offline locked metadata passes and the
-      hosted locked book build is rerunning on PR #14.
-- [ ] Make the hosted book test invoke Cargo and rustdoc through the pinned
-      toolchain; the first rerun exposed an E0514 mismatch between Rust 1.97
-      build artifacts and Rust 1.95 mdBook doctest compilation.
+      hosted locked book build passes in verify run `31859557127`.
+- [x] Make the hosted book test invoke Cargo and rustdoc through the pinned
+      toolchain; verify run `31859557127` passes the six-chapter book suite,
+      and Pages book build `31859557311` passes.
 
 ## Open (consumer- or owner-gated)
 
