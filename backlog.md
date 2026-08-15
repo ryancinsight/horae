@@ -47,6 +47,11 @@ CFDrs, helios) and the domain layer.
   adaptive, events, explicit systems, RK4, and subcycling chapters with
   runnable examples. Evidence: mdBook build and the f32 adaptive-policy
   contract merged as PR #7 (`4ce76ca` on `horae-book-rebase`).
+- [x] [patch] Make the provider book test hermetic (H-004): every Rust example
+  has standalone hidden setup, non-Rust fences are typed as text, and CI runs
+  `mdbook test docs/book` after building the locked all-feature dependency set.
+  Evidence: the complete six-chapter book suite passes locally in a staged
+  dependency view.
 
 ## Gate evidence (2026-08-12 foundation audit)
 
@@ -58,10 +63,6 @@ CFDrs, helios) and the domain layer.
 
 ## Deferred (documented boundary)
 
-- [ ] [patch] Make `mdbook test docs/book` hermetic. Existing book snippets
-  mix standalone pseudocode, prose formulas, and cross-snippet declarations;
-  the current command fails before reaching the changed event/subcycle text.
-  The Rust crate gates and `cargo test --doc` remain green.
 - [ ] [minor] Higher-order adaptive tableaus beyond the RK4 family (Dormand-
   Prince, etc.). The current explicit/adaptive surface satisfies existing
   consumers; a consumer need for embedded higher-order pairs would open this.

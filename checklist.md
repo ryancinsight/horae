@@ -21,11 +21,11 @@
       `gamma_4` reconstruction bound in code, tests, and book text.
 - [x] Regenerate the ADR index from the existing canonical `Status: Accepted`
       header for ADR 0001.
+- [x] Close H-004: make every book Rust example standalone, classify formula and
+      diagram fences as text, and add the hermetic mdBook test to CI.
 
-## Open (not locally actionable)
+## Open (consumer- or owner-gated)
 
-- [ ] Hermetic `mdbook test docs/book` coverage for the existing book snippets;
-      the current failure is documented as H-004 in `gap_audit.md`.
 - [ ] Higher-order embedded adaptive tableaus (Dormand-Prince family) when a
       consumer need emerges.
 - [ ] Stiff/implicit integration policy.

@@ -8,7 +8,7 @@ and Wanner's *Solving Ordinary Differential Equations I*, Chapter II.
 
 A Butcher tableau encodes a k-stage method using the layout:
 
-```
+```text
   c1 | a11  a12  ...  a1k
   c2 | a21  a22  ...  a2k
   .. | ...
@@ -24,7 +24,7 @@ where:
 
 The computation proceeds as:
 
-```
+```text
 y₁ = f(t + c₁·h, y + h·a₁₁·y₁')
 y₂ = f(t + c₂·h, y + h·(a₂₁·y₁' + a₂₂·y₂'))
 ...
@@ -41,7 +41,7 @@ Horae provides three sealed zero-sized method markers:
 
 The simplest explicit method:
 
-```
+```text
   0 | 
   ---+--
     | 1
@@ -50,6 +50,35 @@ The simplest explicit method:
 Implementation:
 
 ```rust
+# extern crate aequitas;
+# extern crate horae;
+# use aequitas::systems::si::quantities::Time;
+# use horae::{
+#     integration::{step_into, StepWorkspace},
+#     system::ExplicitSystem,
+#     time::{Instant, StepSize},
+# };
+# struct ConstantSystem;
+# impl ExplicitSystem<f64> for ConstantSystem {
+#     type Error = core::convert::Infallible;
+#     fn evaluate(
+#         &self,
+#         _time: Instant<f64>,
+#         _state: &[f64],
+#         derivative: &mut [f64],
+#     ) -> Result<(), Self::Error> {
+#         derivative.fill(0.0);
+#         Ok(())
+#     }
+# }
+# fn main() -> Result<(), Box<dyn std::error::Error>> {
+# let system = ConstantSystem;
+# let start = Instant::new(Time::from_base(0.0))?;
+# let step_size = StepSize::new(Time::from_base(0.1))?;
+# let state = [1.0];
+# let mut next_state = [0.0];
+# let mut workspace = StepWorkspace::<f64, 1>::new(1)?;
+
 use horae::integration::tableau::Euler;
 
 let report = step_into(
@@ -61,6 +90,9 @@ let report = step_into(
     &mut next_state,
     &mut workspace,
 )?;
+# let _ = report;
+# Ok(())
+# }
 ```
 
 **Cost**: 1 system evaluation per step
@@ -69,7 +101,7 @@ let report = step_into(
 
 ### Explicit Midpoint (2nd order, 2 stages)
 
-```
+```text
   0   |  
   1/2 | 1/2
   ----+----------
@@ -79,6 +111,35 @@ let report = step_into(
 Implementation:
 
 ```rust
+# extern crate aequitas;
+# extern crate horae;
+# use aequitas::systems::si::quantities::Time;
+# use horae::{
+#     integration::{step_into, StepWorkspace},
+#     system::ExplicitSystem,
+#     time::{Instant, StepSize},
+# };
+# struct ConstantSystem;
+# impl ExplicitSystem<f64> for ConstantSystem {
+#     type Error = core::convert::Infallible;
+#     fn evaluate(
+#         &self,
+#         _time: Instant<f64>,
+#         _state: &[f64],
+#         derivative: &mut [f64],
+#     ) -> Result<(), Self::Error> {
+#         derivative.fill(0.0);
+#         Ok(())
+#     }
+# }
+# fn main() -> Result<(), Box<dyn std::error::Error>> {
+# let system = ConstantSystem;
+# let start = Instant::new(Time::from_base(0.0))?;
+# let step_size = StepSize::new(Time::from_base(0.1))?;
+# let state = [1.0];
+# let mut next_state = [0.0];
+# let mut workspace = StepWorkspace::<f64, 2>::new(1)?;
+
 use horae::integration::tableau::Midpoint;
 
 let report = step_into(
@@ -90,6 +151,9 @@ let report = step_into(
     &mut next_state,
     &mut workspace,
 )?;
+# let _ = report;
+# Ok(())
+# }
 ```
 
 **Cost**: 2 system evaluations per step
@@ -100,7 +164,7 @@ let report = step_into(
 
 The most widely used explicit method:
 
-```
+```text
   0   |  
   1/2 | 1/2
   1/2 | 0   1/2
@@ -112,6 +176,35 @@ The most widely used explicit method:
 Implementation:
 
 ```rust
+# extern crate aequitas;
+# extern crate horae;
+# use aequitas::systems::si::quantities::Time;
+# use horae::{
+#     integration::{step_into, StepWorkspace},
+#     system::ExplicitSystem,
+#     time::{Instant, StepSize},
+# };
+# struct ConstantSystem;
+# impl ExplicitSystem<f64> for ConstantSystem {
+#     type Error = core::convert::Infallible;
+#     fn evaluate(
+#         &self,
+#         _time: Instant<f64>,
+#         _state: &[f64],
+#         derivative: &mut [f64],
+#     ) -> Result<(), Self::Error> {
+#         derivative.fill(0.0);
+#         Ok(())
+#     }
+# }
+# fn main() -> Result<(), Box<dyn std::error::Error>> {
+# let system = ConstantSystem;
+# let start = Instant::new(Time::from_base(0.0))?;
+# let step_size = StepSize::new(Time::from_base(0.1))?;
+# let state = [1.0];
+# let mut next_state = [0.0];
+# let mut workspace = StepWorkspace::<f64, 4>::new(1)?;
+
 use horae::integration::tableau::Rk4;
 
 let report = step_into(
@@ -123,6 +216,9 @@ let report = step_into(
     &mut next_state,
     &mut workspace,
 )?;
+# let _ = report;
+# Ok(())
+# }
 ```
 
 **Cost**: 4 system evaluations per step

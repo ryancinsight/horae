@@ -26,6 +26,8 @@ stiff/implicit stepping, or consumer solver policy.
 - Clippy `-D warnings` (all-targets/all-features): pass.
 - Nextest (all-features): 16/16 pass, 0 skipped.
 - Doctests: pass.
+- Hermetic mdBook Rust examples: pass for all six chapters in a staged
+  dependency view; the clean-checkout CI gate is now committed.
 - `--no-default-features` check: pass.
 - Local planning trail (backlog/checklist/gap_audit) authored at this audit.
 
@@ -39,6 +41,6 @@ stiff/implicit stepping, or consumer solver policy.
 
 No delivered source-level gaps remain: no `TODO`/`FIXME`/`unimplemented!`
 markers exist in `src/`, and the Rust gates are green at the audited revision.
-The separate documentation gate H-004 remains open because the existing book
-contains standalone pseudocode, prose formulas, and cross-snippet declarations
-that `mdbook test` currently compiles as Rust without their surrounding context.
+H-004 is closed: Rust examples are standalone through hidden setup, prose
+formulas and diagrams use non-Rust fences, and CI builds the locked dependency
+set before running the full book test.
