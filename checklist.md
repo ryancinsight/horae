@@ -52,3 +52,12 @@ The lower-case `checklist.md` is the sole tracked provider checklist. Atlas
 root `backlog.md` owns cross-repository hashes, hosted-run identifiers, and
 registration history; this file records only the local completion state and
 points inward to that SSOT to avoid duplicated evidence.
+
+## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin
+
+- [ ] Advance the locked Aequitas and Eunomia revisions to the fetched provider
+      defaults without changing Horae's manifest dependency boundary.
+- [ ] Run the locked provider gates and verify both exact source revisions in
+      `Cargo.lock`.
+- [ ] Synchronize `backlog.md` and `gap_audit.md`, then integrate the merged
+      Horae default into Atlas.

@@ -75,3 +75,15 @@ CFDrs, helios) and the domain layer.
   today; revisit when a consumer requires implicit stepping.
 - [ ] [patch] Registry publication remains `publish = false` (occupied name);
   facade/publication work is an owner-gated follow-up.
+
+## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin [patch] — in-progress
+
+- Owner: current Atlas session; scope: Horae's `Cargo.lock` and provider-local
+  dependency-coherence records. No Horae source or peer checkout files are in
+  scope.
+- Acceptance: the locked Aequitas and Eunomia revisions equal the fetched
+  provider defaults `5114cd1` and `88c685f`, while the manifest remains
+  Git-sourced with its existing semver requirements. The locked provider
+  compile, tests, lint, documentation, and supply-chain gates must pass.
+- No path dependency, compatibility shim, or overlay-only lock state is
+  permitted.
