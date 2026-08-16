@@ -1,5 +1,14 @@
 # Horae checklist
 
+## ATLAS-HORAE-AUDIT-073 — Isolated provider re-verification — closed 2026-08-16
+
+- Owner: current Atlas session.
+- Scope: `checklist.md` and `gap_audit.md`; no source or consumer changes.
+- [x] Record locked isolated-provider gates, the umbrella-overlay lock
+      boundary, and the remaining consumer/owner triggers with exact commands
+      and evidence limits. Revision `1068651`; isolated format, Clippy,
+      `cargo check`, 20/20 Nextest, 1 doctest, and rustdoc pass.
+
 - [x] Land the required Aequitas/Eunomia quantity and scalar contracts for
       typed time/duration values.
 - [x] Implement typed simulation time, explicit RK4 tableau, and fixed-step

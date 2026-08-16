@@ -1,5 +1,32 @@
 # Horae ownership gap audit
 
+## ATLAS-HORAE-AUDIT-073 — Isolated provider re-verification — closed 2026-08-16
+
+The current provider default `1068651` was re-verified from outside the Atlas
+umbrella directory so the parent `.cargo/config.toml` development overlay could
+not alter the standalone lockfile. The exact locked commands were:
+
+- `cargo fmt --check --manifest-path D:\atlas\worktrees\horae-audit-20260816\Cargo.toml`
+- `cargo check --locked --all-features --all-targets --manifest-path D:\atlas\repos\horae\Cargo.toml`
+- `cargo clippy --locked --all-targets --all-features --manifest-path D:\atlas\repos\horae\Cargo.toml -- -D warnings`
+- `cargo nextest run --locked --all-features --manifest-path D:\atlas\repos\horae\Cargo.toml` — 20/20 passed
+- `cargo test --locked --doc --all-features --manifest-path D:\atlas\repos\horae\Cargo.toml` — 1 passed
+- `cargo doc --locked --no-deps --all-features --manifest-path D:\atlas\repos\horae\Cargo.toml`
+
+The standalone checkout remains clean after verification. Running the same
+locked commands from inside `D:\atlas` is a separate environment: the parent
+overlay injects local first-party patches that are not represented in Horae's
+standalone lockfile, so Cargo refuses the command before compilation and asks
+to rewrite `Cargo.lock`. That is an umbrella verification/configuration
+boundary, not evidence that the provider lockfile should be changed. The
+provider lockfile remains the standalone and hosted source of truth.
+
+These checks establish formatting, compilation, static diagnostics, test,
+doctest, and documentation behavior only. They make no new runtime,
+performance, memory, or hardware-backend claim. No source-level placeholder
+markers were found, and the remaining H-001 through H-003 items below retain
+their consumer- or owner-gated status.
+
 ## ATLAS-HORAE-EXACTNESS-069 — resolved 2026-08-14
 
 The event contract now treats `EventClip::event()` as the authoritative
