@@ -52,3 +52,17 @@ The lower-case `checklist.md` is the sole tracked provider checklist. Atlas
 root `backlog.md` owns cross-repository hashes, hosted-run identifiers, and
 registration history; this file records only the local completion state and
 points inward to that SSOT to avoid duplicated evidence.
+
+## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin — locally complete; hosted integration pending
+
+- [x] Advance the locked Aequitas and Eunomia revisions to the fetched provider
+      defaults without changing Horae's manifest dependency boundary.
+- [x] Run the locked provider gates and verify both exact source revisions in
+      `Cargo.lock`. Commit `65cb253` records Aequitas `5114cd12` and Eunomia
+      `88c685f`; formatting, locked build/check, strict Clippy, 20/20 Nextest,
+      1/1 doctest, rustdoc, seven-chapter mdBook tests, the example, and
+      cargo-deny pass from outside the Atlas overlay.
+- [x] Synchronize `backlog.md` and `gap_audit.md` with the local closure
+      evidence.
+- [ ] Publish and merge the provider branch, then integrate the merged Horae
+      default into Atlas after hosted gates pass.

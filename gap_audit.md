@@ -1,5 +1,27 @@
 # Horae ownership gap audit
 
+## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin — local closure 2026-08-16
+
+Horae commit `65cb253` advances its standalone lockfile to the fetched
+provider defaults without changing the manifest boundary:
+
+- Aequitas: `5114cd12b6d7769628f2ebff83e26f9c5e19caed`
+- Eunomia: `88c685f2a733df73f753f2351b2e4d2ede8ff478`
+
+The provider branch passes `cargo fmt --all -- --check`, locked all-feature
+build, locked no-default-features check, strict all-target Clippy, Nextest
+(20/20), doctests (1/1), warning-denied rustdoc, the seven-chapter
+`rustup run 1.97.0 mdbook test docs/book` suite, the `ordered_decay` example,
+and cargo-deny advisories, bans, licenses, and sources. The book test was run
+with the exact locked artifacts on the shared target after removing only the
+verified Horae/Aequitas/Eunomia derived package outputs; no source or peer
+checkout files were removed.
+
+The Atlas parent overlay is intentionally excluded from this standalone
+lockfile verification: running Cargo from `D:\atlas` injects local first-party
+patches and requests overlay-only lock records. Hosted integration remains
+open until the provider branch is merged and its final default-head gates pass.
+
 ## ATLAS-HORAE-AUDIT-073 — Isolated provider re-verification — closed 2026-08-16
 
 The current provider default `1068651` was re-verified from outside the Atlas

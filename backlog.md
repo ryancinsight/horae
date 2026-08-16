@@ -75,3 +75,23 @@ CFDrs, helios) and the domain layer.
   today; revisit when a consumer requires implicit stepping.
 - [ ] [patch] Registry publication remains `publish = false` (occupied name);
   facade/publication work is an owner-gated follow-up.
+
+## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin [patch] — locally complete; hosted integration pending
+
+- Owner: current Atlas session; scope: Horae's `Cargo.lock` and provider-local
+  dependency-coherence records. No Horae source or peer checkout files are in
+  scope.
+- Acceptance: the locked Aequitas and Eunomia revisions equal the fetched
+  provider defaults `5114cd1` and `88c685f`, while the manifest remains
+  Git-sourced with its existing semver requirements. The locked provider
+  compile, tests, lint, documentation, and supply-chain gates must pass.
+- No path dependency, compatibility shim, or overlay-only lock state is
+  permitted.
+- Evidence: `65cb253` pins Aequitas at `5114cd12b6d7769628f2ebff83e26f9c5e19caed`
+  and Eunomia at `88c685f2a733df73f753f2351b2e4d2ede8ff478`. From outside the
+  Atlas overlay, formatting, locked build/check, strict Clippy, 20/20 Nextest,
+  1/1 doctest, warning-free rustdoc, seven-chapter `mdbook test`,
+  `ordered_decay`, and cargo-deny all pass.
+- Remaining delivery: publish and merge the provider branch, then advance
+  Atlas's Horae gitlink only after the merged default and hosted gates are
+  green.
