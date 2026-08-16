@@ -76,7 +76,7 @@ CFDrs, helios) and the domain layer.
 - [ ] [patch] Registry publication remains `publish = false` (occupied name);
   facade/publication work is an owner-gated follow-up.
 
-## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin [patch] — locally complete; hosted integration pending
+## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin [patch] — closed 2026-08-16
 
 - Owner: current Atlas session; scope: Horae's `Cargo.lock` and provider-local
   dependency-coherence records. No Horae source or peer checkout files are in
@@ -92,6 +92,7 @@ CFDrs, helios) and the domain layer.
   Atlas overlay, formatting, locked build/check, strict Clippy, 20/20 Nextest,
   1/1 doctest, warning-free rustdoc, seven-chapter `mdbook test`,
   `ordered_decay`, and cargo-deny all pass.
-- Remaining delivery: publish and merge the provider branch, then advance
-  Atlas's Horae gitlink only after the merged default and hosted gates are
-  green.
+- Hosted evidence: PR #16 merged at default `379f506`; post-merge CI
+  `31964298702` passes verify and supply-chain, and Pages deployment
+  `31964297946` passes. Atlas's Horae gitlink remains a separate integration
+  step owned by the parent repository.
