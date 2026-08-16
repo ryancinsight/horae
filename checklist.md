@@ -53,7 +53,7 @@ root `backlog.md` owns cross-repository hashes, hosted-run identifiers, and
 registration history; this file records only the local completion state and
 points inward to that SSOT to avoid duplicated evidence.
 
-## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin — locally complete; hosted integration pending
+## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin — closed 2026-08-16
 
 - [x] Advance the locked Aequitas and Eunomia revisions to the fetched provider
       defaults without changing Horae's manifest dependency boundary.
@@ -64,5 +64,5 @@ points inward to that SSOT to avoid duplicated evidence.
       cargo-deny pass from outside the Atlas overlay.
 - [x] Synchronize `backlog.md` and `gap_audit.md` with the local closure
       evidence.
-- [ ] Publish and merge the provider branch, then integrate the merged Horae
-      default into Atlas after hosted gates pass.
+- [x] Publish and merge the provider branch. PR #16 merged at `379f506`; hosted
+      CI `31964298702` and Pages deployment `31964297946` pass.

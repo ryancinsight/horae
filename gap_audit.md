@@ -19,8 +19,13 @@ checkout files were removed.
 
 The Atlas parent overlay is intentionally excluded from this standalone
 lockfile verification: running Cargo from `D:\atlas` injects local first-party
-patches and requests overlay-only lock records. Hosted integration remains
-open until the provider branch is merged and its final default-head gates pass.
+patches and requests overlay-only lock records. At the local-closure point,
+hosted integration was pending; the merged-default evidence follows.
+
+PR #16 merged at Horae default `379f506`. Post-merge CI run `31964298702`
+passes the provider verification and supply-chain jobs, and Pages deployment
+`31964297946` passes. The remaining cross-repository action is advancing the
+parent Atlas Horae gitlink to this merged default.
 
 ## ATLAS-HORAE-AUDIT-073 — Isolated provider re-verification — closed 2026-08-16
 
