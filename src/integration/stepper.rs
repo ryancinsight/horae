@@ -41,7 +41,7 @@ where
     ensure_dimension(SliceRole::Output, dimension, output.len())?;
     ensure_dimension(SliceRole::Workspace, dimension, workspace.dimension())?;
 
-    evaluate_stages(system, start, step, state, workspace)?;
+    evaluate_stages::<T, System, Method, STAGES>(system, start, step, state, workspace)?;
     combine_output::<T, STAGES>(
         output,
         state,
@@ -87,7 +87,7 @@ where
     ensure_dimension(SliceRole::ErrorEstimate, dimension, error_estimate.len())?;
     ensure_dimension(SliceRole::Workspace, dimension, workspace.dimension())?;
 
-    evaluate_stages(system, start, step, state, workspace)?;
+    evaluate_stages::<T, System, Method, STAGES>(system, start, step, state, workspace)?;
     combine_embedded_output::<T, STAGES>(
         output,
         error_estimate,
