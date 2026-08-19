@@ -41,8 +41,9 @@
 
 ## Open (consumer- or owner-gated)
 
-- [ ] Higher-order embedded adaptive tableaus (Dormand-Prince family) when a
-      consumer need emerges.
+- [x] Higher-order embedded adaptive tableaus: `DormandPrince` provides a
+      seven-stage fifth/fourth-order pair and `step_embedded_into` returns the
+      primary result plus a caller-owned local-error estimate.
 - [ ] Stiff/implicit integration policy.
 - [ ] Registry publication (`publish = false`; occupied name) — owner-gated.
 

@@ -8,6 +8,8 @@ use crate::time::TimeError;
 pub enum SliceRole {
     /// Caller-owned output state.
     Output,
+    /// Caller-owned embedded local-error estimate.
+    ErrorEstimate,
     /// Workspace state dimension.
     Workspace,
 }
@@ -40,7 +42,7 @@ impl core::error::Error for WorkspaceError {}
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum StepError<E> {
-    /// A state, output, or workspace dimension differs from the input state.
+    /// A state, output, error, or workspace dimension differs from the input state.
     DimensionMismatch {
         /// Slice or workspace with the mismatched dimension.
         role: SliceRole,

@@ -27,6 +27,8 @@ All notable changes to Horae are documented in this file.
 
 ### Added
 
+- Dormand--Prince fifth/fourth-order embedded stepping with a caller-owned
+  local-error estimate and seven-stage workspace reuse.
 - A generic adaptive-policy contract test for `f32`, covering mixed-tolerance
   acceptance/rejection and non-finite observations alongside the existing
   `f64` boundary suite; this pins both supported real scalar monomorphizations.
