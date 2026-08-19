@@ -66,3 +66,21 @@ points inward to that SSOT to avoid duplicated evidence.
       evidence.
 - [x] Publish and merge the provider branch. PR #16 merged at `379f506`; hosted
       CI `31964298702` and Pages deployment `31964297946` pass.
+
+## HORAE-LOCKSTEP-075 — Refresh merged Aequitas/Eunomia lock heads
+
+- [x] Regenerate `Cargo.lock` outside the Atlas overlay to Aequitas
+      `260ad10d` and Eunomia `85e590b7`; preserve the Git-sourced manifest
+      boundary.
+- [x] Run the local-graph format, locked metadata, all-feature and
+      no-default-features checks, warning-denied Clippy, Nextest 20/20,
+      doctest 1/1, rustdoc, and cargo-deny. Cargo-deny passes its four policy
+      classes and reports only the existing unmatched-source warnings.
+- [x] Record the evidence boundary: after restoring the committed standalone
+      lock, root-overlay `cargo nextest --locked` refuses before test execution
+      because local patches are not represented in the lock.
+- [x] Commit and publish the lock-only provider increment as `9cc9fd8` on
+      `codex/horae-lockstep-075`; open draft PR #19.
+- [ ] Collect the exact-head hosted `verify` and `supply-chain` checks, merge
+      the provider PR, and advance the Atlas Horae gitlink after the parent
+      exact-head and overlay gates pass.
