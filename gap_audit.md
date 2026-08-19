@@ -1,6 +1,6 @@
 # Horae ownership gap audit
 
-## HORAE-LOCKSTEP-075 — refreshed consumer lock 2026-08-18
+## HORAE-LOCKSTEP-075 — refreshed consumer lock hosted closure 2026-08-19
 
 The standalone Horae lock now follows the current merged Atlas provider heads:
 
@@ -15,9 +15,10 @@ its only output is the existing unmatched-source warning for the two Git
 origins. After restoring the committed standalone lock, root-overlay
 `cargo nextest --locked` refuses before test execution because local patches
 are not represented in the lock. Exact standalone locked closure remains the
-hosted PR gate. Commit `9cc9fd8` is pushed as draft PR #19; hosted `verify` and
-`supply-chain` checks are queued, so merge and parent-gitlink integration remain
-open.
+hosted PR gate. Commit `9cc9fd8` is merged through PR #19 at default
+`1ed6a17`; post-merge CI `32202560133` passes verification and supply-chain,
+and Pages deployment `32202559349` passes. The provider lockstep item is
+closed; parent-gitlink integration remains an Atlas-owned step.
 
 ## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin — local closure 2026-08-16
 

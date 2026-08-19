@@ -81,6 +81,8 @@ points inward to that SSOT to avoid duplicated evidence.
       because local patches are not represented in the lock.
 - [x] Commit and publish the lock-only provider increment as `9cc9fd8` on
       `codex/horae-lockstep-075`; open draft PR #19.
-- [ ] Collect the exact-head hosted `verify` and `supply-chain` checks, merge
-      the provider PR, and advance the Atlas Horae gitlink after the parent
-      exact-head and overlay gates pass.
+- [x] Collect the exact-head hosted `verify` and `supply-chain` checks, merge
+      provider PR #19 at default `1ed6a17`, and record CI run `32202560133`
+      plus Pages deployment `32202559349`. The Atlas parent may now consume
+      this exact default head; parent overlay and exact-head gates remain
+      owned by Atlas.
