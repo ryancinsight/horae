@@ -3,8 +3,10 @@
 Strategic roadmap; tags `[patch]`/`[minor]`/`[major]`/`[arch]` per SemVer class.
 Horae is the Atlas typed-simulation-time and integration-policy SSOT: typed
 time/duration values, explicit RK-family tableaus, adaptive step control,
-event scheduling, and subcycle policy, consumed by the integrators (kwavers,
-CFDrs, helios) and the domain layer.
+event scheduling, and subcycle policy. The current production consumers use
+typed time/subcycling in Harmonia and validated step sizes in Helios; the
+CFDrs and Kwavers stepping migration remains a consumer-owned integration
+item.
 
 ## Delivered — foundation (0.1.0)
 
@@ -73,8 +75,17 @@ CFDrs, helios) and the domain layer.
   `step_embedded_into` writes the primary result and local-error estimate
   without allocation. Evidence: polynomial exactness, embedded-error scaling,
   dimension-negative, doctest, and provider gates.
-- [ ] [patch] Stiff/implicit integration policy. Explicit-policy-only boundary
-  today; revisit when a consumer requires implicit stepping.
+- [x] [patch] Audit the stiff/implicit integration boundary (2026-08-19).
+  The current production search finds no consumer implementation of
+  `ExplicitSystem` and no consumer call to `step_into` or
+  `step_embedded_into`; Harmonia uses Horae's typed time/subcycle contracts
+  and Helios uses `StepSize`. Athena's roadmap requires a second concrete
+  residual/Jacobian consumer before a shared nonlinear policy is added.
+  ADR 0001 therefore remains correct: no implicit solver is added without
+  that contract.
+- [ ] [patch] Add an implicit integration policy only after a second concrete
+  consumer supplies a residual/Jacobian contract, analytical oracle, and
+  bounded convergence tests.
 - [ ] [patch] Registry publication remains `publish = false` (occupied name);
   facade/publication work is an owner-gated follow-up.
 

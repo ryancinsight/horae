@@ -44,7 +44,13 @@
 - [x] Higher-order embedded adaptive tableaus: `DormandPrince` provides a
       seven-stage fifth/fourth-order pair and `step_embedded_into` returns the
       primary result plus a caller-owned local-error estimate.
-- [ ] Stiff/implicit integration policy.
+- [x] Audit the stiff/implicit integration boundary against all current Atlas
+      consumers. No production `ExplicitSystem` implementation or stepping
+      call exists outside Horae tests/examples; Harmonia consumes typed time
+      and subcycling, and Helios consumes `StepSize`. ADR 0001 remains the
+      governing boundary, so no speculative implicit solver is added.
+- [ ] Add implicit integration only when a second concrete residual/Jacobian
+      consumer establishes the shared contract and bounded convergence oracle.
 - [ ] Registry publication (`publish = false`; occupied name) — owner-gated.
 
 ## Evidence boundary

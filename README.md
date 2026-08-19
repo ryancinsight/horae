@@ -33,10 +33,13 @@ scheduling, or device execution. Consumers supply equations through
 `ExplicitSystem`; Aequitas owns units, Eunomia owns scalar law, Leto owns CPU
 arrays, and Hephaestus owns GPU execution.
 
-Downstream domain and coupling packages implement `ExplicitSystem` and retain
-their equations, stability constraints, and state storage. They may consume
-Horae's typed time, event, and subcycle contracts without introducing a reverse
-dependency from Horae to a domain, scheduler, array, or device provider.
+Downstream domain and coupling packages retain their equations, stability
+constraints, and state storage. Harmonia currently consumes Horae's typed time
+and subcycle contracts, and Helios consumes `StepSize`; the `ExplicitSystem`
+stepping seam is currently exercised by the provider tests and example while
+consumer migrations are completed. Consumers may use Horae's typed time,
+event, and subcycle contracts without introducing a reverse dependency from
+Horae to a domain, scheduler, array, or device provider.
 
 ## Example
 

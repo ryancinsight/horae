@@ -40,7 +40,7 @@ Consumers own:
 
 ```text
 ┌──────────────────────────────────────────┐
-│         Domain Code (CFDrs, etc.)        │
+│     Consumer domain code (when present)  │
 │        implements ExplicitSystem<T>      │
 │        calls step_into(system, ...)      │
 └─────────────────────┬────────────────────┘
@@ -74,6 +74,16 @@ Consumers own:
 Horae does **not** depend on Leto or Hephaestus. Its slice-based contracts
 permit current CPU arrays and future accelerator backends without code
 changes.
+
+## Current consumer status
+
+Harmonia is the live coupling consumer of Horae's typed time and subcycling
+contracts, and Helios uses the validated `StepSize` boundary for delivery
+kinematics. The `ExplicitSystem<T>` and stepping APIs are currently exercised
+by Horae's provider tests and example; no CFDrs or Kwavers production call
+site is yet migrated to them. That migration is consumer-owned. An implicit
+or nonlinear integration policy remains gated on a second concrete
+residual/Jacobian consumer, as recorded in ADR 0001.
 
 ## Integration with Other Atlas Components
 
