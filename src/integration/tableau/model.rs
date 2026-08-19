@@ -14,6 +14,19 @@ pub trait ExplicitTableau<const STAGES: usize>: private::Sealed {
     const C: [f64; STAGES];
 }
 
+/// Embedded lower-order weights sharing an explicit Runge--Kutta tableau.
+///
+/// [`ExplicitTableau::B`] is the primary result and
+/// [`Self::B_EMBEDDED`] produces the error-estimation result from the same
+/// stage derivatives. The difference between the two results is the local
+/// error estimate supplied by [`crate::integration::step_embedded_into`].
+pub trait EmbeddedExplicitTableau<const STAGES: usize>: ExplicitTableau<STAGES> {
+    /// Formal order of the embedded result.
+    const EMBEDDED_ORDER: usize;
+    /// Output weights for the lower-order embedded result.
+    const B_EMBEDDED: [f64; STAGES];
+}
+
 pub(crate) mod private {
     pub trait Sealed {}
 }

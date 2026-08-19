@@ -130,7 +130,7 @@ including book tests, doctests, rustdoc, and the example.
 
 | ID | Description | Status |
 |----|-------------|--------|
-| H-001 | Higher-order embedded adaptive tableaus (Dormand-Prince family) | Open — consumer-gated; current RK4/adaptive surface satisfies integrators |
+| H-001 | Higher-order embedded adaptive tableaus (Dormand-Prince family) | Closed — `DormandPrince` and `step_embedded_into` provide a shared seven-stage 5(4) pair |
 | H-002 | Stiff/implicit integration policy | Open — explicit-policy-only boundary today |
 | H-003 | Registry publication (`publish = false`, occupied name) | Open — owner-gated facade/publication follow-up |
 

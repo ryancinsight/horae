@@ -3,5 +3,5 @@
 mod methods;
 mod model;
 
-pub use methods::{Euler, Midpoint, Rk4};
-pub use model::ExplicitTableau;
+pub use methods::{DormandPrince, Euler, Midpoint, Rk4};
+pub use model::{EmbeddedExplicitTableau, ExplicitTableau};

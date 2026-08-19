@@ -19,7 +19,8 @@ Horae owns:
 - finite `Instant<T>` and positive `StepSize<T>` values over
   `aequitas::Time<T>`;
 - a borrowed-slice `ExplicitSystem<T>` seam with an associated error;
-- const-generic explicit tableaus and one backend-neutral stepping recurrence;
+- const-generic explicit tableaus, including the Dormand--Prince 5(4)
+  embedded pair, and one backend-neutral stepping recurrence;
 - reusable stage workspaces;
 - error-based adaptive decisions and reports;
 - borrowed, sorted event schedules with no-overstep clipping and authoritative
@@ -110,7 +111,7 @@ src/
 │   └── report.rs       # exact boundary hit
 ├── integration/
 │   ├── tableau/
-│   │   ├── methods.rs  # Euler, midpoint, and RK4 ZSTs
+│   │   ├── methods.rs  # Euler, midpoint, RK4, and Dormand--Prince ZSTs
 │   │   └── model.rs    # const-generic coefficient contract
 │   ├── stepper.rs      # single monomorphized explicit recurrence
 │   └── workspace.rs    # caller-owned contiguous stage storage
@@ -137,9 +138,10 @@ contracts without a standard-library dependency.
 The explicit recurrence follows the Butcher tableau formulation in
 Hairer, Nørsett, and Wanner,
 [*Solving Ordinary Differential Equations I*, Chapter II](https://doi.org/10.1007/978-3-662-12607-3).
-The package intentionally supplies only the three current method markers; new
-methods extend the sealed provider-owned coefficient set rather than cloning
-the recurrence.
+The embedded Dormand--Prince coefficient set follows Dormand and Prince,
+[“A family of embedded Runge--Kutta formulae”](https://doi.org/10.1016/0771-050X(80)90013-3).
+The package extends the sealed provider-owned coefficient set rather than
+cloning the recurrence for each method.
 
 ## Verification
 

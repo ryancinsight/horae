@@ -6,7 +6,10 @@ use crate::{
     time::{Instant, StepSize},
 };
 
-use super::{SliceRole, StepError, StepReport, StepWorkspace, tableau::ExplicitTableau};
+use super::{
+    SliceRole, StepError, StepReport, StepWorkspace,
+    tableau::{EmbeddedExplicitTableau, ExplicitTableau},
+};
 
 /// Advance `state` by one explicit Runge--Kutta step into `output`.
 ///
@@ -38,6 +41,81 @@ where
     ensure_dimension(SliceRole::Output, dimension, output.len())?;
     ensure_dimension(SliceRole::Workspace, dimension, workspace.dimension())?;
 
+    evaluate_stages(system, start, step, state, workspace)?;
+    combine_output::<T, STAGES>(
+        output,
+        state,
+        *step.as_time().as_base(),
+        workspace,
+        &Method::B,
+    );
+
+    let end = start.advance(step).map_err(StepError::Time)?;
+    Ok(StepReport::new(start, end, step, STAGES))
+}
+
+/// Advance `state` with an embedded explicit Runge--Kutta pair.
+///
+/// The primary higher-order result is written to `output`. The caller-owned
+/// `error_estimate` receives `output - embedded_output`, so its componentwise
+/// absolute value is the local error observation for an adaptive controller.
+/// Both results reuse the same stage derivatives and perform no allocation.
+///
+/// # Errors
+///
+/// Returns [`StepError::DimensionMismatch`] before evaluation when the state,
+/// output, error-estimate slice, or workspace dimensions disagree,
+/// [`StepError::Time`] when a stage or end instant overflows to a non-finite
+/// value, or [`StepError::System`] when the system rejects a stage evaluation.
+pub fn step_embedded_into<T, System, Method, const STAGES: usize>(
+    system: &System,
+    _method: Method,
+    start: Instant<T>,
+    step: StepSize<T>,
+    state: &[T],
+    output: &mut [T],
+    error_estimate: &mut [T],
+    workspace: &mut StepWorkspace<T, STAGES>,
+) -> Result<StepReport<T>, StepError<System::Error>>
+where
+    T: FloatElement,
+    System: ExplicitSystem<T>,
+    Method: EmbeddedExplicitTableau<STAGES>,
+{
+    let dimension = state.len();
+    ensure_dimension(SliceRole::Output, dimension, output.len())?;
+    ensure_dimension(SliceRole::ErrorEstimate, dimension, error_estimate.len())?;
+    ensure_dimension(SliceRole::Workspace, dimension, workspace.dimension())?;
+
+    evaluate_stages(system, start, step, state, workspace)?;
+    combine_embedded_output::<T, STAGES>(
+        output,
+        error_estimate,
+        state,
+        *step.as_time().as_base(),
+        workspace,
+        &Method::B,
+        &Method::B_EMBEDDED,
+    );
+
+    let end = start.advance(step).map_err(StepError::Time)?;
+    Ok(StepReport::new(start, end, step, STAGES))
+}
+
+fn evaluate_stages<T, System, Method, const STAGES: usize>(
+    system: &System,
+    start: Instant<T>,
+    step: StepSize<T>,
+    state: &[T],
+    workspace: &mut StepWorkspace<T, STAGES>,
+) -> Result<(), StepError<System::Error>>
+where
+    T: FloatElement,
+    System: ExplicitSystem<T>,
+    Method: ExplicitTableau<STAGES>,
+{
+    let dimension = state.len();
+
     let step_value = *step.as_time().as_base();
     let start_value = *start.as_time().as_base();
 
@@ -67,9 +145,22 @@ where
             .map_err(StepError::System)?;
     }
 
+    Ok(())
+}
+
+fn combine_output<T, const STAGES: usize>(
+    output: &mut [T],
+    state: &[T],
+    step_value: T,
+    workspace: &StepWorkspace<T, STAGES>,
+    weights: &[f64; STAGES],
+) where
+    T: FloatElement,
+{
+    let dimension = state.len();
     output.copy_from_slice(state);
     for stage in 0..STAGES {
-        let weight = T::from_f64(Method::B[stage]);
+        let weight = T::from_f64(weights[stage]);
         let factor = step_value * weight;
         let offset = stage * dimension;
         let derivative = &workspace.derivatives[offset..offset + dimension];
@@ -77,9 +168,39 @@ where
             *result = factor.scalar_fmadd(*slope, *result);
         }
     }
+}
 
-    let end = start.advance(step).map_err(StepError::Time)?;
-    Ok(StepReport::new(start, end, step, STAGES))
+fn combine_embedded_output<T, const STAGES: usize>(
+    output: &mut [T],
+    error_estimate: &mut [T],
+    state: &[T],
+    step_value: T,
+    workspace: &StepWorkspace<T, STAGES>,
+    primary_weights: &[f64; STAGES],
+    embedded_weights: &[f64; STAGES],
+) where
+    T: FloatElement,
+{
+    let dimension = state.len();
+    output.copy_from_slice(state);
+    error_estimate.copy_from_slice(state);
+    for stage in 0..STAGES {
+        let primary_factor = step_value * T::from_f64(primary_weights[stage]);
+        let embedded_factor = step_value * T::from_f64(embedded_weights[stage]);
+        let offset = stage * dimension;
+        let derivative = &workspace.derivatives[offset..offset + dimension];
+        for ((primary, embedded), slope) in output
+            .iter_mut()
+            .zip(error_estimate.iter_mut())
+            .zip(derivative)
+        {
+            *primary = primary_factor.scalar_fmadd(*slope, *primary);
+            *embedded = embedded_factor.scalar_fmadd(*slope, *embedded);
+        }
+    }
+    for (primary, embedded) in output.iter().zip(error_estimate.iter_mut()) {
+        *embedded = *primary - *embedded;
+    }
 }
 
 fn ensure_dimension<E>(

@@ -68,9 +68,11 @@ CFDrs, helios) and the domain layer.
 
 ## Deferred (documented boundary)
 
-- [ ] [minor] Higher-order adaptive tableaus beyond the RK4 family (Dormand-
-  Prince, etc.). The current explicit/adaptive surface satisfies existing
-  consumers; a consumer need for embedded higher-order pairs would open this.
+- [x] [minor] Higher-order adaptive tableaus: `DormandPrince` provides a
+  seven-stage fifth/fourth-order embedded pair through the shared recurrence;
+  `step_embedded_into` writes the primary result and local-error estimate
+  without allocation. Evidence: polynomial exactness, embedded-error scaling,
+  dimension-negative, doctest, and provider gates.
 - [ ] [patch] Stiff/implicit integration policy. Explicit-policy-only boundary
   today; revisit when a consumer requires implicit stepping.
 - [ ] [patch] Registry publication remains `publish = false` (occupied name);
