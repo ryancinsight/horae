@@ -11,6 +11,23 @@ use super::{
     tableau::{EmbeddedExplicitTableau, ExplicitTableau},
 };
 
+/// Caller-owned output slices for one embedded explicit step.
+#[must_use]
+pub struct EmbeddedOutputs<'output, T> {
+    primary: &'output mut [T],
+    error_estimate: &'output mut [T],
+}
+
+impl<'output, T> EmbeddedOutputs<'output, T> {
+    /// Pair a primary output slice with its local-error estimate slice.
+    pub const fn new(primary: &'output mut [T], error_estimate: &'output mut [T]) -> Self {
+        Self {
+            primary,
+            error_estimate,
+        }
+    }
+}
+
 /// Advance `state` by one explicit Runge--Kutta step into `output`.
 ///
 /// `method` is a zero-sized marker used only for type inference. All stage
@@ -56,9 +73,10 @@ where
 
 /// Advance `state` with an embedded explicit Runge--Kutta pair.
 ///
-/// The primary higher-order result is written to `output`. The caller-owned
-/// `error_estimate` receives `output - embedded_output`, so its componentwise
-/// absolute value is the local error observation for an adaptive controller.
+/// The primary higher-order result is written to `outputs.primary`. The
+/// caller-owned `outputs.error_estimate` receives the primary result minus the
+/// embedded result, so its componentwise absolute value is the local error
+/// observation for an adaptive controller.
 /// Both results reuse the same stage derivatives and perform no allocation.
 ///
 /// # Errors
@@ -73,8 +91,7 @@ pub fn step_embedded_into<T, System, Method, const STAGES: usize>(
     start: Instant<T>,
     step: StepSize<T>,
     state: &[T],
-    output: &mut [T],
-    error_estimate: &mut [T],
+    outputs: EmbeddedOutputs<'_, T>,
     workspace: &mut StepWorkspace<T, STAGES>,
 ) -> Result<StepReport<T>, StepError<System::Error>>
 where
@@ -82,6 +99,10 @@ where
     System: ExplicitSystem<T>,
     Method: EmbeddedExplicitTableau<STAGES>,
 {
+    let EmbeddedOutputs {
+        primary: output,
+        error_estimate,
+    } = outputs;
     let dimension = state.len();
     ensure_dimension(SliceRole::Output, dimension, output.len())?;
     ensure_dimension(SliceRole::ErrorEstimate, dimension, error_estimate.len())?;
@@ -159,8 +180,8 @@ fn combine_output<T, const STAGES: usize>(
 {
     let dimension = state.len();
     output.copy_from_slice(state);
-    for stage in 0..STAGES {
-        let weight = T::from_f64(weights[stage]);
+    for (stage, weight) in weights.iter().enumerate() {
+        let weight = T::from_f64(*weight);
         let factor = step_value * weight;
         let offset = stage * dimension;
         let derivative = &workspace.derivatives[offset..offset + dimension];
@@ -184,9 +205,11 @@ fn combine_embedded_output<T, const STAGES: usize>(
     let dimension = state.len();
     output.copy_from_slice(state);
     error_estimate.copy_from_slice(state);
-    for stage in 0..STAGES {
-        let primary_factor = step_value * T::from_f64(primary_weights[stage]);
-        let embedded_factor = step_value * T::from_f64(embedded_weights[stage]);
+    for (stage, (primary_weight, embedded_weight)) in
+        primary_weights.iter().zip(embedded_weights).enumerate()
+    {
+        let primary_factor = step_value * T::from_f64(*primary_weight);
+        let embedded_factor = step_value * T::from_f64(*embedded_weight);
         let offset = stage * dimension;
         let derivative = &workspace.derivatives[offset..offset + dimension];
         for ((primary, embedded), slope) in output

@@ -13,15 +13,16 @@ the selected `T: eunomia::FloatElement` at the arithmetic boundary.
 
 ## One embedded step
 
-`step_embedded_into` writes the fifth-order result to `output` and
-`output - embedded_output` to `error_estimate`:
+`step_embedded_into` takes an [`EmbeddedOutputs`] pair, writes the fifth-order
+result to its primary slice, and writes `output - embedded_output` to its
+error-estimate slice:
 
 ```rust
 # extern crate aequitas;
 # extern crate horae;
 use aequitas::systems::si::quantities::Time;
 use horae::{
-    integration::{step_embedded_into, tableau::DormandPrince, StepWorkspace},
+    integration::{step_embedded_into, tableau::DormandPrince, EmbeddedOutputs, StepWorkspace},
     system::ExplicitSystem,
     time::{Instant, StepSize},
 };
@@ -54,8 +55,7 @@ let report = step_embedded_into(
     start,
     step,
     &[0.0],
-    &mut output,
-    &mut error_estimate,
+    EmbeddedOutputs::new(&mut output, &mut error_estimate),
     &mut workspace,
 )?;
 

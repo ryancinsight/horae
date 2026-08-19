@@ -5,7 +5,7 @@ use core::convert::Infallible;
 use aequitas::systems::si::quantities::Time;
 use horae::{
     integration::{
-        SliceRole, StepError, StepWorkspace, step_embedded_into,
+        EmbeddedOutputs, SliceRole, StepError, StepWorkspace, step_embedded_into,
         tableau::{DormandPrince, EmbeddedExplicitTableau, ExplicitTableau},
     },
     system::ExplicitSystem,
@@ -41,8 +41,7 @@ fn run(rate: &FourthDegreeRate, step_value: f64) -> ([f64; 1], [f64; 1]) {
         start,
         step,
         &[0.0],
-        &mut output,
-        &mut error,
+        EmbeddedOutputs::new(&mut output, &mut error),
         &mut workspace,
     )
     .expect("invariant: polynomial rate is infallible");
@@ -99,8 +98,7 @@ fn embedded_step_validates_error_estimate_dimension_before_evaluation() {
         start,
         step,
         &[0.0],
-        &mut output,
-        &mut [],
+        EmbeddedOutputs::new(&mut output, &mut []),
         &mut workspace,
     );
 
