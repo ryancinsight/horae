@@ -1,5 +1,19 @@
 # Horae ownership gap audit
 
+## HORAE-LOCKSTEP-075 — refreshed consumer lock 2026-08-18
+
+The standalone Horae lock now follows the current merged Atlas provider heads:
+
+- Aequitas: `260ad10dd5480eef8c82958d1d148199656db59e`
+- Eunomia: `85e590b789505c66f5174043c2e7e851c20547a5`
+
+Only `Cargo.lock` changed. From outside the Atlas overlay, format, locked
+metadata, all-feature check, no-default-features check, warning-denied Clippy,
+Nextest 20/20, doctest 1/1, and rustdoc pass. Cargo-deny passes advisories,
+bans, licenses, and sources; its only output is the existing unmatched-source
+warning for the two Git origins. The provider lock is ready for commit and
+parent-gitlink integration.
+
 ## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin — local closure 2026-08-16
 
 Horae commit `65cb253` advances its standalone lockfile to the fetched

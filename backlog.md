@@ -96,3 +96,17 @@ CFDrs, helios) and the domain layer.
   `31964298702` passes verify and supply-chain, and Pages deployment
   `31964297946` passes. Atlas's Horae gitlink remains a separate integration
   step owned by the parent repository.
+
+## HORAE-LOCKSTEP-075 — Refresh merged Aequitas/Eunomia lock heads [patch] — complete
+
+- Owner: Atlas integration session; scope: `Cargo.lock` plus this provider's
+  lock-coherence evidence. No Horae source or manifest change is in scope.
+- The lock now records Aequitas `260ad10dd5480eef8c82958d1d148199656db59e`
+  and Eunomia `85e590b789505c66f5174043c2e7e851c20547a5`, the current merged
+  provider defaults used by Atlas. The Git-sourced dependency boundary is
+  unchanged and no overlay-only records or compatibility paths were added.
+- Standalone evidence from outside the Atlas overlay: format, locked metadata,
+  all-feature check, no-default-features check, warning-denied Clippy, Nextest
+  20/20, doctest 1/1, and rustdoc all pass. `cargo deny check` passes
+  advisories, bans, licenses, and sources; it reports only the existing
+  unmatched-source warnings for the two Git origins.
