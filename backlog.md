@@ -97,7 +97,7 @@ CFDrs, helios) and the domain layer.
   `31964297946` passes. Atlas's Horae gitlink remains a separate integration
   step owned by the parent repository.
 
-## HORAE-LOCKSTEP-075 — Refresh merged Aequitas/Eunomia lock heads [patch] — hosted gate pending
+## HORAE-LOCKSTEP-075 — Refresh merged Aequitas/Eunomia lock heads [patch] — closed 2026-08-19
 
 - Owner: Atlas integration session; scope: `Cargo.lock` plus this provider's
   lock-coherence evidence. No Horae source or manifest change is in scope.
@@ -116,6 +116,7 @@ CFDrs, helios) and the domain layer.
   execution because local patches are not represented in the lock. The exact
   standalone locked closure is therefore the hosted PR gate, not the local
   overlay run.
-- Commit `9cc9fd8` is pushed on `codex/horae-lockstep-075` as draft PR #19;
-  hosted `verify` and `supply-chain` checks are queued. Merge and the Atlas
-  gitlink advance remain gated on those exact-head checks.
+- Commit `9cc9fd8` is pushed on `codex/horae-lockstep-075` and merged through
+  PR #19 at default `1ed6a17`. Post-merge CI run `32202560133` passes the
+  provider verification and supply-chain jobs; Pages deployment
+  `32202559349` passes. The Atlas parent may consume this exact default head.
