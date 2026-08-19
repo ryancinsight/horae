@@ -105,11 +105,17 @@ CFDrs, helios) and the domain layer.
   and Eunomia `85e590b789505c66f5174043c2e7e851c20547a5`, the current merged
   provider defaults used by Atlas. The Git-sourced dependency boundary is
   unchanged and no overlay-only records or compatibility paths were added.
-- Standalone evidence from outside the Atlas overlay: format, locked metadata,
-  all-feature check, no-default-features check, warning-denied Clippy, Nextest
-  20/20, doctest 1/1, and rustdoc all pass. `cargo deny check` passes
-  advisories, bans, licenses, and sources; it reports only the existing
-  unmatched-source warnings for the two Git origins.
+- Local-graph evidence: format, locked metadata, all-feature check,
+  no-default-features check, warning-denied Clippy, Nextest 20/20, doctest
+  1/1, and rustdoc pass while the Atlas overlay resolves the refreshed local
+  provider graph. `cargo deny check` passes advisories, bans, licenses, and
+  sources; it reports only the existing unmatched-source warnings for the two
+  Git origins.
+- Evidence limit: after restoring the committed standalone lock form, root
+  overlay `cargo nextest --locked --all-features` refuses before test
+  execution because local patches are not represented in the lock. The exact
+  standalone locked closure is therefore the hosted PR gate, not the local
+  overlay run.
 - Commit `9cc9fd8` is pushed on `codex/horae-lockstep-075` as draft PR #19;
   hosted `verify` and `supply-chain` checks are queued. Merge and the Atlas
   gitlink advance remain gated on those exact-head checks.

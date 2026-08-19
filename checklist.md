@@ -72,10 +72,13 @@ points inward to that SSOT to avoid duplicated evidence.
 - [x] Regenerate `Cargo.lock` outside the Atlas overlay to Aequitas
       `260ad10d` and Eunomia `85e590b7`; preserve the Git-sourced manifest
       boundary.
-- [x] Run standalone format, locked metadata, all-feature and no-default-
-      features checks, warning-denied Clippy, Nextest 20/20, doctest 1/1,
-      rustdoc, and cargo-deny. Cargo-deny passes its four policy classes and
-      reports only the existing unmatched-source warnings.
+- [x] Run the local-graph format, locked metadata, all-feature and
+      no-default-features checks, warning-denied Clippy, Nextest 20/20,
+      doctest 1/1, rustdoc, and cargo-deny. Cargo-deny passes its four policy
+      classes and reports only the existing unmatched-source warnings.
+- [x] Record the evidence boundary: after restoring the committed standalone
+      lock, root-overlay `cargo nextest --locked` refuses before test execution
+      because local patches are not represented in the lock.
 - [x] Commit and publish the lock-only provider increment as `9cc9fd8` on
       `codex/horae-lockstep-075`; open draft PR #19.
 - [ ] Collect the exact-head hosted `verify` and `supply-chain` checks, merge
