@@ -76,5 +76,8 @@ points inward to that SSOT to avoid duplicated evidence.
       features checks, warning-denied Clippy, Nextest 20/20, doctest 1/1,
       rustdoc, and cargo-deny. Cargo-deny passes its four policy classes and
       reports only the existing unmatched-source warnings.
-- [ ] Commit and publish the lock-only provider increment, then advance the
-      Atlas Horae gitlink after the parent exact-head and overlay gates pass.
+- [x] Commit and publish the lock-only provider increment as `9cc9fd8` on
+      `codex/horae-lockstep-075`; open draft PR #19.
+- [ ] Collect the exact-head hosted `verify` and `supply-chain` checks, merge
+      the provider PR, and advance the Atlas Horae gitlink after the parent
+      exact-head and overlay gates pass.

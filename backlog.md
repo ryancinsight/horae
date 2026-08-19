@@ -97,7 +97,7 @@ CFDrs, helios) and the domain layer.
   `31964297946` passes. Atlas's Horae gitlink remains a separate integration
   step owned by the parent repository.
 
-## HORAE-LOCKSTEP-075 — Refresh merged Aequitas/Eunomia lock heads [patch] — complete
+## HORAE-LOCKSTEP-075 — Refresh merged Aequitas/Eunomia lock heads [patch] — hosted gate pending
 
 - Owner: Atlas integration session; scope: `Cargo.lock` plus this provider's
   lock-coherence evidence. No Horae source or manifest change is in scope.
@@ -110,3 +110,6 @@ CFDrs, helios) and the domain layer.
   20/20, doctest 1/1, and rustdoc all pass. `cargo deny check` passes
   advisories, bans, licenses, and sources; it reports only the existing
   unmatched-source warnings for the two Git origins.
+- Commit `9cc9fd8` is pushed on `codex/horae-lockstep-075` as draft PR #19;
+  hosted `verify` and `supply-chain` checks are queued. Merge and the Atlas
+  gitlink advance remain gated on those exact-head checks.

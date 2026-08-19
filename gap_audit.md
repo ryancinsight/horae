@@ -12,7 +12,9 @@ metadata, all-feature check, no-default-features check, warning-denied Clippy,
 Nextest 20/20, doctest 1/1, and rustdoc pass. Cargo-deny passes advisories,
 bans, licenses, and sources; its only output is the existing unmatched-source
 warning for the two Git origins. The provider lock is ready for commit and
-parent-gitlink integration.
+parent-gitlink integration. Commit `9cc9fd8` is pushed as draft PR #19; hosted
+`verify` and `supply-chain` checks are queued, so merge and parent-gitlink
+integration remain open.
 
 ## HORAE-LOCKSTEP-074 — Aequitas/Eunomia consumer pin — local closure 2026-08-16
 
