@@ -7,7 +7,9 @@ All notable changes to Horae are documented in this file.
 ### Changed
 
 - Refresh the Pages caller to the current Atlas reusable workflow revision;
-  retain the existing package-staged executable book gate.
+  retain the existing package-staged executable book gate. Exact hosted CI,
+  mdBook, and Pages deployment runs pass at merged default `c2e7766`; live
+  Pages returns HTTP 200.
 
 - Qualify event endpoint reconstruction with the Sterbenz exact-subtraction
   condition and document `EventClip::event()` as the authoritative boundary;
