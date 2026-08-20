@@ -6,6 +6,9 @@ All notable changes to Horae are documented in this file.
 
 ### Changed
 
+- Refresh the Pages caller to the current Atlas reusable workflow revision;
+  retain the existing package-staged executable book gate.
+
 - Qualify event endpoint reconstruction with the Sterbenz exact-subtraction
   condition and document `EventClip::event()` as the authoritative boundary;
   add a large-magnitude regression case.
