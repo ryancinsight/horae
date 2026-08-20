@@ -1,12 +1,19 @@
 # Horae backlog
 
-## ATLAS-HORAE-WORKFLOW-PIN-2026-08-20 — Refresh shared book workflow pin [patch] — hosted verification pending
+## ATLAS-HORAE-WORKFLOW-PIN-2026-08-20 — Refresh shared book workflow pin [patch] — done 2026-08-20
 
 - Owner: Atlas integration. Scope is the Pages caller and this PM/changelog
   record; the Horae implementation and lockfile remain unchanged.
 - Acceptance: pin the caller to the current Atlas reusable workflow while
   preserving the existing executable book-test inputs, then pass the exact
   hosted source and Pages gates before advancing the Atlas gitlink.
+- Evidence: source `aaed0cff8e777d62fcaff4f20b3347bb1eefa403`, PR #22, and
+  merged default `c2e7766847e3ef28125b809d98fe07250acc6cec`. Exact PR
+  `verify`, `supply-chain`, and Pages book-build checks pass; post-merge CI
+  `32341053963`, Deploy mdBook `32341054529`, and dynamic Pages `32341052968`
+  pass. Live Pages returns HTTP 200 with the expected Horae title.
+- Delivery: the Atlas gitlink records the merged default and this provider
+  item is closed.
 
 Strategic roadmap; tags `[patch]`/`[minor]`/`[major]`/`[arch]` per SemVer class.
 Horae is the Atlas typed-simulation-time and integration-policy SSOT: typed
