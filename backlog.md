@@ -1,5 +1,13 @@
 # Horae backlog
 
+## ATLAS-HORAE-WORKFLOW-PIN-2026-08-20 — Refresh shared book workflow pin [patch] — hosted verification pending
+
+- Owner: Atlas integration. Scope is the Pages caller and this PM/changelog
+  record; the Horae implementation and lockfile remain unchanged.
+- Acceptance: pin the caller to the current Atlas reusable workflow while
+  preserving the existing executable book-test inputs, then pass the exact
+  hosted source and Pages gates before advancing the Atlas gitlink.
+
 Strategic roadmap; tags `[patch]`/`[minor]`/`[major]`/`[arch]` per SemVer class.
 Horae is the Atlas typed-simulation-time and integration-policy SSOT: typed
 time/duration values, explicit RK-family tableaus, adaptive step control,
