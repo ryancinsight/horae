@@ -1,5 +1,24 @@
 # Horae backlog
 
+## H-ORDER-001 — Verify observed order of accuracy by refinement [verification][patch] — done 2026-08-20
+
+- Owner: current Atlas session; scope is the closed-form refinement oracle in
+  `tests/fixed_step.rs`. No tableau, API, consumer, or dirty-primary changes
+  are included.
+- Acceptance met: the exact solution of `y' = y` is integrated from zero to
+  one at dyadic refinements. The observed `log2(e(h)/e(h/2))` rounds to the
+  declared order for Euler, Midpoint, RK4, and Dormand–Prince in f64. The
+  generic f32 path verifies the non-embedded tableaus at a coarser signal
+  range; existing embedded tests retain f32/f64 Dormand–Prince execution
+  coverage because its fifth-order f32 truncation signal is roundoff-limited
+  at this finite range.
+- Evidence: clean lane `fix/horae-order-oracle` is based on fetched
+  `origin/main` `a05dbeb`. The source-level mutation of the RK4 output weight
+  fails the f64 refinement oracle and is restored. Exact provider gates pass:
+  format, locked all-target check, warning-denied Clippy, all-feature Nextest
+  25/25, doctest 1/1, and warning-denied Rustdoc. The no-default matrix is
+  recorded in the delivery closeout.
+
 ## ATLAS-HORAE-WORKFLOW-PIN-2026-08-20 — Refresh shared book workflow pin [patch] — done 2026-08-20
 
 - Owner: Atlas integration. Scope is the Pages caller and this PM/changelog
