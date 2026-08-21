@@ -126,10 +126,27 @@ Cargo and mdBook through `rustup run`, keeping compilation and doctest tooling
 on one pinned compiler. Verify run `31859557127` passes the full workflow,
 including book tests, doctests, rustdoc, and the example.
 
+## H-ORDER-001 — Observed tableau order by refinement — closed 2026-08-20
+
+The formal orders are now exercised through the real stepping path rather than
+only read from tableau constants. The test integrates `y' = y` from zero to
+one at dyadic step counts and compares the numerical state with `e`; the
+coarse/fine error ratio is classified by its nearest formal order. The f64
+oracle covers Euler (1), Midpoint (2), RK4 (4), and Dormand–Prince (5). The
+f32 oracle covers the non-embedded tableaus at a coarser range where their
+truncation signal remains above the rounding floor; the existing embedded
+tests retain f32/f64 Dormand–Prince execution coverage.
+
+The exact-lane source mutation of the RK4 output weight fails the f64
+refinement test. Format, locked all-target check, warning-denied Clippy,
+all-feature Nextest (25/25), doctest (1/1), and warning-denied Rustdoc pass at
+the current lane revision. No stability or implicit-integration claim is made.
+
 ## Gap inventory
 
 | ID | Description | Status |
 |----|-------------|--------|
+| H-ORDER-001 | Observed order of accuracy by refinement | Closed — closed-form f64 oracle plus f32 non-embedded coverage |
 | H-001 | Higher-order embedded adaptive tableaus (Dormand-Prince family) | Closed — `DormandPrince` and `step_embedded_into` provide a shared seven-stage 5(4) pair |
 | H-002 | Stiff/implicit integration policy | Open — explicit-policy-only boundary today |
 | H-003 | Registry publication (`publish = false`, occupied name) | Open — owner-gated facade/publication follow-up |

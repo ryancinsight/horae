@@ -1,5 +1,17 @@
 # Horae checklist
 
+## H-ORDER-001 — Verify observed order of accuracy by refinement — closed 2026-08-20
+
+- [x] Add the closed-form `y' = y` refinement oracle for Euler, Midpoint, RK4,
+      and Dormand–Prince, with dyadic refinement and discrete formal-order
+      classification.
+- [x] Cover the resolvable f32 non-embedded orders and retain the existing
+      f32/f64 embedded execution tests where f32 fifth-order truncation is
+      below the finite-step rounding floor.
+- [x] Run exact-lane format, locked checks, warning-denied Clippy, Nextest,
+      doctests, and Rustdoc; run the RK4 weight mutation control and restore
+      the source.
+
 ## ATLAS-HORAE-AUDIT-073 — Isolated provider re-verification — closed 2026-08-16
 
 - Owner: current Atlas session.
