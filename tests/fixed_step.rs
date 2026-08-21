@@ -124,9 +124,35 @@ where
     }
 }
 
-fn march_exponential<T, Method, const STAGES: usize>(method: Method, subdivisions: usize) -> f64
+#[derive(Clone, Copy)]
+struct TimeAffineRate;
+
+impl<T> ExplicitSystem<T> for TimeAffineRate
 where
     T: RealField,
+{
+    type Error = Infallible;
+
+    fn evaluate(
+        &self,
+        time: Instant<T>,
+        state: &[T],
+        derivative: &mut [T],
+    ) -> Result<(), Self::Error> {
+        derivative[0] = *time.as_time().as_base() + state[0];
+        Ok(())
+    }
+}
+
+fn march_system<T, System, Method, const STAGES: usize>(
+    system: &System,
+    method: Method,
+    subdivisions: usize,
+) -> f64
+where
+    T: RealField,
+    System: ExplicitSystem<T>,
+    System::Error: fmt::Debug,
     Method: ExplicitTableau<STAGES> + Copy,
 {
     let subdivision_count = u32::try_from(subdivisions).expect("fixture count fits u32");
@@ -140,7 +166,7 @@ where
 
     for _ in 0..subdivisions {
         let report = step_into(
-            &ExponentialRate,
+            system,
             method,
             time,
             step,
@@ -156,22 +182,26 @@ where
     state[0].to_f64()
 }
 
-fn observed_order<T, Method, const STAGES: usize>(
+fn observed_order<T, System, Method, const STAGES: usize>(
+    system: &System,
     method: Method,
+    exact: f64,
     coarse_subdivisions: usize,
 ) -> (f64, f64, f64)
 where
     T: RealField,
+    System: ExplicitSystem<T>,
+    System::Error: fmt::Debug,
     Method: ExplicitTableau<STAGES> + Copy,
 {
-    let coarse = march_exponential::<T, Method, STAGES>(method, coarse_subdivisions);
-    let fine = march_exponential::<T, Method, STAGES>(
+    let coarse = march_system::<T, System, Method, STAGES>(system, method, coarse_subdivisions);
+    let fine = march_system::<T, System, Method, STAGES>(
+        system,
         method,
         coarse_subdivisions
             .checked_mul(2)
             .expect("invariant: refinement count does not overflow"),
     );
-    let exact = core::f64::consts::E;
     let coarse_error = (coarse - exact).abs();
     let fine_error = (fine - exact).abs();
     let rate = (coarse_error / fine_error).ln() / core::f64::consts::LN_2;
@@ -182,13 +212,19 @@ where
     clippy::float_cmp,
     reason = "the rounded convergence class is the discrete oracle"
 )]
-fn assert_formal_order<T, Method, const STAGES: usize>(method: Method, coarse_subdivisions: usize)
-where
+fn assert_formal_order<T, System, Method, const STAGES: usize>(
+    system: &System,
+    method: Method,
+    exact: f64,
+    coarse_subdivisions: usize,
+) where
     T: RealField,
+    System: ExplicitSystem<T>,
+    System::Error: fmt::Debug,
     Method: ExplicitTableau<STAGES> + Copy,
 {
     let (coarse_error, fine_error, observed) =
-        observed_order::<T, Method, STAGES>(method, coarse_subdivisions);
+        observed_order::<T, System, Method, STAGES>(system, method, exact, coarse_subdivisions);
     let formal =
         f64::from(u32::try_from(Method::ORDER).expect("invariant: tableau order fits u32"));
 
@@ -197,15 +233,22 @@ where
     // the closed-form oracle supplies the value and the classification has no
     // tunable tolerance.
     assert!(coarse_error > fine_error, "refinement must reduce error");
-    assert_eq!(observed.round(), formal, "observed order {observed}");
+    assert_eq!(
+        observed.round(),
+        formal,
+        "{} observed order {observed}",
+        core::any::type_name::<Method>()
+    );
 }
 
 #[test]
 fn refinement_recovers_each_tableau_order_against_closed_form_solution() {
-    assert_formal_order::<f64, _, 1>(Euler, 16);
-    assert_formal_order::<f64, _, 2>(Midpoint, 16);
-    assert_formal_order::<f64, _, 4>(Rk4, 16);
-    assert_formal_order::<f64, _, 7>(DormandPrince, 16);
+    let system = ExponentialRate;
+    let exact = core::f64::consts::E;
+    assert_formal_order::<f64, _, _, 1>(&system, Euler, exact, 16);
+    assert_formal_order::<f64, _, _, 2>(&system, Midpoint, exact, 16);
+    assert_formal_order::<f64, _, _, 4>(&system, Rk4, exact, 16);
+    assert_formal_order::<f64, _, _, 7>(&system, DormandPrince, exact, 16);
 }
 
 #[test]
@@ -215,9 +258,22 @@ fn refinement_order_class_is_stable_for_f32() {
     // f32 check is limited to the non-embedded tableaus with a resolvable
     // truncation signal; generic execution of Dormand--Prince remains covered
     // by the existing f32/f64 embedded tests.
-    assert_formal_order::<f32, _, 1>(Euler, 4);
-    assert_formal_order::<f32, _, 2>(Midpoint, 4);
-    assert_formal_order::<f32, _, 4>(Rk4, 4);
+    let system = ExponentialRate;
+    let exact = core::f64::consts::E;
+    assert_formal_order::<f32, _, _, 1>(&system, Euler, exact, 4);
+    assert_formal_order::<f32, _, _, 2>(&system, Midpoint, exact, 4);
+    assert_formal_order::<f32, _, _, 4>(&system, Rk4, exact, 4);
+}
+
+#[test]
+fn refinement_recovers_each_tableau_order_for_time_dependent_solution() {
+    let system = TimeAffineRate;
+    // The exact solution of y' = t + y, y(0) = 1, at t = 1 is 2e - 2.
+    let exact = 2.0_f64.mul_add(core::f64::consts::E, -2.0);
+    assert_formal_order::<f64, _, _, 1>(&system, Euler, exact, 64);
+    assert_formal_order::<f64, _, _, 2>(&system, Midpoint, exact, 64);
+    assert_formal_order::<f64, _, _, 4>(&system, Rk4, exact, 64);
+    assert_formal_order::<f64, _, _, 7>(&system, DormandPrince, exact, 64);
 }
 
 struct TimeRate;

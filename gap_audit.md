@@ -126,6 +126,18 @@ Cargo and mdBook through `rustup run`, keeping compilation and doctest tooling
 on one pinned compiler. Verify run `31859557127` passes the full workflow,
 including book tests, doctests, rustdoc, and the example.
 
+## H-ORDER-002 — Stage-time coefficient refinement — in progress
+
+The autonomous `y' = y` refinement fixture does not read the stage-time
+argument, so it cannot detect a regression in a tableau's `C` coefficients.
+The replacement audit adds the non-autonomous exact solution of `y' = t + y`,
+`y(0) = 1`, whose endpoint at one is `2e - 2`. The generic f64 refinement
+oracle classifies Euler (1), Midpoint (2), RK4 (4), and Dormand–Prince (5)
+through the real stepping path with no tunable decimal tolerance. The focused
+fixed-step Nextest binary passes 6/6 and warning-denied all-target Clippy
+passes; doctests and Rustdoc remain to be collected after the shared build
+lock drains.
+
 ## H-ORDER-001 — Observed tableau order by refinement — closed 2026-08-20
 
 The formal orders are now exercised through the real stepping path rather than
@@ -140,12 +152,17 @@ tests retain f32/f64 Dormand–Prince execution coverage.
 The exact-lane source mutation of the RK4 output weight fails the f64
 refinement test. Format, locked all-target check, warning-denied Clippy,
 all-feature Nextest (25/25), doctest (1/1), and warning-denied Rustdoc pass at
-the current lane revision. No stability or implicit-integration claim is made.
+the current lane revision. The full locked all-featured Nextest suite passes
+26/26, no-default-features Cargo check passes, warning-denied all-target Clippy
+passes, the doctest gate passes 1/1, and warning-denied Rustdoc generates
+successfully. Hosted PR and Pages evidence remain pending. No stability or
+implicit-integration claim is made.
 
 ## Gap inventory
 
 | ID | Description | Status |
 |----|-------------|--------|
+| H-ORDER-002 | Stage-time coefficient refinement | In progress — non-autonomous exact solution added; doctest/Rustdoc and hosted evidence pending |
 | H-ORDER-001 | Observed order of accuracy by refinement | Closed — closed-form f64 oracle plus f32 non-embedded coverage |
 | H-001 | Higher-order embedded adaptive tableaus (Dormand-Prince family) | Closed — `DormandPrince` and `step_embedded_into` provide a shared seven-stage 5(4) pair |
 | H-002 | Stiff/implicit integration policy | Open — explicit-policy-only boundary today |
