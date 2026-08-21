@@ -1,5 +1,19 @@
 # Horae checklist
 
+## H-ORDER-002 — Verify stage-time coefficients — current Atlas session
+
+- [x] Reproduce the review finding: the autonomous `y' = y` fixture never
+      reads the stage-time argument.
+- [x] Add the generic non-autonomous `y' = t + y`, `y(0) = 1` refinement oracle
+      with exact endpoint `2e - 2` for Euler, Midpoint, RK4, and
+      Dormand–Prince.
+- [x] Run the fixed-step Nextest binary (6/6), the locked all-featured Nextest
+      suite (26/26), no-default-features Cargo check, and warning-denied
+      all-target Clippy against the clean provider lane.
+- [x] Run provider doctests (1/1) and warning-denied Rustdoc; both pass on the
+      exact lane revision.
+- [ ] Synchronize the exact hosted PR and Atlas pointer evidence.
+
 ## H-ORDER-001 — Verify observed order of accuracy by refinement — closed 2026-08-20
 
 - [x] Add the closed-form `y' = y` refinement oracle for Euler, Midpoint, RK4,

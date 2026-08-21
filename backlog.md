@@ -1,6 +1,23 @@
 # Horae backlog
 
-## H-ORDER-001 — Verify observed order of accuracy by refinement [verification][patch] — done 2026-08-20
+## H-ORDER-002 — Verify stage-time coefficients `verification` `patch` — in progress
+
+- Owner: Atlas integration; scope is the non-autonomous refinement oracle in
+  `tests/fixed_step.rs` and synchronized provider records. No tableau or
+  consumer implementation changes are in scope.
+- Finding: the H-ORDER-001 autonomous fixture ignores the stage-time input, so
+  a regression in a tableau's `C` coefficients can pass its convergence test.
+- Acceptance: integrate the exact solution of `y' = t + y`, `y(0) = 1`, at
+  dyadic refinements; classify Euler, Midpoint, RK4, and Dormand–Prince by
+  their declared orders without a tunable decimal tolerance; run the locked
+  format, warning-denied Clippy, Nextest, doctest, and Rustdoc gates.
+- Current evidence: the new time-dependent test passes with the other five
+  fixed-step tests (6/6); the full locked all-featured Nextest run passes
+  26/26, no-default-features Cargo check passes, warning-denied all-target
+  Clippy passes, the doctest gate passes 1/1, and warning-denied Rustdoc
+  generates successfully. Hosted PR and Pages evidence remain pending.
+
+## H-ORDER-001 — Verify observed order of accuracy by refinement `verification` `patch` — done 2026-08-20
 
 - Owner: current Atlas session; scope is the closed-form refinement oracle in
   `tests/fixed_step.rs`. No tableau, API, consumer, or dirty-primary changes
