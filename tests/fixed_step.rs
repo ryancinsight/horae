@@ -7,7 +7,7 @@ use eunomia::{NumericElement, RealField};
 use horae::{
     integration::{
         SliceRole, StepError, StepWorkspace, step_into,
-        tableau::{Euler, Midpoint, Rk4},
+        tableau::{DormandPrince, Euler, ExplicitTableau, Midpoint, Rk4},
     },
     system::ExplicitSystem,
     time::{Instant, StepSize},
@@ -102,6 +102,122 @@ where
 fn constant_rate_is_exact_for_each_method_and_scalar() {
     assert_constant_rate::<f32>();
     assert_constant_rate::<f64>();
+}
+
+#[derive(Clone, Copy)]
+struct ExponentialRate;
+
+impl<T> ExplicitSystem<T> for ExponentialRate
+where
+    T: RealField,
+{
+    type Error = Infallible;
+
+    fn evaluate(
+        &self,
+        _time: Instant<T>,
+        state: &[T],
+        derivative: &mut [T],
+    ) -> Result<(), Self::Error> {
+        derivative[0] = state[0];
+        Ok(())
+    }
+}
+
+fn march_exponential<T, Method, const STAGES: usize>(method: Method, subdivisions: usize) -> f64
+where
+    T: RealField,
+    Method: ExplicitTableau<STAGES> + Copy,
+{
+    let subdivision_count = u32::try_from(subdivisions).expect("fixture count fits u32");
+    let step_value = T::from_f64(1.0 / f64::from(subdivision_count));
+    let step = StepSize::new(Time::from_base(step_value)).expect("invariant: positive step");
+    let start = Instant::new(Time::from_base(T::from_f64(0.0))).expect("invariant: finite start");
+    let mut time = start;
+    let mut state = [T::from_f64(1.0)];
+    let mut output = [<T as NumericElement>::ZERO];
+    let mut workspace = StepWorkspace::<T, STAGES>::new(1).expect("invariant: nonzero workspace");
+
+    for _ in 0..subdivisions {
+        let report = step_into(
+            &ExponentialRate,
+            method,
+            time,
+            step,
+            &state,
+            &mut output,
+            &mut workspace,
+        )
+        .expect("invariant: exponential system is infallible");
+        state.copy_from_slice(&output);
+        time = report.end();
+    }
+
+    state[0].to_f64()
+}
+
+fn observed_order<T, Method, const STAGES: usize>(
+    method: Method,
+    coarse_subdivisions: usize,
+) -> (f64, f64, f64)
+where
+    T: RealField,
+    Method: ExplicitTableau<STAGES> + Copy,
+{
+    let coarse = march_exponential::<T, Method, STAGES>(method, coarse_subdivisions);
+    let fine = march_exponential::<T, Method, STAGES>(
+        method,
+        coarse_subdivisions
+            .checked_mul(2)
+            .expect("invariant: refinement count does not overflow"),
+    );
+    let exact = core::f64::consts::E;
+    let coarse_error = (coarse - exact).abs();
+    let fine_error = (fine - exact).abs();
+    let rate = (coarse_error / fine_error).ln() / core::f64::consts::LN_2;
+    (coarse_error, fine_error, rate)
+}
+
+#[expect(
+    clippy::float_cmp,
+    reason = "the rounded convergence class is the discrete oracle"
+)]
+fn assert_formal_order<T, Method, const STAGES: usize>(method: Method, coarse_subdivisions: usize)
+where
+    T: RealField,
+    Method: ExplicitTableau<STAGES> + Copy,
+{
+    let (coarse_error, fine_error, observed) =
+        observed_order::<T, Method, STAGES>(method, coarse_subdivisions);
+    let formal =
+        f64::from(u32::try_from(Method::ORDER).expect("invariant: tableau order fits u32"));
+
+    // The dyadic refinement ratio is classified by its nearest formal order.
+    // This is an order-class check, not a fabricated decimal accuracy claim:
+    // the closed-form oracle supplies the value and the classification has no
+    // tunable tolerance.
+    assert!(coarse_error > fine_error, "refinement must reduce error");
+    assert_eq!(observed.round(), formal, "observed order {observed}");
+}
+
+#[test]
+fn refinement_recovers_each_tableau_order_against_closed_form_solution() {
+    assert_formal_order::<f64, _, 1>(Euler, 16);
+    assert_formal_order::<f64, _, 2>(Midpoint, 16);
+    assert_formal_order::<f64, _, 4>(Rk4, 16);
+    assert_formal_order::<f64, _, 7>(DormandPrince, 16);
+}
+
+#[test]
+fn refinement_order_class_is_stable_for_f32() {
+    // The f64 test covers all tableaus. At this finite dyadic range the
+    // embedded fifth-order f32 signal is below its rounding floor, so the
+    // f32 check is limited to the non-embedded tableaus with a resolvable
+    // truncation signal; generic execution of Dormand--Prince remains covered
+    // by the existing f32/f64 embedded tests.
+    assert_formal_order::<f32, _, 1>(Euler, 4);
+    assert_formal_order::<f32, _, 2>(Midpoint, 4);
+    assert_formal_order::<f32, _, 4>(Rk4, 4);
 }
 
 struct TimeRate;
