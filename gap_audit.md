@@ -1,5 +1,166 @@
 # Horae ownership gap audit
 
+## Finding 2026-08-20: horae scope-vs-delivery audit
+
+Static audit at detached head `a05dbeb`
+(`a05dbeb` = merge of PR #23, `git status --porcelain` empty before the pass).
+Read-only: no build, test, lint, or Git state-changing command was executed, so
+nothing here asserts a passing suite. Every claim is a file-and-line citation
+or the output of a counting command.
+
+### Measured shape
+
+- One package (`Cargo.toml` has no `[workspace]`), `no_std + alloc`
+  (`src/lib.rs:8`, `:12`), edition 2024, `publish = false`.
+- 1388 `src` LOC across 28 files; largest file `src/integration/stepper.rs`
+  at 243 lines. 771 `tests` LOC across six integration binaries, 71
+  `examples` LOC, no `benches/`.
+- 23 `#[test]` functions in `tests/` (two of them proptest cases) plus one
+  doctest in `README.md` included via `src/lib.rs:7`.
+- Documentation: seven numbered book chapters plus an introduction and one
+  example page (`docs/book/SUMMARY.md`); one ADR, status Accepted.
+
+### Conformance floor
+
+Clean at every measured class: zero `todo!`, zero `unimplemented!`, zero
+TODO/FIXME/HACK, zero `#[allow]` sites, one justified `#[expect]`
+(`examples/ordered_decay.rs:3`), zero production `unwrap()`, zero `dyn` in
+`src`, zero `pub use ... as ...`, zero files over the 500-line target, zero
+type-suffixed identifiers, and `lib.rs` plus every `mod.rs` manifest-only.
+`missing_docs` and `unwrap_used` are denied and `unsafe_code` forbidden at the
+manifest and crate level (`Cargo.toml` `[lints]`, `src/lib.rs:9`–`:10`).
+A committed nextest budget exists (`.config/nextest.toml`: slow at 30s,
+terminate after 60s) and the toolchain is pinned (`rust-toolchain.toml`).
+
+### Capability coverage against the declared boundary
+
+Every one of the seven capabilities the `README.md` Boundary section claims is
+implemented with real, input-sensitive computation and no stub:
+typed `Instant`/`StepSize` over Aequitas time, the borrowed-slice
+`ExplicitSystem` seam, const-generic tableaus with one shared recurrence,
+reusable stage workspaces, error-based adaptive reports, borrowed event
+schedules with clipping, and zero-sized subcycle plans.
+
+Integrator set: Euler, Midpoint, `Rk4`, and `DormandPrince` 5(4)
+(`src/integration/tableau/methods.rs:9`, `:22`, `:35`, `:60`, `:107`). No
+leapfrog/Verlet, SSP-RK, implicit, or IMEX surface is declared anywhere, and
+ADR 0001 explicitly defers implicit integration until a second consumer
+supplies a residual/Jacobian contract — so their absence is a recorded
+boundary, not an undelivered claim. Likewise stability and CFL criteria are
+declared out of scope (`README.md` Boundary; ADR 0001 "Move equations or CFL
+policy into Horae"), so no typed CFL constraint is expected here.
+
+The stepping recurrence is genuine: `evaluate_stages`
+(`src/integration/stepper.rs:126`) consumes the tableau `A`/`C` coefficients
+and the caller's system, and `combine_embedded_output` (`:194`) forms the
+primary and embedded results from the shared stage derivatives.
+
+### Verification depth — the material gap
+
+The existing suite is strong on value semantics, negative paths, and derived
+tolerances: every assertion cites a rounding-unit derivation rather than a
+tuned epsilon (`tests/fixed_step.rs:93`, `tests/policy.rs:42`,
+`tests/embedded.rs:78`), the Sterbenz and `gamma_4` boundary conditions are
+pinned by tests (`tests/policy.rs:142`, `:213`), layout claims are proved
+(`tests/layout.rs`), and an instrumented allocator proves zero allocation
+across 16 steps (`tests/allocation.rs:70`–`:80`). Generic instantiation
+coverage exists at `f32` and `f64` for the fixed-step methods
+(`tests/fixed_step.rs:36`, `:102`) and the controller (`tests/policy.rs:56`).
+
+What is missing is the independent oracle that matters most for an integrator:
+
+1. No observed-order-of-accuracy study. The formal `ORDER` constants
+   (`methods.rs:10`, `:23`, `:36`, `:61`) are consumed by
+   `AdaptiveController::assess::<ORDER>` to form the step-scaling exponent
+   (`src/adaptive/controller.rs:122`) but are never checked against a measured
+   convergence rate. A grep for refinement or convergence across `tests/` and
+   `examples/` returns only the two-point `h^5` ratio at `tests/embedded.rs:85`,
+   which measures the *embedded error estimate*, not the order of the
+   integrated solution. Filed as H-ORDER-001.
+2. No closed adaptive loop. All eight `assess` call sites in the tree
+   (`tests/policy.rs:38`, `:47`, `:62`, `:69`, `:76`, `:93`, `:97`, `:103`;
+   `examples/ordered_decay.rs:57`) supply hand-written error and scale values.
+   No test feeds `step_embedded_into`'s error-estimate slice into the
+   controller, and no test exercises reject → re-step at the suggested size →
+   accept. Filed as H-ADAPT-LOOP-002.
+3. No multi-step accuracy composition. The only stepping loop in the tree
+   (`tests/allocation.rs:44`) asserts allocation counts; every accuracy
+   assertion in the repository is single-step. Filed as H-MULTISTEP-003.
+4. `DormandPrince` and `step_embedded_into` are `f64`-only in tests
+   (`tests/embedded.rs`), unlike the fixed-step and controller suites. Filed as
+   H-DP-SCALAR-004.
+
+Adaptive policy itself is real, not a mock: mixed absolute-relative
+normalization, order-derived scaling, min/max clamping, and typed errors for
+non-finite observation, overflowing tolerance, invalid order, and invalid
+suggested step (`src/adaptive/controller.rs:96`–`:128`), with the accept,
+reject, invalid-parameter, and non-finite branches all covered. Event clipping
+is verified at exact event times, including duplicate-skip, no-clip-without-
+crossing, and a high-magnitude case (`tests/properties.rs:60`, `:87`;
+`tests/policy.rs:109`, `:161`).
+
+### Documentation drift found
+
+- Fixed in this pass: `README.md:164` said behavioral tests compare "all three
+  method instantiations" — four tableaus now carry oracle-based tests.
+  `docs/book/rk4.md:38` said "Horae provides three sealed zero-sized method
+  markers"; corrected to four with the chapter's scope stated and a link to
+  `rk5.md`.
+- Filed, not fixed (each needs a judgement call or a citation):
+  ADR 0001's Consequences section still lists "Adaptive embedded-pair
+  estimation" as absent though `DormandPrince` and `step_embedded_into` ship
+  (H-ADR-STALE-006); `docs/adr/README.md:3` instructs regeneration through
+  `scripts/adr-index.py`, which does not exist in this repository
+  (H-ADRIDX-007); `docs/book/rk4.md:226` asserts RK4 stability is
+  "approximately 2.8 times CFL compared to forward Euler", an unsourced figure
+  that reads as a ratio while approximating RK4's own real-axis boundary,
+  inside a repository that disclaims CFL ownership (H-STAB-DOC-005);
+  `src/integration/mod.rs:1` still summarizes the module as "Fixed-step
+  explicit integration" while re-exporting the embedded surface
+  (H-MODDOC-010).
+
+### CI and supply-chain observations
+
+`.github/workflows/ci.yml` pins every action to a full SHA and declares
+least-privilege `permissions`, and the `verify` job carries
+`timeout-minutes: 30`. Two floor gaps: the `supply-chain` job (`:52`) carries
+no `timeout-minutes`, and only one cargo invocation in the workflow (`:34`)
+passes `--locked` — the feature check, clippy, nextest, doctest, doc, and
+example steps re-resolve against the network rather than verifying the
+committed lock (H-CI-LOCKED-008). Separately, `Cargo.toml:5` declares
+`rust-version = "1.95"` while `rust-toolchain.toml` pins `1.97.0` and no job
+builds at the declared floor, so the MSRV claim is unverified (H-MSRV-009).
+
+### Performance observation
+
+`DormandPrince::B` equals its `A[6]` row (`methods.rs:85`–`:103`) — the FSAL
+property — but `evaluate_stages` (`stepper.rs:143`) evaluates all seven stages
+on every call, so a continuing accepted step pays one avoidable right-hand-side
+evaluation. The crate carries no benchmarks, so this is an observation from the
+coefficient structure, not a measurement (H-FSAL-011).
+
+### PM-record note
+
+`backlog.md` and `checklist.md` record "Nextest 20/20" as the most recent
+counted run (entries dated 2026-08-16 and 2026-08-19); the tree now contains 23
+`#[test]` functions. No run was performed in this pass, so the current count is
+unknown — the discrepancy is only noted, not resolved.
+
+### Completeness
+
+Approximately 84% of Horae's own declared scope is delivered and verified.
+Denominator: the seven capability bullets in the `README.md` Boundary section,
+the decisions recorded in Accepted ADR 0001, and the seven chapters listed in
+`docs/book/SUMMARY.md`. Weighting per the audit rubric — capabilities
+implemented without stubs 40% (full marks: all seven present, real, and
+stub-free), verification depth 25% (roughly half: exemplary value-semantic and
+derived-bound coverage, but no order-of-accuracy refinement study, no closed
+adaptive loop, and no multi-step accuracy test), documentation 20% (most marks:
+complete book and README with four filed stale claims), conformance floor 15%
+(near-full: clean at every measured class, docked for the two CI gaps and the
+unverified MSRV).
+
+
 ## HORAE-LOCKSTEP-075 — refreshed consumer lock hosted closure 2026-08-19
 
 The standalone Horae lock now follows the current merged Atlas provider heads:
