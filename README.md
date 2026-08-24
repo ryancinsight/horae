@@ -161,7 +161,7 @@ cargo run --example ordered_decay
 cargo deny check
 ```
 
-Behavioral tests compare all three method instantiations with independent
+Behavioral tests compare all four method instantiations with independent
 closed-form or polynomial oracles. Property tests cover constant-rate
 integration, high-magnitude event clipping, and scalar-bounded ratio
 reconstruction. Layout tests prove policy markers are

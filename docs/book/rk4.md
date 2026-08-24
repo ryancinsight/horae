@@ -35,7 +35,9 @@ where `y_i'` denotes the i-th stage derivative.
 
 ## Supported Methods
 
-Horae provides three sealed zero-sized method markers:
+Horae provides four sealed zero-sized method markers. This chapter covers the
+three fixed-step markers; the [Dormand--Prince embedded pair](rk5.md) is
+covered separately.
 
 ### Euler (1st order, 1 stage)
 

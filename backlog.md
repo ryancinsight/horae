@@ -184,3 +184,170 @@ item.
   PR #19 at default `1ed6a17`. Post-merge CI run `32202560133` passes the
   provider verification and supply-chain jobs; Pages deployment
   `32202559349` passes. The Atlas parent may consume this exact default head.
+
+## Gap audit 2026-08-20 — scope-vs-delivery items
+
+Filed by the Atlas gap-audit pass at detached head `a05dbeb`. Evidence is
+recorded in `gap_audit.md` under
+`Finding 2026-08-20: horae scope-vs-delivery audit`. No item below is claimed
+verified; each carries its own acceptance oracle.
+
+### H-ORDER-001 — Verify observed order of accuracy by refinement [patch] — status: todo
+
+- Outcome: each sealed tableau's declared `ORDER` is verified against a
+  measured convergence rate, so the constant consumed by
+  `AdaptiveController::assess::<ORDER>` (`src/adaptive/controller.rs:122`) is
+  evidence-backed rather than declared.
+- Scope: `tests/`. Non-goals: no source, tableau, or API change; no stability
+  or CFL criteria (ADR 0001 excludes them).
+- Acceptance oracle: for Euler, Midpoint, `Rk4`, and `DormandPrince`, a
+  timestep-refinement study over a smooth initial-value problem with a
+  closed-form solution recovers `log2(e(h)/e(h/2))` within a derived tolerance
+  of the formal order (1, 2, 4, 5), with the refinement range chosen so
+  truncation error dominates rounding and the tolerance derived from that
+  separation, not tuned.
+- Dependencies: none. Risk/change class: [verification] [patch]. Effort M.
+- Note: `tests/embedded.rs:85` establishes the `h^5` scaling of the *embedded
+  error estimate* only; no study covers the order of the integrated solution.
+
+### H-ADAPT-LOOP-002 — Close the adaptive control loop in a test [patch] — status: todo
+
+- Outcome: the adaptive controller is verified against a real embedded local
+  error estimate rather than synthetic scalars.
+- Scope: `tests/`. Non-goals: no controller API change.
+- Acceptance oracle: a test drives `step_embedded_into` on a system with a
+  closed-form solution, feeds the resulting error-estimate slice and state
+  scale into `AdaptiveController::assess::<5>`, asserts a `Reject` at a step
+  that exceeds tolerance, re-steps at the suggested step, asserts `Accept`,
+  and asserts the accepted state against the closed-form oracle within a
+  derived bound.
+- Dependencies: none. Risk/change class: [verification] [patch]. Effort M.
+- Note: all eight current `assess` call sites (`tests/policy.rs:38`–`:103`,
+  `examples/ordered_decay.rs:57`) pass hand-written error values; the
+  estimator-to-controller composition is untested.
+
+### H-MULTISTEP-003 — Value-semantic multi-step accumulation test [patch] — status: todo
+
+- Outcome: repeated stepping is verified for accumulated state, not only for
+  allocation behavior.
+- Scope: `tests/`. Non-goals: no source change.
+- Acceptance oracle: an N-step march over a closed-form system asserts the
+  final state within a derived accumulated-error bound and asserts the final
+  `StepReport::end()` against the analytic end instant.
+- Dependencies: none. Risk/change class: [verification] [patch]. Effort S.
+- Note: the only multi-step loop is `tests/allocation.rs:44`, whose assertions
+  are allocation counts.
+
+### H-DP-SCALAR-004 — Instantiate the embedded pair for `f32` [patch] — status: todo
+
+- Outcome: `DormandPrince` and `step_embedded_into` are covered at every
+  shipped scalar, matching the generic coverage already present for the
+  fixed-step methods and the controller.
+- Scope: `tests/embedded.rs`. Non-goals: no new scalar type.
+- Acceptance oracle: the polynomial-oracle and error-scaling assertions run
+  from a generic helper instantiated at `f32` and `f64`, with per-scalar
+  derived bounds.
+- Dependencies: none. Risk/change class: [verification] [patch]. Effort S.
+- Note: `tests/fixed_step.rs:36` already uses this generic-helper shape.
+
+### H-STAB-DOC-005 — Remove or source the book stability constants [patch] — status: todo
+
+- Outcome: no unsourced numerical stability claim remains in a repository that
+  declares stability and CFL criteria out of scope (`README.md` Boundary,
+  ADR 0001 "Move equations or CFL policy into Horae").
+- Scope: `docs/book/rk4.md`. Non-goals: no stability API.
+- Acceptance oracle: `docs/book/rk4.md:226` ("approximately 2.8 times CFL
+  compared to forward Euler") and `:161` ("moderately larger than Euler") are
+  either deleted or replaced with a cited real-axis stability-interval
+  statement carrying its source; `mdbook test docs/book` still passes.
+- Dependencies: none. Risk/change class: [docs] [patch]. Effort S.
+- Note: the classical RK4 real-axis stability interval is approximately
+  `[-2.785, 0]` and forward Euler's is `[-2, 0]`, so the stated figure is the
+  RK4 boundary itself, not a ratio to Euler, while the sentence asserts a
+  ratio. A correct replacement needs a citation, so this was not fixed in the
+  audit pass.
+
+### H-ADR-STALE-006 — Revise ADR 0001 for the delivered embedded pair [patch] — status: todo
+
+- Outcome: the one current record of the time-integration boundary decision
+  matches the delivered surface.
+- Scope: `docs/adr/0001-time-integration-boundary.md`, `docs/adr/README.md`.
+  Non-goals: no boundary change; the implicit and dense-output exclusions
+  stand.
+- Acceptance oracle: the Consequences sentence listing "Adaptive embedded-pair
+  estimation, dense output, implicit integration, and device-resident stage
+  storage" as absent is rewritten in place to record the delivered embedded
+  pair, the Decision section names `EmbeddedExplicitTableau` and
+  `step_embedded_into`, and a dated revision note records what changed and
+  why; the ADR index still passes its check.
+- Dependencies: none. Risk/change class: [docs] [patch]. Effort S.
+- Note: contradicted by `src/integration/tableau/methods.rs:107` and
+  `src/integration/stepper.rs:88`.
+
+### H-ADRIDX-007 — Restore or retarget the ADR index generator [patch] — status: todo
+
+- Outcome: the ADR index stated regeneration procedure is executable in this
+  repository.
+- Scope: `docs/adr/README.md` and, if the generator is adopted, a committed
+  script plus its CI check. Non-goals: no ADR content change.
+- Acceptance oracle: either the referenced generator exists and its `check`
+  mode runs in CI, or the "do not hand-edit" header is replaced with the
+  procedure that actually applies.
+- Dependencies: none. Risk/change class: [pm-hygiene] [patch]. Effort S.
+- Note: `docs/adr/README.md:3` names `scripts/adr-index.py`; the repository
+  has no `scripts/` directory.
+
+### H-CI-LOCKED-008 — Run CI cargo steps against the committed lock [patch] — status: todo
+
+- Outcome: hosted gates verify the committed `Cargo.lock` instead of
+  re-resolving, and every CI job carries a bounded wait.
+- Scope: `.github/workflows/ci.yml`. Non-goals: no lock content change.
+- Acceptance oracle: the feature-check, clippy, nextest, doctest, doc, and
+  example steps pass with `--locked`; the `supply-chain` job declares
+  `timeout-minutes`; both jobs pass on a hosted run at the exact revision.
+- Dependencies: the standalone lock must stay overlay-free (already closed by
+  the `[[patch.unused]]` removal item). Risk/change class: [verification]
+  [patch]. Effort S.
+- Note: only `.github/workflows/ci.yml:34` currently passes `--locked`; the
+  `supply-chain` job at `:52` has no `timeout-minutes`.
+
+### H-MSRV-009 — Verify or drop the declared MSRV [patch] — status: todo
+
+- Outcome: the `rust-version` claim is either enforced by a run or removed.
+- Scope: `.github/workflows/ci.yml`, `Cargo.toml`. Non-goals: no dependency
+  change to reach an older floor.
+- Acceptance oracle: a CI job builds and checks the crate on the declared
+  floor toolchain and passes, or `rust-version` is raised to the pinned
+  toolchain with the change recorded in the changelog.
+- Dependencies: none. Risk/change class: [verification] [patch]. Effort S.
+- Note: `Cargo.toml:5` declares `rust-version = "1.95"`; `rust-toolchain.toml`
+  pins `1.97.0` and every CI step uses the pin, so the floor is never
+  exercised.
+
+### H-MODDOC-010 — Correct the integration module summary [patch] — status: todo
+
+- Outcome: the module doc describes the module's actual surface.
+- Scope: `src/integration/mod.rs`. Non-goals: none.
+- Acceptance oracle: the `//!` summary covers embedded as well as fixed-step
+  stepping; `cargo doc` stays warning-clean.
+- Dependencies: none. Risk/change class: [docs] [patch]. Effort S.
+- Note: `src/integration/mod.rs:1` reads "Fixed-step explicit integration."
+  while the module re-exports `step_embedded_into` and `EmbeddedOutputs`.
+
+### H-FSAL-011 — Record or exploit the Dormand--Prince FSAL property [patch] — status: todo
+
+- Outcome: the per-step evaluation cost of the embedded pair is either reduced
+  to six evaluations for a continuing accepted step or explicitly documented
+  as seven by design.
+- Scope: `src/integration/`, `docs/book/rk5.md`, `tests/`. Non-goals: no
+  tableau coefficient change; no dense output.
+- Acceptance oracle: either a stage-reuse path is added whose accepted-step
+  evaluation count is six and whose result matches the current seven-stage
+  result bit-for-bit on a fixture, or `rk5.md` states that FSAL reuse is not
+  exploited and why. Benchmark evidence is required for the former.
+- Dependencies: H-ADAPT-LOOP-002 supplies the loop the reuse applies to.
+  Risk/change class: [perf] [patch]. Effort M.
+- Note: `DormandPrince::B` equals `A[6]`
+  (`src/integration/tableau/methods.rs:85`–`:103`), the FSAL condition;
+  `evaluate_stages` (`src/integration/stepper.rs:143`) evaluates all seven
+  stages every call.

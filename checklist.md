@@ -119,3 +119,49 @@ points inward to that SSOT to avoid duplicated evidence.
       plus Pages deployment `32202559349`. The Atlas parent may now consume
       this exact default head; parent overlay and exact-head gates remain
       owned by Atlas.
+
+## gap-audit-2026-08-20 (owner: atlas-gap-audit)
+
+Static, read-only scope-vs-delivery audit at detached head `a05dbeb` with a
+clean tree. No build, test, lint, or Git state-changing command was run; every
+claim below is a file-and-line or command-output citation. Findings are filed
+as `H-*-0NN` items in `backlog.md`.
+
+- [x] Orient: `git log --oneline -8`, `git status -sb` (`## HEAD (no branch)`),
+      `git status --porcelain` (0 entries).
+- [x] Read declared scope: `README.md`, `CHANGELOG.md` Unreleased,
+      `docs/adr/README.md` and ADR 0001, `docs/book/SUMMARY.md`, `backlog.md`,
+      `checklist.md`, `gap_audit.md`.
+- [x] Measure the tree: one package, 1388 `src` LOC across 28 files (largest
+      `src/integration/stepper.rs` at 243), 771 `tests` LOC, 71 `examples`
+      LOC, no `benches/`, 23 `#[test]` functions plus one doctest.
+- [x] Measure the conformance floor: zero `todo!`/`unimplemented!`, zero
+      TODO/FIXME/HACK, zero `#[allow]`, one justified `#[expect]`
+      (`examples/ordered_decay.rs:3`), zero production `unwrap()`, zero `dyn`
+      in `src`, zero aliasing re-exports, zero files over 500 lines, zero
+      type-suffixed identifiers, `lib.rs` and every `mod.rs` manifest-only.
+- [x] Answer the integrator-coverage question: Euler, Midpoint, `Rk4`, and the
+      `DormandPrince` 5(4) embedded pair exist; no leapfrog/Verlet, SSP-RK,
+      implicit, or IMEX surface is declared or present, and ADR 0001 excludes
+      implicit integration pending a second consumer contract.
+- [x] Answer the order-verification question: no observed-order-of-accuracy
+      refinement study exists for any method. Filed as H-ORDER-001.
+- [x] Answer the stability/CFL question: `README.md` and ADR 0001 place
+      stability and CFL criteria outside the boundary, so their absence is not
+      a gap; two unsourced stability sentences in the book contradict that
+      boundary and are filed as H-STAB-DOC-005.
+- [x] Answer the adaptive-policy question: accept/reject, scale clamping,
+      validation, and non-finite handling are real and tested against synthetic
+      observations; the estimator-to-controller loop and step rejection retry
+      are untested. Filed as H-ADAPT-LOOP-002. Event clipping at exact event
+      times is genuinely tested (`tests/properties.rs:60`, `:87`,
+      `tests/policy.rs:109`, `:161`).
+- [x] Cross-check every README and Accepted-ADR claim against the code; two
+      stale claims fixed in place, three deferred to backlog items.
+- [x] Update `backlog.md` (11 DoR-shaped items), this section, and
+      `gap_audit.md`.
+- [ ] Not performed and not claimed: no gate was executed. `cargo fmt`,
+      `clippy`, `nextest`, doctests, `cargo doc`, the example, `mdbook test`,
+      and `cargo deny` were all out of scope for this pass; the most recent
+      recorded green run is the hosted evidence under
+      `ATLAS-HORAE-WORKFLOW-PIN-2026-08-20` in `backlog.md`, not this audit.
