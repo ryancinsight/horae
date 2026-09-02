@@ -149,9 +149,13 @@ where
     );
 
     // The extrapolation is only meaningful if the raw sequence is converging:
-    // each pair estimate must sit closer to the declared order than the last.
+    // every pair estimate must sit closer to the declared order than the one
+    // before it. Checking only the last step would accept a sequence that
+    // diverges first and recovers once.
     assert!(
-        (pairs[2] - declared).abs() < (pairs[1] - declared).abs(),
+        pairs
+            .windows(2)
+            .all(|step| (step[1] - declared).abs() < (step[0] - declared).abs()),
         "{name}: the order estimate is not converging — pairs {:.4}, {:.4},          {:.4} against declared {declared}",
         pairs[0],
         pairs[1],
