@@ -1,4 +1,9 @@
-//! Fixed-step explicit integration.
+//! Explicit Runge--Kutta integration, fixed-step and embedded.
+//!
+//! [`step_into`] advances one step with a plain tableau. [`step_embedded_into`]
+//! advances one step with an embedded pair, writing the primary result and the
+//! componentwise local-error estimate into the two slices of an
+//! [`EmbeddedOutputs`], which is what [`crate::adaptive`] assesses.
 
 mod error;
 mod report;

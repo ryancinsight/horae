@@ -74,3 +74,34 @@ The caller supplies the state norm and tolerances to
 For a scalar state, `error_estimate[0].abs()` is an absolute observation; for
 vector states, the caller chooses the norm appropriate to its equations and
 units. The pair does not impose a norm or silently accept a step.
+
+## Why seven evaluations, not six
+
+The pair satisfies the *first same as last* condition: `C[6] == 1` and the
+final stage row `A[6]` equals the primary weights `B`, so stage seven is
+evaluated at `t + h` with exactly the state the step returns. Its derivative is
+therefore the next step's first stage, and an accepted step could carry it
+forward for six evaluations instead of seven — a seventh less work per step,
+where the right-hand side dominates. `dormand_prince_satisfies_the_fsal_condition`
+asserts the property, so this section cannot quietly describe a tableau that no
+longer has it.
+
+Horae does not exploit it, deliberately.
+
+`step_into` and `step_embedded_into` are pure functions of their arguments: the
+same state, step and start instant produce the same output and the same
+estimate, which `tests/multi_step_march.rs` asserts by splitting a march and
+comparing bit-for-bit. Reuse breaks that. The saved derivative is only valid
+for a step that *begins where the previous one ended and was accepted*, so a
+caller holding one must be prevented from using it after a rejected step, a
+changed step size, or an event that moved the state. Threading it as a plain
+extra argument would make a silent wrong answer reachable from safe code, and
+threading it as a typed continuation the previous step returns is a public API
+change to the whole stepping surface.
+
+That trade is worth making only against a measurement showing the seventh
+evaluation is a material share of a real workload's cost, and for stiff or
+expensive right-hand sides it usually is. Nothing here measures it yet, and the
+adaptive loop rejects steps often enough at tight tolerances that the reuse does
+not apply to every step. Until such a measurement exists, seven evaluations per
+step is the honest cost, and `StepReport::evaluations()` reports it.
