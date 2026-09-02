@@ -257,7 +257,7 @@ verified; each carries its own acceptance oracle.
 - Evidence the clauses bite: a controller patched to propose the step it just
   rejected fails the loop clause and leaves the determinism clause passing.
 
-### H-MULTISTEP-003 — Value-semantic multi-step accumulation test [patch] — status: todo
+### H-MULTISTEP-003 — Value-semantic multi-step accumulation test [patch] — status: done 2026-09-02
 
 - Outcome: repeated stepping is verified for accumulated state, not only for
   allocation behavior.
@@ -268,6 +268,18 @@ verified; each carries its own acceptance oracle.
 - Dependencies: none. Risk/change class: [verification] [patch]. Effort S.
 - Note: the only multi-step loop is `tests/allocation.rs:44`, whose assertions
   are allocation counts.
+- **Delivered 2026-09-02** as `tests/multi_step_march.rs`. A 64-step `Rk4`
+  march over `y' = -y` on `[0, 1]` asserts the final state against `e^(-1)`
+  within `10·h^4/120` — the fourth-order local truncation constant
+  accumulated over `1/h` steps, carrying an order of magnitude rather than a
+  fitted factor — and the reported `StepReport::end()` against the analytic
+  end instant within `STEPS · eps`. A companion clause asserts the deviation
+  is nonzero, so the bound cannot pass vacuously on a march that is not
+  integrating.
+- Two further clauses: splitting a 32-step march into two 16-step marches
+  must give the bit-identical result (the stepper carries nothing between
+  calls beyond what it is handed), and a workspace/state dimension mismatch
+  must be reported by name rather than absorbed.
 
 ### H-DP-SCALAR-004 — Instantiate the embedded pair for `f32` [patch] — status: todo
 
