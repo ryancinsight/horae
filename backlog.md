@@ -225,7 +225,7 @@ verified; each carries its own acceptance oracle.
 - Evidence that the clauses bite: declaring `Rk4::ORDER = 3` fails
   `rk4_recovers_its_declared_fourth_order` and leaves the other three passing.
 
-### H-ADAPT-LOOP-002 — Close the adaptive control loop in a test [patch] — status: todo
+### H-ADAPT-LOOP-002 — Close the adaptive control loop in a test [patch] — status: done 2026-09-02
 
 - Outcome: the adaptive controller is verified against a real embedded local
   error estimate rather than synthetic scalars.
@@ -240,8 +240,24 @@ verified; each carries its own acceptance oracle.
 - Note: all eight current `assess` call sites (`tests/policy.rs:38`–`:103`,
   `examples/ordered_decay.rs:57`) pass hand-written error values; the
   estimator-to-controller composition is untested.
+- **Delivered 2026-09-02** as `tests/adaptive_loop.rs`. A real
+  `step_embedded_into` estimate on `y' = -y` drives `assess::<5>`: the coarse
+  step is rejected, each proposal is asserted strictly smaller, the loop runs
+  to `Accept`, and the accepted state is asserted against `e^(-h)` within twice
+  the local error the controller just certified — the estimate is accurate to
+  the next order, so that is a sound bound rather than a chosen one.
+- **A first attempt asserted the wrong contract** and is worth recording: it
+  expected one re-step to clear tolerance. The controller clamps its scale
+  factor, so from a large overshoot it takes several rejections — the test was
+  wrong, not the controller. The rejection count is now bounded by the clamp
+  (`0.2^5` per rejection against the initial normalized error), which is what
+  proves the controller drives itself to a decision instead of stalling.
+- A second clause pins determinism by bit equality: the same step on the same
+  state must produce the same estimate and the same decision.
+- Evidence the clauses bite: a controller patched to propose the step it just
+  rejected fails the loop clause and leaves the determinism clause passing.
 
-### H-MULTISTEP-003 — Value-semantic multi-step accumulation test [patch] — status: todo
+### H-MULTISTEP-003 — Value-semantic multi-step accumulation test [patch] — status: done 2026-09-02
 
 - Outcome: repeated stepping is verified for accumulated state, not only for
   allocation behavior.
@@ -252,6 +268,18 @@ verified; each carries its own acceptance oracle.
 - Dependencies: none. Risk/change class: [verification] [patch]. Effort S.
 - Note: the only multi-step loop is `tests/allocation.rs:44`, whose assertions
   are allocation counts.
+- **Delivered 2026-09-02** as `tests/multi_step_march.rs`. A 64-step `Rk4`
+  march over `y' = -y` on `[0, 1]` asserts the final state against `e^(-1)`
+  within `10·h^4/120` — the fourth-order local truncation constant
+  accumulated over `1/h` steps, carrying an order of magnitude rather than a
+  fitted factor — and the reported `StepReport::end()` against the analytic
+  end instant within `STEPS · eps`. A companion clause asserts the deviation
+  is nonzero, so the bound cannot pass vacuously on a march that is not
+  integrating.
+- Two further clauses: splitting a 32-step march into two 16-step marches
+  must give the bit-identical result (the stepper carries nothing between
+  calls beyond what it is handed), and a workspace/state dimension mismatch
+  must be reported by name rather than absorbed.
 
 ### H-DP-SCALAR-004 — Instantiate the embedded pair for `f32` [patch] — status: todo
 
