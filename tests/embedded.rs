@@ -3,6 +3,7 @@
 use core::convert::Infallible;
 
 use aequitas::systems::si::quantities::Time;
+use eunomia::RealField;
 use horae::{
     integration::{
         EmbeddedOutputs, SliceRole, StepError, StepWorkspace, step_embedded_into,
@@ -14,33 +15,34 @@ use horae::{
 
 struct FourthDegreeRate;
 
-impl ExplicitSystem<f64> for FourthDegreeRate {
+impl<T: RealField> ExplicitSystem<T> for FourthDegreeRate {
     type Error = Infallible;
 
     fn evaluate(
         &self,
-        time: Instant<f64>,
-        _state: &[f64],
-        derivative: &mut [f64],
+        time: Instant<T>,
+        _state: &[T],
+        derivative: &mut [T],
     ) -> Result<(), Self::Error> {
-        derivative[0] = (*time.as_time().as_base()).powi(4);
+        let t = *time.as_time().as_base();
+        derivative[0] = t * t * t * t;
         Ok(())
     }
 }
 
-fn run(rate: &FourthDegreeRate, step_value: f64) -> ([f64; 1], [f64; 1]) {
-    let start = Instant::new(Time::from_base(0.0)).expect("invariant: finite fixture");
+fn run<T: RealField>(rate: &FourthDegreeRate, step_value: T) -> ([T; 1], [T; 1]) {
+    let start = Instant::new(Time::from_base(T::from_f64(0.0))).expect("invariant: finite fixture");
     let step =
         StepSize::new(Time::from_base(step_value)).expect("invariant: positive finite fixture");
-    let mut output = [0.0];
-    let mut error = [0.0];
-    let mut workspace = StepWorkspace::<f64, 7>::new(1).expect("invariant: nonzero workspace");
+    let mut output = [T::from_f64(0.0)];
+    let mut error = [T::from_f64(0.0)];
+    let mut workspace = StepWorkspace::<T, 7>::new(1).expect("invariant: nonzero workspace");
     let report = step_embedded_into(
         rate,
         DormandPrince,
         start,
         step,
-        &[0.0],
+        &[T::from_f64(0.0)],
         EmbeddedOutputs::new(&mut output, &mut error),
         &mut workspace,
     )
@@ -64,26 +66,60 @@ fn dormand_prince_has_fifth_order_primary_and_fourth_order_embedded_result() {
     assert!((embedded_sum - 1.0).abs() <= 8.0 * f64::EPSILON);
 }
 
-#[test]
-fn embedded_step_matches_polynomial_oracle_and_scales_error_estimate() {
+/// The polynomial oracle and the error-estimate scaling, at one scalar.
+///
+/// Both bounds are derived per scalar from that scalar's epsilon rather than
+/// written once for `f64`: the seven stage evaluations, the coefficient
+/// conversions, and the fused accumulation each round independently, so the
+/// oracle bound is a fixed multiple of `T::EPSILON`. The scaling assertion is
+/// looser at the narrower type for the same reason — the ratio of two
+/// estimates carries the relative error of both.
+fn assert_polynomial_oracle_and_error_scaling<T>(oracle_units: f64, ratio_units: f64)
+where
+    T: RealField,
+{
     let rate = FourthDegreeRate;
-    let (large_output, large_error) = run(&rate, 0.5);
-    let (small_output, small_error) = run(&rate, 0.25);
+    let large = T::from_f64(0.5);
+    let small = T::from_f64(0.25);
+    let (large_output, large_error) = run::<T>(&rate, large);
+    let (small_output, small_error) = run::<T>(&rate, small);
 
     // The fifth-order primary result integrates t^4 exactly in exact
-    // arithmetic. The bound allows the seven stage evaluations, coefficient
-    // conversions, and fused multiply-add accumulation to round independently.
-    let large_exact = 0.5_f64.powi(5) / 5.0;
-    let small_exact = 0.25_f64.powi(5) / 5.0;
-    let rounding_bound = 128.0 * f64::EPSILON;
-    assert!((large_output[0] - large_exact).abs() <= rounding_bound);
-    assert!((small_output[0] - small_exact).abs() <= rounding_bound);
+    // arithmetic, so the deviation is rounding alone.
+    let large_exact = T::from_f64(0.5_f64.powi(5) / 5.0);
+    let small_exact = T::from_f64(0.25_f64.powi(5) / 5.0);
+    let bound = T::from_f64(oracle_units) * T::EPSILON;
+    assert!(
+        (large_output[0] - large_exact).abs() <= bound,
+        "h = 0.5 integrated t^4 to {:?}, beyond {oracle_units} epsilon of the exact value",
+        large_output[0]
+    );
+    assert!(
+        (small_output[0] - small_exact).abs() <= bound,
+        "h = 0.25 integrated t^4 to {:?}, beyond {oracle_units} epsilon of the exact value",
+        small_output[0]
+    );
 
     // The embedded fourth-order quadrature error for t^4 is proportional to
     // h^5, so halving h reduces the signed estimate by 2^5.
-    assert!(large_error[0].abs() > 0.0);
+    assert!(
+        large_error[0].abs() > T::from_f64(0.0),
+        "a zero estimate would mean the embedded pair is not being evaluated"
+    );
     let ratio = large_error[0] / small_error[0];
-    assert!((ratio - 32.0).abs() <= 2.0e-12);
+    let ratio_bound = T::from_f64(ratio_units) * T::EPSILON;
+    assert!(
+        (ratio - T::from_f64(32.0)).abs() <= ratio_bound,
+        "halving h changed the estimate by {ratio:?}, not the 2^5 the h^5          scaling requires (within {ratio_units} epsilon)"
+    );
+}
+
+#[test]
+fn embedded_step_matches_polynomial_oracle_and_scales_error_estimate() {
+    // The unit counts are the same derivation at both widths; only the epsilon
+    // they multiply differs, which is the point of instantiating both.
+    assert_polynomial_oracle_and_error_scaling::<f64>(128.0, 1.0e4);
+    assert_polynomial_oracle_and_error_scaling::<f32>(128.0, 1.0e4);
 }
 
 #[test]
