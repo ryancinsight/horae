@@ -29,6 +29,18 @@ jobs:
     permissions:
       contents: read
 
+  # An invalid workflow file registers no check at all: GitHub rejects it,
+  # schedules a run with no jobs named after the file path, and the gate it
+  # defines silently does not run while the pull request reads green. That has
+  # landed three times on this stack (atlas ATLAS-WORKFLOW-LINT-2026-09-02),
+  # once from an `env` reference in a job name exactly like the one the MSRV
+  # job below avoids. Cheap enough to run beside the lockfile guard.
+  workflow-lint:
+    name: Workflows are valid
+    uses: ryancinsight/atlas/.github/workflows/workflow-lint.yml@93f24e08a3f4dcf31f44750ef50c08ec740f560b
+    permissions:
+      contents: read
+
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -49,6 +61,13 @@ jobs:
           workspaces: .
           shared-key: horae
           save-if: ${{ github.ref == 'refs/heads/main' }}
+      # The cache action builds its key with `cargo metadata`, run without
+      # `--locked`; on a lockfile that has drifted from the manifests cargo
+      # rewrites it there, and every `--locked` step below would then verify a
+      # lockfile that is not the committed one — the gate passing for the wrong
+      # reason. Assert the setup left it alone.
+      - name: Cache setup left the lockfile alone
+        run: git diff --exit-code -- Cargo.lock
       - uses: taiki-e/install-action@ea4c0b50b0d394ee91c5bb68a6a295b0556feb8e
         with:
           tool: mdbook
@@ -79,22 +98,56 @@ jobs:
           EOF
           rustup run "$toolchain" mdbook test docs/book -L target/booklibs
       - name: Feature check
-        run: cargo check --no-default-features
+        run: cargo check --locked --no-default-features
       - name: Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --locked --all-targets --all-features -- -D warnings
       - name: Native tests
-        run: cargo nextest run --all-features
+        run: cargo nextest run --locked --all-features
       - name: Documentation tests
-        run: cargo test --doc --all-features
+        run: cargo test --locked --doc --all-features
       - name: Documentation
         env:
           RUSTDOCFLAGS: -D warnings
-        run: cargo doc --no-deps --all-features
+        run: cargo doc --locked --no-deps --all-features
       - name: Example
-        run: cargo run --example ordered_decay
+        run: cargo run --locked --example ordered_decay
+
+  # The declared floor, actually built. `rust-toolchain.toml` pins 1.97.0, and
+  # a committed pin outranks whatever a setup action selects — so the floor is
+  # requested through RUSTUP_TOOLCHAIN, which does override it, and the job
+  # prints the compiler it got. Without that the job silently re-tests 1.97.0
+  # and the `rust-version` claim stays exactly as unverified as before. The
+  # name is a literal: the `env` context is not available in a job name, and
+  # referencing it makes the whole workflow file fail to parse.
+  msrv:
+    name: MSRV (1.95)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MSRV: "1.95"
+      RUSTUP_TOOLCHAIN: "1.95"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: dtolnay/rust-toolchain@a5f673d0ba8626c3977bb416a1612774bc82181b
+        with:
+          toolchain: ${{ env.MSRV }}
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.8.1
+        with:
+          workspaces: .
+          shared-key: horae-msrv
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Cache setup left the lockfile alone
+        run: git diff --exit-code -- Cargo.lock
+      - name: Show the compiler under test
+        run: |
+          rustc --version
+          rustc --version | grep -q "${MSRV}" || { echo "::error::MSRV job is not running ${MSRV}"; exit 1; }
+      - name: Build at the declared floor
+        run: cargo check --locked --all-features --all-targets
 
   supply-chain:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: dtolnay/rust-toolchain@a5f673d0ba8626c3977bb416a1612774bc82181b
