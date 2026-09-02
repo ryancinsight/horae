@@ -59,7 +59,25 @@ jobs:
           toolchain="$(rustup show active-toolchain | awk '{print $1}')"
           rustup run "$toolchain" cargo build --all-features --locked
           rustup run "$toolchain" rustdoc --version
-          rustup run "$toolchain" mdbook test docs/book -L target/debug/deps
+          # `-L target/debug/deps` shows rustdoc every artifact the restored cache
+          # holds: `.rmeta` from check/clippy runs beside the build's `.rlib`, at
+          # several hashes, and it refuses (E0464 "multiple candidates for
+          # `rmeta` dependency `aequitas`"). Doctests link rlibs and proc-macro
+          # dylibs only; hand them one copy per crate, the newest.
+          python3 - <<'EOF'
+          import pathlib, re, shutil
+          deps = pathlib.Path("target/debug/deps")
+          out = pathlib.Path("target/booklibs"); shutil.rmtree(out, ignore_errors=True); out.mkdir()
+          newest = {}
+          for artifact in list(deps.glob("*.rlib")) + list(deps.glob("*.so")):
+              crate = re.sub(r"-[0-9a-f]{16}\.(rlib|so)$", "", artifact.name)
+              if crate not in newest or artifact.stat().st_mtime > newest[crate].stat().st_mtime:
+                  newest[crate] = artifact
+          for artifact in newest.values():
+              shutil.copy2(artifact, out / artifact.name)
+          print(f"{len(newest)} crates staged for the book tests")
+          EOF
+          rustup run "$toolchain" mdbook test docs/book -L target/booklibs
       - name: Feature check
         run: cargo check --no-default-features
       - name: Clippy
