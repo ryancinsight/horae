@@ -336,7 +336,7 @@ verified; each carries its own acceptance oracle.
 - Note: contradicted by `src/integration/tableau/methods.rs:107` and
   `src/integration/stepper.rs:88`.
 
-### H-ADRIDX-007 — Restore or retarget the ADR index generator [patch] — status: todo
+### H-ADRIDX-007 — Restore or retarget the ADR index generator [patch] — status: done 2026-09-02
 
 - Outcome: the ADR index stated regeneration procedure is executable in this
   repository.
@@ -348,8 +348,14 @@ verified; each carries its own acceptance oracle.
 - Dependencies: none. Risk/change class: [pm-hygiene] [patch]. Effort S.
 - Note: `docs/adr/README.md:3` names `scripts/adr-index.py`; the repository
   has no `scripts/` directory.
+- **Closed 2026-09-02 on the merged tree.** The note is stale: the header now
+  names atlas's generator, called through the shared reusable workflow
+  (`.github/workflows/adr-index.yml` → `adr-index-guard.yml`, `strict: true`).
+  The item's "commit a generator here" branch was the wrong one — atlas owns
+  one generator for the fleet, so adopting it is what keeps the index from
+  drifting per repo.
 
-### H-CI-LOCKED-008 — Run CI cargo steps against the committed lock [patch] — status: todo
+### H-CI-LOCKED-008 — Run CI cargo steps against the committed lock [patch] — status: done 2026-09-02
 
 - Outcome: hosted gates verify the committed `Cargo.lock` instead of
   re-resolving, and every CI job carries a bounded wait.
@@ -362,8 +368,15 @@ verified; each carries its own acceptance oracle.
   [patch]. Effort S.
 - Note: only `.github/workflows/ci.yml:34` currently passes `--locked`; the
   `supply-chain` job at `:52` has no `timeout-minutes`.
+- **Delivered 2026-09-02.** Feature-check, clippy, nextest, doctest, doc and
+  example all carry `--locked`; `supply-chain` and the new MSRV job carry
+  `timeout-minutes`. **`Swatinem/rust-cache` builds its key with
+  `cargo metadata` run without `--locked`**, so on a drifted lockfile it
+  rewrites the file and every `--locked` step after it would verify a lock
+  that is not the committed one — the gate passing for the wrong reason. Each
+  cache step is now followed by `git diff --exit-code -- Cargo.lock`.
 
-### H-MSRV-009 — Verify or drop the declared MSRV [patch] — status: todo
+### H-MSRV-009 — Verify or drop the declared MSRV [patch] — status: done 2026-09-02
 
 - Outcome: the `rust-version` claim is either enforced by a run or removed.
 - Scope: `.github/workflows/ci.yml`, `Cargo.toml`. Non-goals: no dependency
@@ -375,6 +388,19 @@ verified; each carries its own acceptance oracle.
 - Note: `Cargo.toml:5` declares `rust-version = "1.95"`; `rust-toolchain.toml`
   pins `1.97.0` and every CI step uses the pin, so the floor is never
   exercised.
+- **Delivered 2026-09-02** as the `MSRV (1.95)` job, which builds
+  `--locked --all-features --all-targets` at the floor. **The floor is
+  requested through `RUSTUP_TOOLCHAIN`, not the setup action**: the committed
+  `rust-toolchain.toml` pin outranks what the action selects, so the obvious
+  spelling would have re-tested 1.97.0 and left the claim as unverified as
+  before. The job prints `rustc --version` and fails if it is not the floor,
+  so it cannot pass vacuously.
+- The floor was verified locally before the job was written —
+  `RUSTUP_TOOLCHAIN=1.95.0 cargo check --locked --all-features --all-targets`
+  compiles horae, eunomia and aequitas clean — so this does not ship a red
+  check.
+- Also adopted atlas's shared workflow linter, which catches the class that
+  would otherwise make a broken `ci.yml` register no check at all.
 
 ### H-MODDOC-010 — Correct the integration module summary [patch] — status: todo
 
