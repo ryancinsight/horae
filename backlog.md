@@ -192,7 +192,7 @@ recorded in `gap_audit.md` under
 `Finding 2026-08-20: horae scope-vs-delivery audit`. No item below is claimed
 verified; each carries its own acceptance oracle.
 
-### H-ORDER-001 — Verify observed order of accuracy by refinement [patch] — status: todo
+### H-ORDER-001 — Verify observed order of accuracy by refinement [patch] — status: done 2026-09-02
 
 - Outcome: each sealed tableau's declared `ORDER` is verified against a
   measured convergence rate, so the constant consumed by
@@ -209,6 +209,21 @@ verified; each carries its own acceptance oracle.
 - Dependencies: none. Risk/change class: [verification] [patch]. Effort M.
 - Note: `tests/embedded.rs:85` establishes the `h^5` scaling of the *embedded
   error estimate* only; no study covers the order of the integrated solution.
+- **Delivered 2026-09-02** as `tests/order_of_accuracy.rs`: a four-level
+  refinement study on `y' = −y` over `t ∈ [0, 1]`, one clause per tableau.
+  Every declared `ORDER` is recovered — Euler 1, Midpoint 2, `Rk4` 4,
+  `DormandPrince` 5.
+- **The tolerance is derived from the run, not chosen.** The two-level
+  estimate `log2(e(h)/e(h/2))` carries a defect `K·h + M·h² + …`; Richardson
+  on that estimate cancels the linear term, four levels give two extrapolants,
+  and the distance between them measures what the finer one still neglects.
+  That distance plus the rounding floor propagated through the same logarithms
+  is the bound. A separate clause asserts the raw pair estimates are
+  converging, so the extrapolation cannot be arithmetic over a diverging
+  sequence, and each level is asserted clear of the rounding floor by 100x so
+  the study cannot measure the floor instead of the method.
+- Evidence that the clauses bite: declaring `Rk4::ORDER = 3` fails
+  `rk4_recovers_its_declared_fourth_order` and leaves the other three passing.
 
 ### H-ADAPT-LOOP-002 — Close the adaptive control loop in a test [patch] — status: todo
 
