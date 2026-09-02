@@ -147,3 +147,39 @@ fn embedded_step_validates_error_estimate_dimension_before_evaluation() {
         })
     );
 }
+
+/// The FSAL condition holds for this tableau, and is asserted rather than
+/// described (H-FSAL-011).
+///
+/// "First Same As Last": the final stage is evaluated at `t + h` with the
+/// state the step returns, so its derivative is exactly the next step's first
+/// stage. The condition is `C[6] == 1` and `A[6] == B`. `docs/book/rk5.md`
+/// records why the seventh evaluation is not reused; that explanation is only
+/// meaningful while the property it describes is true, so it is checked here.
+#[test]
+fn dormand_prince_satisfies_the_fsal_condition() {
+    let last_row = <DormandPrince as ExplicitTableau<7>>::A[6];
+    let primary = DormandPrince::B;
+    // Bit equality, deliberately: FSAL is coefficient *identity*, not
+    // closeness. A pair that agreed only to a tolerance would not let the
+    // final stage stand in for the next step's first one.
+    assert_eq!(
+        last_row.map(f64::to_bits),
+        primary.map(f64::to_bits),
+        "FSAL requires the final stage row to equal the primary weights"
+    );
+    assert!(
+        (DormandPrince::C[6] - 1.0).abs() <= f64::EPSILON,
+        "FSAL requires the final stage node at the step endpoint, got {}",
+        DormandPrince::C[6]
+    );
+
+    // The seventh weight is zero, which is what makes the final stage free to
+    // carry forward: it contributes nothing to the primary result it is
+    // evaluated from.
+    assert_eq!(
+        primary[6].to_bits(),
+        0.0_f64.to_bits(),
+        "the final stage must not contribute to the primary result"
+    );
+}
