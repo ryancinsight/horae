@@ -281,7 +281,7 @@ verified; each carries its own acceptance oracle.
   calls beyond what it is handed), and a workspace/state dimension mismatch
   must be reported by name rather than absorbed.
 
-### H-DP-SCALAR-004 — Instantiate the embedded pair for `f32` [patch] — status: todo
+### H-DP-SCALAR-004 — Instantiate the embedded pair for `f32` [patch] — status: done 2026-09-02
 
 - Outcome: `DormandPrince` and `step_embedded_into` are covered at every
   shipped scalar, matching the generic coverage already present for the
@@ -292,6 +292,15 @@ verified; each carries its own acceptance oracle.
   derived bounds.
 - Dependencies: none. Risk/change class: [verification] [patch]. Effort S.
 - Note: `tests/fixed_step.rs:36` already uses this generic-helper shape.
+- **Delivered 2026-09-02.** `FourthDegreeRate` and `run` are generic over the
+  scalar, and the polynomial-oracle and error-scaling assertions moved into
+  `assert_polynomial_oracle_and_error_scaling<T>`, instantiated at `f64` and
+  `f32`. The bounds are stated in units of `T::EPSILON` rather than as
+  absolute constants, so the same derivation holds at both widths and only
+  the epsilon it multiplies changes — which is what instantiating the second
+  scalar is for.
+- Evidence the clauses bite at both widths: expecting a `2^5` ratio of `31.9`
+  instead of `32.0` fails the test.
 
 ### H-STAB-DOC-005 — Remove or source the book stability constants [patch] — status: todo
 
