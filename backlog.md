@@ -402,7 +402,7 @@ verified; each carries its own acceptance oracle.
 - Also adopted atlas's shared workflow linter, which catches the class that
   would otherwise make a broken `ci.yml` register no check at all.
 
-### H-MODDOC-010 — Correct the integration module summary [patch] — status: todo
+### H-MODDOC-010 — Correct the integration module summary [patch] — status: done 2026-09-02
 
 - Outcome: the module doc describes the module's actual surface.
 - Scope: `src/integration/mod.rs`. Non-goals: none.
@@ -411,8 +411,11 @@ verified; each carries its own acceptance oracle.
 - Dependencies: none. Risk/change class: [docs] [patch]. Effort S.
 - Note: `src/integration/mod.rs:1` reads "Fixed-step explicit integration."
   while the module re-exports `step_embedded_into` and `EmbeddedOutputs`.
+- **Delivered 2026-09-02.** The summary names both stepping forms and says what
+  the embedded one writes, with intra-doc links to the two entry points.
+  `cargo doc` stays warning-clean under `RUSTDOCFLAGS=-D warnings`.
 
-### H-FSAL-011 — Record or exploit the Dormand--Prince FSAL property [patch] — status: todo
+### H-FSAL-011 — Record or exploit the Dormand--Prince FSAL property [patch] — status: done 2026-09-02
 
 - Outcome: the per-step evaluation cost of the embedded pair is either reduced
   to six evaluations for a continuing accepted step or explicitly documented
@@ -429,3 +432,18 @@ verified; each carries its own acceptance oracle.
   (`src/integration/tableau/methods.rs:85`–`:103`), the FSAL condition;
   `evaluate_stages` (`src/integration/stepper.rs:143`) evaluates all seven
   stages every call.
+- **Delivered 2026-09-02 by the documenting branch, with the property made
+  executable.** `dormand_prince_satisfies_the_fsal_condition` asserts
+  `A[6] == B` bit-for-bit and `C[6] == 1`, so `docs/book/rk5.md` cannot go on
+  describing a tableau that no longer has the property; perturbing one
+  coefficient of the final stage row fails it.
+- **Why not the reuse branch.** `step_into` and `step_embedded_into` are pure
+  functions of their arguments — `tests/multi_step_march.rs` asserts that by
+  splitting a march and comparing bit-for-bit. A carried derivative is valid
+  only for a step that begins where the previous one ended *and was accepted*,
+  so passing it as a plain argument makes a silent wrong answer reachable from
+  safe code after a rejection, a step-size change, or an event; passing it as a
+  typed continuation is a public API change to the whole stepping surface. The
+  item's own oracle requires benchmark evidence for that branch and none
+  exists, so the cost is documented as seven by design with the measurement
+  that would reopen it named.
