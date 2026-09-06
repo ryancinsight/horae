@@ -10,3 +10,4 @@
 | ADR | Title | Status |
 | --- | ----- | ------ |
 | [0001](0001-time-integration-boundary.md) | Own time-integration policy in Horae | Accepted |
+| [0002](0002-implicit-system-seam.md) | Add an implicit-system seam for stiff kinetics | Proposed |
