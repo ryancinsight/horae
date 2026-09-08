@@ -10,7 +10,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 keywords = ["integration", "ode", "simulation", "no-std"]
 categories = ["no-std", "science"]
-publish = false
+publish = true
 
 [dependencies]
 aequitas = { version = "0.2.0", git = "https://github.com/ryancinsight/aequitas", default-features = false }
