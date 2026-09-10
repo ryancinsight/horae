@@ -37,8 +37,12 @@ impl ImplicitMethod for BackwardEuler {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum SolveError {
-    /// Newton exceeded [`MAX_NEWTON_ITERATIONS`] without satisfying the
+    /// Newton exhausted its iteration bound without satisfying the
     /// convergence tolerance.
+    ///
+    /// The bound guards against a divergent predictor rather than tuning the
+    /// solve, so its value is an implementation detail and not part of this
+    /// contract: a caller sees only that the step did not converge.
     NonConvergence,
     /// The Newton matrix was numerically singular.
     SingularMatrix,
