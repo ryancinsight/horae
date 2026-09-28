@@ -4,6 +4,39 @@ use crate::time::StepSize;
 
 use super::{AdaptiveError, AdaptiveParameter, AdaptiveReport, StepDecision};
 
+/// Monomorphization-time constants derived from the formal method order.
+///
+/// `ORDER` is a const-generic parameter of [`AdaptiveController::assess`];
+/// these associated constants are evaluated once per monomorphization, so the
+/// order-range guard and the exponent denominator cost nothing per call.
+struct OrderParameters<const ORDER: usize>;
+
+impl<const ORDER: usize> OrderParameters<ORDER> {
+    /// Whether `ORDER` lies in the supported range `1..u32::MAX`.
+    const IS_SUPPORTED: bool = ORDER > 0 && ORDER < u32::MAX as usize;
+    /// The exponent reciprocal `1 / (ORDER + 1)`.
+    const EXPONENT_RECIPROCAL: f64 = 1.0 / exact_float_from_bits(ORDER + 1);
+}
+
+/// Convert a non-negative integer below `2^53` to a float exactly.
+///
+/// The value is rebuilt from its binary digits so the crate keeps its
+/// no-`as`-cast property under the pedantic lint floor. Every supported order
+/// plus one is far below the `2^53` exactness bound.
+const fn exact_float_from_bits(value: usize) -> f64 {
+    let mut result = 0.0_f64;
+    let mut scale = 1.0_f64;
+    let mut remaining = value;
+    while remaining > 0 {
+        if remaining & 1 == 1 {
+            result += scale;
+        }
+        remaining >>= 1;
+        scale *= 2.0;
+    }
+    result
+}
+
 /// Mixed absolute-relative adaptive step controller.
 ///
 /// The caller supplies an aggregate absolute error and reference-state scale;
@@ -96,8 +129,7 @@ where
         if !absolute_error.is_finite() || !reference_scale.is_finite() {
             return Err(AdaptiveError::NonFiniteObservation);
         }
-        let order = u32::try_from(ORDER).map_err(|_| AdaptiveError::InvalidOrder)?;
-        if order == 0 || order == u32::MAX {
+        if !OrderParameters::<ORDER>::IS_SUPPORTED {
             return Err(AdaptiveError::InvalidOrder);
         }
 
@@ -119,8 +151,8 @@ where
         let scale = if normalized_error == <T as NumericElement>::ZERO {
             self.maximum_scale
         } else {
-            let exponent_denominator = T::from_f64(f64::from(order + 1));
-            let raw_scale = self.safety_factor / normalized_error.powf(one / exponent_denominator);
+            let raw_scale = self.safety_factor
+                / normalized_error.powf(T::from_f64(OrderParameters::<ORDER>::EXPONENT_RECIPROCAL));
             raw_scale
                 .max_scalar(self.minimum_scale)
                 .min_scalar(self.maximum_scale)

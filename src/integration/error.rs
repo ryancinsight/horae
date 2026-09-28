@@ -2,6 +2,8 @@ use core::fmt;
 
 use crate::time::TimeError;
 
+use super::implicit::ImplicitStepError;
+
 /// Slice participating in a failed step-shape check.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[non_exhaustive]
@@ -78,3 +80,54 @@ where
 }
 
 impl<E> core::error::Error for StepError<E> where E: core::error::Error + 'static {}
+
+/// A slice or workspace dimension that disagrees with the input state.
+///
+/// Both stepping paths share this check and payload. The `pub(crate)` type is
+/// lifted into each path's public error enum through the [`From`] conversions
+/// below, so the two error surfaces keep their own enum shapes while the
+/// comparison and the payload layout live in one place.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct DimensionMismatch {
+    pub(crate) role: SliceRole,
+    pub(crate) expected: usize,
+    pub(crate) actual: usize,
+}
+
+/// Return `Ok(())` when `expected == actual`, else a [`DimensionMismatch`].
+#[inline]
+pub(crate) fn ensure_dimension(
+    role: SliceRole,
+    expected: usize,
+    actual: usize,
+) -> Result<(), DimensionMismatch> {
+    if expected == actual {
+        Ok(())
+    } else {
+        Err(DimensionMismatch {
+            role,
+            expected,
+            actual,
+        })
+    }
+}
+
+impl<E> From<DimensionMismatch> for StepError<E> {
+    fn from(mismatch: DimensionMismatch) -> Self {
+        Self::DimensionMismatch {
+            role: mismatch.role,
+            expected: mismatch.expected,
+            actual: mismatch.actual,
+        }
+    }
+}
+
+impl<E> From<DimensionMismatch> for ImplicitStepError<E> {
+    fn from(mismatch: DimensionMismatch) -> Self {
+        Self::DimensionMismatch {
+            role: mismatch.role,
+            expected: mismatch.expected,
+            actual: mismatch.actual,
+        }
+    }
+}
