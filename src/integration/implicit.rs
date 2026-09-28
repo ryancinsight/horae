@@ -8,7 +8,7 @@ use eunomia::{NumericElement, RealField};
 use crate::system::ImplicitSystem;
 use crate::time::{Instant, StepSize, TimeError};
 
-use super::{SliceRole, StepReport, WorkspaceError};
+use super::{SliceRole, StepReport, WorkspaceError, error::ensure_dimension};
 
 /// Nominal bound on Newton iterations before the step is declared
 /// non-convergent. Backward Euler's Newton is contractive once the iterate is
@@ -185,20 +185,8 @@ where
     Method: ImplicitMethod,
 {
     let dimension = state.len();
-    if output.len() != dimension {
-        return Err(ImplicitStepError::DimensionMismatch {
-            role: SliceRole::Output,
-            expected: dimension,
-            actual: output.len(),
-        });
-    }
-    if workspace.dimension() != dimension {
-        return Err(ImplicitStepError::DimensionMismatch {
-            role: SliceRole::Workspace,
-            expected: dimension,
-            actual: workspace.dimension(),
-        });
-    }
+    ensure_dimension(SliceRole::Output, dimension, output.len())?;
+    ensure_dimension(SliceRole::Workspace, dimension, workspace.dimension())?;
 
     let end = start.advance(step).map_err(ImplicitStepError::Time)?;
     let h = *step.as_time().as_base();
