@@ -70,7 +70,7 @@ assert!(error_estimate[0].is_finite());
 ```
 
 The caller supplies the state norm and tolerances to
-[`AdaptiveController`](https://docs.rs/horae/latest/horae/adaptive/struct.AdaptiveController.html).
+[`AdaptiveController`](https://docs.rs/horae-time/latest/horae/adaptive/struct.AdaptiveController.html).
 For a scalar state, `error_estimate[0].abs()` is an absolute observation; for
 vector states, the caller chooses the norm appropriate to its equations and
 units. The pair does not impose a norm or silently accept a step.

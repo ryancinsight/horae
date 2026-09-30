@@ -111,8 +111,10 @@ normally.
 
 ## API Stability
 
-Horae is `publish = false` in its workspace but exported as a Git dependency.
-Its public API is stable; breaking changes require explicit coordination with
+Horae publishes to crates.io as the package `horae-time`, because the bare
+name `horae` belongs to another owner; the library crate stays `horae`, so
+every `use horae::` path is independent of the registry name. Its public API is
+stable; breaking changes require explicit coordination with
 consuming repositories.
 
 The trait contracts (`ExplicitSystem<T>`, the tableau model, workspace layout)
