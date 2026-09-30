@@ -12,6 +12,20 @@ Horae is independently versioned and consumed by the
 cross-repository ownership and migration boundary is recorded in
 [Atlas ADR 0022](https://github.com/ryancinsight/atlas/blob/main/docs/adr/0022-horae-athena-provider-extraction.md).
 
+## Package and library names
+
+The registry package is `horae-time`; the library crate is `horae`. Declare the
+dependency under the package name and import under the library name:
+
+```toml
+[dependencies]
+horae-time = "0.1"
+```
+
+```rust
+use horae::time::Instant;
+```
+
 ## Boundary
 
 Horae owns:

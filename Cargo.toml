@@ -1,5 +1,5 @@
 [package]
-name = "horae"
+name = "horae-time"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.95"
@@ -11,6 +11,12 @@ readme = "README.md"
 keywords = ["integration", "ode", "simulation", "no-std"]
 categories = ["no-std", "science"]
 publish = true
+
+[lib]
+# The registry package is `horae-time` (crates.io `horae` belongs to another
+# owner); the library keeps the classical name so every `use horae::` path is
+# the same in source, doctests, book samples, and consumers.
+name = "horae"
 
 [dependencies]
 aequitas = { version = "0.2.0", git = "https://github.com/ryancinsight/aequitas", default-features = false }

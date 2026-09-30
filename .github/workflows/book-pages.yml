@@ -48,4 +48,5 @@ jobs:
 
       rust-toolchain: "1.97.0"
 
-      cargo-package: horae
+      cargo-package: horae-time
+      cargo-crate: horae
