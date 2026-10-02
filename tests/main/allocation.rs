@@ -1,18 +1,20 @@
 //! Instrumented proof that stepping reuses all allocated storage.
+//!
+//! The measurement window counts allocations made by the calling thread only.
+//! A process-wide counter is invalid here: libtest runs the test body on a
+//! spawned thread while its main thread keeps inserting the running test into
+//! its bookkeeping collections, so a process-wide window occasionally absorbs
+//! those allocations and fails for reasons unrelated to the stepping path.
 
 use core::convert::Infallible;
-use std::alloc::System;
 
 use aequitas::systems::si::quantities::Time;
+use allocation_counter::AllocationInfo;
 use horae::{
     integration::{StepWorkspace, step_into, tableau::Rk4},
     system::ExplicitSystem,
     time::{Instant, StepSize},
 };
-use stats_alloc::{INSTRUMENTED_SYSTEM, Region, StatsAlloc};
-
-#[global_allocator]
-static GLOBAL: &StatsAlloc<System> = &INSTRUMENTED_SYSTEM;
 
 struct Decay;
 
@@ -40,16 +42,14 @@ fn repeated_steps_allocate_nothing_after_workspace_construction() {
     let step = StepSize::new(Time::from_base(0.01)).expect("invariant: positive fixture");
     let mut time = Instant::new(Time::from_base(0.0)).expect("invariant: finite fixture");
 
-    let region = Region::new(GLOBAL);
-    for _ in 0..16 {
-        let report = step_into(&Decay, Rk4, time, step, &state, &mut output, &mut workspace)
-            .expect("invariant: infallible system");
-        state.copy_from_slice(&output);
-        time = report.end();
-    }
-    let change = region.change();
+    let change = allocation_counter::measure(|| {
+        for _ in 0..16 {
+            let report = step_into(&Decay, Rk4, time, step, &state, &mut output, &mut workspace)
+                .expect("invariant: infallible system");
+            state.copy_from_slice(&output);
+            time = report.end();
+        }
+    });
 
-    assert_eq!(change.allocations, 0);
-    assert_eq!(change.reallocations, 0);
-    assert_eq!(change.deallocations, 0);
+    assert_eq!(change, AllocationInfo::default());
 }

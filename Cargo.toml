@@ -23,8 +23,8 @@ aequitas = { version = "0.2.0", git = "https://github.com/ryancinsight/aequitas"
 eunomia = { version = "0.8.0", git = "https://github.com/ryancinsight/eunomia", default-features = false }
 
 [dev-dependencies]
+allocation-counter = "0.8.1"
 proptest = "1.11.0"
-stats_alloc = "0.1.10"
 
 [features]
 default = ["std"]
