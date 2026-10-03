@@ -5,7 +5,7 @@ version = 4
 [[package]]
 name = "aequitas"
 version = "0.2.1"
-source = "git+https://github.com/ryancinsight/aequitas#e433dbd4c9f7c750d533eb747e5be3ee72d7279e"
+source = "git+https://github.com/ryancinsight/aequitas#bfc9b78df58bb422551ea8db347866ed28596335"
 dependencies = [
  "eunomia",
  "typenum",
@@ -82,8 +82,8 @@ dependencies = [
 
 [[package]]
 name = "eunomia"
-version = "0.8.1"
-source = "git+https://github.com/ryancinsight/eunomia#9931fc1f18279a205802127ba86b1b3775df1e38"
+version = "0.9.0"
+source = "git+https://github.com/ryancinsight/eunomia#a41e58d45829a45f42c9446c6c663bd6f3d342d1"
 dependencies = [
  "bytemuck",
  "eunomia-derive",
@@ -92,8 +92,8 @@ dependencies = [
 
 [[package]]
 name = "eunomia-derive"
-version = "0.8.1"
-source = "git+https://github.com/ryancinsight/eunomia#9931fc1f18279a205802127ba86b1b3775df1e38"
+version = "0.9.0"
+source = "git+https://github.com/ryancinsight/eunomia#a41e58d45829a45f42c9446c6c663bd6f3d342d1"
 dependencies = [
  "proc-macro2",
  "quote",
