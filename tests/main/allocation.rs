@@ -9,12 +9,16 @@
 use core::convert::Infallible;
 
 use aequitas::systems::si::quantities::Time;
-use allocation_counter::AllocationInfo;
 use horae::{
     integration::{StepWorkspace, step_into, tableau::Rk4},
     system::ExplicitSystem,
     time::{Instant, StepSize},
 };
+use mnemosyne::counting::{AllocationDelta, CountingAllocator, measure};
+
+#[global_allocator]
+static ALLOCATOR: CountingAllocator<std::alloc::System> =
+    CountingAllocator::new(std::alloc::System);
 
 struct Decay;
 
@@ -42,7 +46,7 @@ fn repeated_steps_allocate_nothing_after_workspace_construction() {
     let step = StepSize::new(Time::from_base(0.01)).expect("invariant: positive fixture");
     let mut time = Instant::new(Time::from_base(0.0)).expect("invariant: finite fixture");
 
-    let change = allocation_counter::measure(|| {
+    let ((), change) = measure(|| {
         for _ in 0..16 {
             let report = step_into(&Decay, Rk4, time, step, &state, &mut output, &mut workspace)
                 .expect("invariant: infallible system");
@@ -51,5 +55,5 @@ fn repeated_steps_allocate_nothing_after_workspace_construction() {
         }
     });
 
-    assert_eq!(change, AllocationInfo::default());
+    assert_eq!(change, AllocationDelta::default());
 }
