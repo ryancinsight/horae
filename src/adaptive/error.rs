@@ -14,7 +14,7 @@ pub enum AdaptiveError {
     NonFiniteObservation,
     /// Mixed absolute-relative tolerance overflowed the scalar range.
     NonFiniteTolerance,
-    /// The const-generic method order is zero or exceeds `u32`.
+    /// The const-generic method order is outside `1..u32::MAX`.
     InvalidOrder,
     /// The suggested scaled step is not representable.
     SuggestedStep(TimeError),
@@ -33,7 +33,7 @@ impl fmt::Display for AdaptiveError {
                 formatter.write_str("adaptive mixed tolerance must remain finite")
             }
             Self::InvalidOrder => {
-                formatter.write_str("adaptive method order must be in 1..=u32::MAX")
+                formatter.write_str("adaptive method order must be in 1..u32::MAX")
             }
             Self::SuggestedStep(error) => write!(formatter, "invalid suggested step: {error}"),
         }

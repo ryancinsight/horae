@@ -1,5 +1,33 @@
 # Horae backlog
 
+## Integration renewal — 2026-10-17 [patch]
+
+PR #101 integrates the coherent 0.2.0 provider tree at
+[accepted main](https://github.com/ryancinsight/horae/commit/ab42e5707a3b9a3cc080cfbbb8aa8e36bd4fc56f) with the independently reviewed
+tree, passing main CI/ADR and automatic Pages. The pending publisher selects
+nothing because horae-time remains unpublished; no publication tag exists.
+The isolated invalid-order rebase preserves its reviewed production fix and
+regression leaf byte for byte, keeps all current main provider/registry pins,
+and reserves 0.2.1 as the next patch after the frozen 0.2.0 first-publication
+candidate. This does not claim 0.2.0 is published. The original checkout and
+first-publication handoff remain unchanged. Fresh exact-head verification and
+independent review are renewed separately; acceptance stays held until the
+reviewed 0.2.0 publication is verified. Historical 0.1.1 evidence below belongs
+to the original old-provider head and does not certify this rebased head.
+
+
+<a id="h-adapt-order-range-001"></a>
+## H-ADAPT-ORDER-RANGE-001 — Preserve invalid-order error contract [patch] — blocked
+
+- Priority: correctness.
+- Status: implementation verified locally; exact-head independent review, fresh Git provider coherence and release acceptance remain held.
+- Owner: this bounded adaptive-order repair; H-ORDER-002 fixed-step and provider PRs #96/#98/#99 remain untouched.
+- Baseline: [main snapshot](https://github.com/ryancinsight/horae/commit/6f09a96dbf8de6565eb27591ccd0c76c820b7d93). `assess::<{usize::MAX}>` fails compilation with E0080 because the associated `ORDER + 1` overflows before the error guard executes.
+- Correction: guard coefficient derivation at const evaluation and represent unsupported orders with `None`. Preserve the existing supported range `1 <= ORDER < u32::MAX`, the coefficient formula, native scalar arithmetic and nonfinite-observation precedence. Align `InvalidOrder` text with that existing exclusive bound.
+- Regression: native and wrapped f32/f64 cover zero, maximum supported order, its supported and unsupported neighbors, `usize::MAX`, computed valid-order values, and nonfinite observation precedence. The expanded regression fails compilation before the repair and all three new tests pass afterward.
+- Verification: 45/45 native tests, zero skips; book tests, warning-denied Clippy/Rustdoc, two doctests, no-default-feature check, example, declared MSRV 1.95 and current supply-chain checks pass. Frozen baseline/current output bits and error classes match for 12,544 records at each of O0/O2/O3. Existing test leaves, timeout policy and 87 external lock records remain unchanged.
+- Release scope: patch version 0.1.1; only the root package lock record changes. Registry lookup reports `horae-time` absent. The committed locked-source API comparison passes all 223 applicable checks (30 inapplicable checks skipped); package verification and publication dry-run pass. Fresh Git API generation is blocked because Aequitas main declares 0.3.0 while this manifest requires ^0.2.1. Fresh typed normalized-package consumers pass for native/wrapped f32/f64 against registry Aequitas 0.2.2/Eunomia 0.9.2; its 45-test suite, two doctests and no-default check pass. Unmodified main reproduces the same fresh Git resolution failure. Assess final hosted gates before acceptance; the current provider migration remains owned separately. No merge, publication, tag or service deployment is authorized by this repair. The pinned main push/schedule workflow plans publication and tagging, but skips a never-published crate until its separately authorized first token publication; the registry currently reports this name absent. Renew registry/ownership and publication-scope checks before any future merge.
+
 <a id="h-provider-boundary-001"></a>
 ## H-PROVIDER-BOUNDARY-001 — Complete current provider compatibility [major] — blocked
 

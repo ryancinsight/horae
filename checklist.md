@@ -1,5 +1,34 @@
 # Horae checklist
 
+## Integration renewal — 2026-10-17 [patch]
+
+PR #101 integrates the coherent 0.2.0 provider tree at
+[accepted main](https://github.com/ryancinsight/horae/commit/ab42e5707a3b9a3cc080cfbbb8aa8e36bd4fc56f) with the independently reviewed
+tree, passing main CI/ADR and automatic Pages. The pending publisher selects
+nothing because horae-time remains unpublished; no publication tag exists.
+The isolated invalid-order rebase preserves its reviewed production fix and
+regression leaf byte for byte, keeps all current main provider/registry pins,
+and reserves 0.2.1 as the next patch after the frozen 0.2.0 first-publication
+candidate. This does not claim 0.2.0 is published. The original checkout and
+first-publication handoff remain unchanged. Fresh exact-head verification and
+independent review are renewed separately; acceptance stays held until the
+reviewed 0.2.0 publication is verified. Historical 0.1.1 evidence below belongs
+to the original old-provider head and does not certify this rebased head.
+
+
+## H-ADAPT-ORDER-RANGE-001 — Invalid const order [patch]
+
+- [x] Inspect exact main, current tasks and complete open-PR file ownership; preserve H-ORDER-002 and provider lanes.
+- [x] Reproduce E0080 with the expanded boundary regression before editing production source.
+- [x] Guard const coefficient derivation without changing the supported range, valid formula or observation-error precedence.
+- [x] Test zero, maximum valid, neighboring unsupported and maximum usize orders for native/wrapped f32/f64.
+- [x] Pass 45 native tests with zero skips, all configured local native/documentation/MSRV checks and current supply-chain policy.
+- [x] Compare 12,544 frozen baseline/current result records at each of O0/O2/O3 exactly; preserve all external lock records and existing test leaves.
+- [x] Assess committed locked-source API (223 pass; 30 inapplicable), package/dry-run and typed normalized consumers; normalized 45-test suite, two doctests and no-default check pass.
+- [x] Reproduce the same fresh Aequitas ^0.2.1/main-0.3.0 resolution failure on unmodified main; preserve provider PR ownership.
+- [ ] Assess final hosted gates after draft creation; the fresh Git graph remains blocked.
+- [ ] Obtain exact-head independent review and explicit release acceptance; no merge/publication is performed here.
+
 ## H-PROVIDER-BOUNDARY-001 — Current provider and public API boundary
 
 - [x] Verify exact #99 tree and preserve #99/#100 branches and current review.
