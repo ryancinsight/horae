@@ -7,6 +7,9 @@ use horae::{
     time::StepSize,
 };
 
+// The u32-wide limit expressed in usize without a narrowing cast.
+const ORDER_LIMIT: usize = usize::MAX >> (usize::BITS - u32::BITS);
+
 fn fixture<T: FloatElement>() -> (AdaptiveController<T>, StepSize<T>) {
     let zero = <T as NumericElement>::ZERO;
     let one = <T as NumericElement>::ONE;
@@ -27,7 +30,7 @@ fn verify_unsupported_orders<T: FloatElement>() {
         Err(AdaptiveError::InvalidOrder)
     );
     assert_eq!(
-        controller.assess::<{ u32::MAX as usize }>(step, one, one),
+        controller.assess::<{ ORDER_LIMIT }>(step, one, one),
         Err(AdaptiveError::InvalidOrder)
     );
     assert_eq!(
@@ -37,7 +40,7 @@ fn verify_unsupported_orders<T: FloatElement>() {
     // This neighboring unsupported value is representable only on 64-bit hosts.
     #[cfg(target_pointer_width = "64")]
     assert_eq!(
-        controller.assess::<{ u32::MAX as usize + 1 }>(step, one, one),
+        controller.assess::<{ ORDER_LIMIT + 1 }>(step, one, one),
         Err(AdaptiveError::InvalidOrder)
     );
 }
@@ -62,8 +65,8 @@ fn verify_supported_orders<T: FloatElement>(epsilon: T) {
         (StepDecision::Reject, four, half, quarter)
     );
     for report in [
-        controller.assess::<{ u32::MAX as usize - 2 }>(step, zero, one),
-        controller.assess::<{ u32::MAX as usize - 1 }>(step, zero, one),
+        controller.assess::<{ ORDER_LIMIT - 2 }>(step, zero, one),
+        controller.assess::<{ ORDER_LIMIT - 1 }>(step, zero, one),
     ] {
         let report = report.expect("supported upper boundary with zero error");
         assert_eq!(
@@ -73,7 +76,7 @@ fn verify_supported_orders<T: FloatElement>(epsilon: T) {
         assert_eq!(*report.suggested_step().as_time().as_base(), one);
     }
     let report = controller
-        .assess::<{ u32::MAX as usize - 1 }>(step, four, one)
+        .assess::<{ ORDER_LIMIT - 1 }>(step, four, one)
         .expect("supported upper boundary with nonzero error");
     // For M = 2^32 - 1, 1 - 2^-31 < 4^(-1/M) < 1 - 2^-33.
     // Widen these analytic dyadic bounds by two native ulps at one.
