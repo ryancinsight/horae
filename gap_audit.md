@@ -1,5 +1,13 @@
 # Horae ownership gap audit
 
+## H-ADAPT-ORDER-RANGE-001 — Unsupported const-order overflow [patch] — repaired; acceptance held
+
+At the [audited main snapshot](https://github.com/ryancinsight/horae/commit/6f09a96dbf8de6565eb27591ccd0c76c820b7d93), `assess::<{usize::MAX}>` fails monomorphization with E0080 at `ORDER + 1`, preventing the documented error return. The original 42-test suite misses this compile-time boundary.
+
+The repair guards coefficient derivation in the associated constant and uses `Option` to represent unsupported orders. It preserves `1 <= ORDER < u32::MAX`, the valid coefficient expression and native computation, and nonfinite-observation precedence; error wording now reflects the existing exclusive upper bound. Three regression tests cover native/wrapped f32/f64 boundaries and computed results. All 45 native tests pass with zero skips. A frozen baseline/current corpus has identical values/error classes for 12,544 records at each of O0/O2/O3. No fixed-step leaf, provider revision, timeout or workflow changes.
+
+Version 0.1.1 is a patch correction; API/package/fresh-consumer and hosted acceptance remain to be assessed. Existing provider migration ownership and release holds remain. Main push/schedule can invoke pending publication, so a future merge requires separate publication-scope assessment. This repair does not merge, publish, tag or deploy a service.
+
 ## H-PROVIDER-BOUNDARY-001 — Locked provider success hides fresh and nominal boundaries
 
 Provider PR #99 compiles against its lock, but a fresh root graph rejects its

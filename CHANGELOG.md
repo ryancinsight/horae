@@ -18,6 +18,11 @@ All notable changes to Horae are documented in this file.
   Retain the runtime provider updates from #99 and advance required transitive
   provider pins to their current defaults without changing registry records.
 
+- Return `AdaptiveError::InvalidOrder` for unsupported const orders including
+  `usize::MAX`, avoiding associated-constant overflow during compilation.
+  Preserve the existing `1..u32::MAX` supported range, valid-order results,
+  and nonfinite-observation precedence; correct the error text's upper bound.
+
 ### Changed
 
 - Refresh the Pages caller to the current Atlas reusable workflow revision;

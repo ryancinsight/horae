@@ -1,5 +1,16 @@
 # Horae checklist
 
+## H-ADAPT-ORDER-RANGE-001 — Invalid const order [patch]
+
+- [x] Inspect exact main, current tasks and complete open-PR file ownership; preserve H-ORDER-002 and provider lanes.
+- [x] Reproduce E0080 with the expanded boundary regression before editing production source.
+- [x] Guard const coefficient derivation without changing the supported range, valid formula or observation-error precedence.
+- [x] Test zero, maximum valid, neighboring unsupported and maximum usize orders for native/wrapped f32/f64.
+- [x] Pass 45 native tests with zero skips, all configured local native/documentation/MSRV checks and current supply-chain policy.
+- [x] Compare 12,544 frozen baseline/current result records at each of O0/O2/O3 exactly; preserve all external lock records and existing test leaves.
+- [ ] Assess exact-head API, package, fresh-consumer and hosted gates plus current provider coherence.
+- [ ] Obtain exact-head independent review and explicit release acceptance; no merge/publication is performed here.
+
 ## H-PROVIDER-BOUNDARY-001 — Current provider and public API boundary
 
 - [x] Verify exact #99 tree and preserve #99/#100 branches and current review.

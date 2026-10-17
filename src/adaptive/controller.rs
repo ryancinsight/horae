@@ -14,8 +14,14 @@ struct OrderParameters<const ORDER: usize>;
 impl<const ORDER: usize> OrderParameters<ORDER> {
     /// Whether `ORDER` lies in the supported range `1..u32::MAX`.
     const IS_SUPPORTED: bool = ORDER > 0 && ORDER < u32::MAX as usize;
-    /// The exponent reciprocal `1 / (ORDER + 1)`.
-    const EXPONENT_RECIPROCAL: f64 = 1.0 / exact_float_from_bits(ORDER + 1);
+    /// The exponent reciprocal `1 / (ORDER + 1)` for a supported order.
+    /// Keep the addition inside this const guard: unsupported orders must
+    /// instantiate successfully so `assess` can return `InvalidOrder`.
+    const EXPONENT_RECIPROCAL: Option<f64> = if Self::IS_SUPPORTED {
+        Some(1.0 / exact_float_from_bits(ORDER + 1))
+    } else {
+        None
+    };
 }
 
 /// Convert a non-negative integer below `2^53` to a float exactly.
@@ -129,9 +135,9 @@ where
         if !absolute_error.is_finite() || !reference_scale.is_finite() {
             return Err(AdaptiveError::NonFiniteObservation);
         }
-        if !OrderParameters::<ORDER>::IS_SUPPORTED {
+        let Some(exponent_reciprocal) = OrderParameters::<ORDER>::EXPONENT_RECIPROCAL else {
             return Err(AdaptiveError::InvalidOrder);
-        }
+        };
 
         let error = absolute_error.abs();
         let scale_reference = reference_scale.abs();
@@ -151,8 +157,8 @@ where
         let scale = if normalized_error == <T as NumericElement>::ZERO {
             self.maximum_scale
         } else {
-            let raw_scale = self.safety_factor
-                / normalized_error.powf(T::from_f64(OrderParameters::<ORDER>::EXPONENT_RECIPROCAL));
+            let raw_scale =
+                self.safety_factor / normalized_error.powf(T::from_f64(exponent_reciprocal));
             raw_scale
                 .max_scalar(self.minimum_scale)
                 .min_scalar(self.maximum_scale)

@@ -1,5 +1,14 @@
 # Horae backlog
 
+## H-ADAPT-ORDER-RANGE-001 — Preserve invalid-order error contract [patch] — repaired; review and release held
+
+- Owner: this bounded adaptive-order repair; H-ORDER-002 fixed-step and provider PRs #96/#98/#99 remain untouched.
+- Baseline: [main snapshot](https://github.com/ryancinsight/horae/commit/6f09a96dbf8de6565eb27591ccd0c76c820b7d93). `assess::<{usize::MAX}>` fails compilation with E0080 because the associated `ORDER + 1` overflows before the error guard executes.
+- Correction: guard coefficient derivation at const evaluation and represent unsupported orders with `None`. Preserve the existing supported range `1 <= ORDER < u32::MAX`, the coefficient formula, native scalar arithmetic and nonfinite-observation precedence. Align `InvalidOrder` text with that existing exclusive bound.
+- Regression: native and wrapped f32/f64 cover zero, maximum supported order, its supported and unsupported neighbors, `usize::MAX`, computed valid-order values, and nonfinite observation precedence. The expanded regression fails compilation before the repair and all three new tests pass afterward.
+- Verification: 45/45 native tests, zero skips; book tests, warning-denied Clippy/Rustdoc, two doctests, no-default-feature check, example, declared MSRV 1.95 and current supply-chain checks pass. Frozen baseline/current output bits and error classes match for 12,544 records at each of O0/O2/O3. Existing test leaves, timeout policy and 87 external lock records remain unchanged.
+- Release scope: patch version 0.1.1; only the root package lock record changes. Registry lookup reports `horae-time` absent. Assess API, normalized package, fresh consumer and hosted gates before acceptance; the current provider migration remains owned separately. No merge, publication, tag or service deployment is authorized by this repair. The main push/schedule pending-publication workflow must be assessed before any future merge.
+
 <a id="h-provider-boundary-001"></a>
 ## H-PROVIDER-BOUNDARY-001 — Complete current provider compatibility [major] — blocked
 
