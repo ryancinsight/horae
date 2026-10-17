@@ -1,5 +1,21 @@
 # Horae ownership gap audit
 
+## Integration renewal — 2026-10-17 [patch]
+
+PR #101 integrates the coherent 0.2.0 provider tree at
+`ab42e5707a3b9a3cc080cfbbb8aa8e36bd4fc56f` with the independently reviewed
+tree, passing main CI/ADR and automatic Pages. The pending publisher selects
+nothing because horae-time remains unpublished; no publication tag exists.
+The isolated invalid-order rebase preserves its reviewed production fix and
+regression leaf byte for byte, keeps all current main provider/registry pins,
+and reserves 0.2.1 as the next patch after the frozen 0.2.0 first-publication
+candidate. This does not claim 0.2.0 is published. The original checkout and
+first-publication handoff remain unchanged. Fresh exact-head verification and
+independent review are renewed separately; acceptance stays held until the
+reviewed 0.2.0 publication is verified. Historical 0.1.1 evidence below belongs
+to the original old-provider head and does not certify this rebased head.
+
+
 ## H-ADAPT-ORDER-RANGE-001 — Unsupported const-order overflow [patch] — repaired; acceptance held
 
 At the [audited main snapshot](https://github.com/ryancinsight/horae/commit/6f09a96dbf8de6565eb27591ccd0c76c820b7d93), `assess::<{usize::MAX}>` fails monomorphization with E0080 at `ORDER + 1`, preventing the documented error return. The original 42-test suite misses this compile-time boundary.
