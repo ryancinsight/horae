@@ -8,7 +8,9 @@
 - [x] Test zero, maximum valid, neighboring unsupported and maximum usize orders for native/wrapped f32/f64.
 - [x] Pass 45 native tests with zero skips, all configured local native/documentation/MSRV checks and current supply-chain policy.
 - [x] Compare 12,544 frozen baseline/current result records at each of O0/O2/O3 exactly; preserve all external lock records and existing test leaves.
-- [ ] Assess exact-head API, package, fresh-consumer and hosted gates plus current provider coherence.
+- [x] Assess committed locked-source API (223 pass; 30 inapplicable), package/dry-run and typed normalized consumers; normalized 45-test suite, two doctests and no-default check pass.
+- [x] Reproduce the same fresh Aequitas ^0.2.1/main-0.3.0 resolution failure on unmodified main; preserve provider PR ownership.
+- [ ] Assess final hosted gates after draft creation; the fresh Git graph remains blocked.
 - [ ] Obtain exact-head independent review and explicit release acceptance; no merge/publication is performed here.
 
 ## H-PROVIDER-BOUNDARY-001 — Current provider and public API boundary
