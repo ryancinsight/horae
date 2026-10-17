@@ -1,5 +1,14 @@
 # Horae checklist
 
+## H-PROVIDER-BOUNDARY-001 — Current provider and public API boundary
+
+- [x] Verify exact #99 tree and preserve #99/#100 branches and current review.
+- [x] Reproduce fresh Mnemosyne resolution failure and old quantity/scalar consumer failures before the correction.
+- [x] Keep the consumer source unchanged between matched-provider passing runs and mixed-provider failing runs; assert computed values for native/wrapped f32/f64.
+- [x] Declare 0.2.0 for the incompatible provider boundary and admit current Mnemosyne 0.10 without old pins or arithmetic changes.
+- [ ] Renew fresh graph, source and normalized consumers, API, native/docs/MSRV/supply-chain, package and hosted checks at final head.
+- [ ] Obtain exact-head independent review and version/publication-scope acceptance; keep #100 review and all existing holds.
+
 ## H-ORDER-002 — Verify stage-time coefficients — current Atlas session
 
 - [x] Reproduce the review finding: the autonomous `y' = y` fixture never

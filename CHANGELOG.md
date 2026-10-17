@@ -4,6 +4,20 @@ All notable changes to Horae are documented in this file.
 
 ## [Unreleased]
 
+### Breaking
+
+- Version the public provider boundary as Horae 0.2.0: `Time<T>` uses
+  Aequitas 0.3 and generic scalar bounds use Eunomia 0.10. Existing consumers
+  must align their provider identities. ADR 0003 records the externally
+  reproduced quantity-type and generic-bound failures; arithmetic is unchanged.
+
+### Fixed
+
+- Admit current Mnemosyne 0.10 in the versioned dev dependency so fresh
+  repository resolution no longer depends on an obsolete provider lock.
+  Retain the runtime provider updates from #99 and advance required transitive
+  provider pins to their current defaults without changing registry records.
+
 ### Changed
 
 - Refresh the Pages caller to the current Atlas reusable workflow revision;

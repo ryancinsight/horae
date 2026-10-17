@@ -1,5 +1,14 @@
 # Horae backlog
 
+<a id="h-provider-boundary-001"></a>
+## H-PROVIDER-BOUNDARY-001 — Complete current provider compatibility [major] — blocked
+
+- Priority: correctness.
+- Scope: separate prerequisite stacked on [provider PR #99](https://github.com/ryancinsight/horae/pull/99); preserve that branch and [invalid-order PR #100](https://github.com/ryancinsight/horae/pull/100), its head and current review.
+- Reproduction: fresh #99 root resolution rejects `mnemosyne-memory ^0.9.0` because current provider main declares 0.10.0. An unchanged typed consumer runs with matching old/new providers but fails against #99 with old Aequitas types (E0308) or old Eunomia bounds (E0277).
+- Correction: retain Aequitas 0.3/Eunomia 0.10, admit Mnemosyne 0.10 and its current transitive defaults, and declare Horae 0.2.0 for the public nominal boundary. No numerical kernel, old test leaf, feature, timeout, toolchain or workflow change. ADR 0003 and the shared computed-value consumer record the contract.
+- Acceptance: renew fresh graph and external-consumer, native/docs/MSRV/supply-chain, API and package checks; exact-head independent review and publication-scope acceptance remain held. The absent registry name has no published API baseline. No merge, upload, tag, service deployment or credential change is performed. Existing release and owner/service holds remain separate.
+
 ## H-ORDER-002 — Verify stage-time coefficients `verification` `patch` — in progress
 
 - Owner: Atlas integration; scope is the non-autonomous refinement oracle in
