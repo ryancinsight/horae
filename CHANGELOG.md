@@ -14,7 +14,7 @@ All notable changes to Horae are documented in this file.
 ### Acceptance hold
 
 The reviewed 0.2.0 provider tree integrates through PR #101 at
-`ab42e5707a3b9a3cc080cfbbb8aa8e36bd4fc56f`; first publication is still pending.
+[accepted main](https://github.com/ryancinsight/horae/commit/ab42e5707a3b9a3cc080cfbbb8aa8e36bd4fc56f); first publication is still pending.
 This separate next-patch draft must not merge or publish until the exact reviewed
 0.2.0 source is accepted on the registry and this changed head receives renewed
 checks and independent review. No registry upload, tag or credentials change

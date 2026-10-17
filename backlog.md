@@ -3,7 +3,7 @@
 ## Integration renewal — 2026-10-17 [patch]
 
 PR #101 integrates the coherent 0.2.0 provider tree at
-`ab42e5707a3b9a3cc080cfbbb8aa8e36bd4fc56f` with the independently reviewed
+[accepted main](https://github.com/ryancinsight/horae/commit/ab42e5707a3b9a3cc080cfbbb8aa8e36bd4fc56f) with the independently reviewed
 tree, passing main CI/ADR and automatic Pages. The pending publisher selects
 nothing because horae-time remains unpublished; no publication tag exists.
 The isolated invalid-order rebase preserves its reviewed production fix and
