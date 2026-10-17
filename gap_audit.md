@@ -1,5 +1,20 @@
 # Horae ownership gap audit
 
+## H-PROVIDER-BOUNDARY-001 — Locked provider success hides fresh and nominal boundaries
+
+Provider PR #99 compiles against its lock, but a fresh root graph rejects its
+Mnemosyne 0.9 requirement against main 0.10. An unchanged external-style consumer
+passes with matching old or new providers; mixed old quantity types or scalar
+bounds fail with E0308/E0277. This supports a pre-1.0 incompatible boundary,
+not an unchanged public API merely because Horae implementation source is equal.
+
+The prerequisite keeps #99's runtime updates, admits current Mnemosyne and its
+required defaults, and declares 0.2.0. One generic computed-value consumer is
+shared by the example and native test harness. Numerical implementation and
+existing test leaves stay unchanged. Fresh graph/API/package, native/docs and
+exact-head review/publication acceptance must be renewed. #100 remains a separate
+unmodified invalid-order patch with its current review and release holds.
+
 ## Finding 2026-08-20: horae scope-vs-delivery audit
 
 Static audit at detached head `a05dbeb`
