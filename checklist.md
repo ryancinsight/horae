@@ -6,7 +6,8 @@
 - [x] Reproduce fresh Mnemosyne resolution failure and old quantity/scalar consumer failures before the correction.
 - [x] Keep the consumer source unchanged between matched-provider passing runs and mixed-provider failing runs; assert computed values for native/wrapped f32/f64.
 - [x] Declare 0.2.0 for the incompatible provider boundary and admit current Mnemosyne 0.10 without old pins or arithmetic changes.
-- [ ] Renew fresh graph, source and normalized consumers, API, native/docs/MSRV/supply-chain, package and hosted checks at final head.
+- [x] Pass local 43-test native suite with zero skips, all configured native/docs/MSRV gates, the computed-value consumer and current supply-chain policy; preserve 74 registry lock records.
+- [ ] Complete final-head fresh graph, source/normalized consumer, API, package and hosted acceptance with independent review.
 - [ ] Obtain exact-head independent review and version/publication-scope acceptance; keep #100 review and all existing holds.
 
 ## H-ORDER-002 — Verify stage-time coefficients — current Atlas session
