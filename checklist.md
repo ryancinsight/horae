@@ -1,5 +1,15 @@
 # Horae checklist
 
+Active sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
+
+
+## H-PROVIDER-RANGE-20261019 [patch] — target0.2.2
+
+- [x] Retain current0.3/0.10 support and reviewed0.2.1 numerical source.
+- [x] Verify current and future typed values,strict/API/MSRV and unchanged policy.
+- [ ] Complete exact-head package/review/CI lifecycle;preserve0.2.1 local publication hold.
+
+
 ## Integration renewal — 2026-10-17 [patch]
 
 PR #101 integrates the coherent 0.2.0 provider tree at
