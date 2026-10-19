@@ -1,5 +1,17 @@
 # Horae backlog
 
+<a id="h-provider-range-20261019"></a>
+## H-PROVIDER-RANGE-20261019 — Current and next provider admission [patch] — blocked
+
+- Priority: correctness;target:0.2.2;scope:requirements,versions,lock and records only.
+- [x] Preserve current lower bounds and all Rust/test/policy bytes.
+- [x] Verify baseline resolver refusals and four real current/future typed consumer cohorts.
+- [x] Pass current native,strict,docs,MSRV and explicit patch API gates.
+- [ ] Complete standard-package,exact-head independent review and hosted gates.
+- [ ] Coordinate final canonical provider ordering;retain actual publication/auth holds.
+- Basis:`docs/verification/provider-range-bridge.md`;no older source pin or policy exception.
+
+
 ## Integration renewal — 2026-10-17 [patch]
 
 PR #101 integrates the coherent 0.2.0 provider tree at
