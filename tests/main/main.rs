@@ -8,6 +8,7 @@
 //! harness module prefix.
 
 mod adaptive_loop;
+mod adaptive_order_contract;
 mod allocation;
 mod embedded;
 mod fixed_step;

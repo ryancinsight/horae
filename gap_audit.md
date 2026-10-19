@@ -1,5 +1,29 @@
 # Horae ownership gap audit
 
+## Integration renewal — 2026-10-17 [patch]
+
+PR #101 integrates the coherent 0.2.0 provider tree at
+[accepted main](https://github.com/ryancinsight/horae/commit/ab42e5707a3b9a3cc080cfbbb8aa8e36bd4fc56f) with the independently reviewed
+tree, passing main CI/ADR and automatic Pages. The pending publisher selects
+nothing because horae-time remains unpublished; no publication tag exists.
+The isolated invalid-order rebase preserves its reviewed production fix and
+regression leaf byte for byte, keeps all current main provider/registry pins,
+and reserves 0.2.1 as the next patch after the frozen 0.2.0 first-publication
+candidate. This does not claim 0.2.0 is published. The original checkout and
+first-publication handoff remain unchanged. Fresh exact-head verification and
+independent review are renewed separately; acceptance stays held until the
+reviewed 0.2.0 publication is verified. Historical 0.1.1 evidence below belongs
+to the original old-provider head and does not certify this rebased head.
+
+
+## H-ADAPT-ORDER-RANGE-001 — Unsupported const-order overflow [patch] — repaired; acceptance held
+
+At the [audited main snapshot](https://github.com/ryancinsight/horae/commit/6f09a96dbf8de6565eb27591ccd0c76c820b7d93), `assess::<{usize::MAX}>` fails monomorphization with E0080 at `ORDER + 1`, preventing the documented error return. The original 42-test suite misses this compile-time boundary.
+
+The repair guards coefficient derivation in the associated constant and uses `Option` to represent unsupported orders. It preserves `1 <= ORDER < u32::MAX`, the valid coefficient expression and native computation, and nonfinite-observation precedence; error wording now reflects the existing exclusive upper bound. Three regression tests cover native/wrapped f32/f64 boundaries and computed results. All 45 native tests pass with zero skips. A frozen baseline/current corpus has identical values/error classes for 12,544 records at each of O0/O2/O3. No fixed-step leaf, provider revision, timeout or workflow changes.
+
+Version 0.1.1 is a patch correction; The locked-source API comparison passes all 223 applicable checks (30 inapplicable checks skipped), package verification and publication dry-run pass. Fresh Git API generation fails on the inherited Aequitas ^0.2.1/main-0.3.0 mismatch; Unmodified main reproduces the same fresh-resolution failure. Fresh typed normalized-package consumers pass against registry Aequitas 0.2.2/Eunomia 0.9.2, as do its 45 tests, two doctests and no-default check. Hosted acceptance and independent review remain pending. Existing provider migration ownership and release holds remain. Main push/schedule can invoke pending publication, so a future merge requires separate publication-scope assessment. This repair does not merge, publish, tag or deploy a service.
+
 ## H-PROVIDER-BOUNDARY-001 — Locked provider success hides fresh and nominal boundaries
 
 Provider PR #99 compiles against its lock, but a fresh root graph rejects its

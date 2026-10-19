@@ -2,7 +2,25 @@
 
 All notable changes to Horae are documented in this file.
 
-## [Unreleased]
+## [0.2.1] - Unreleased
+
+### Fixed
+
+- Return `AdaptiveError::InvalidOrder` for unsupported const orders including
+  `usize::MAX`, avoiding associated-constant overflow during compilation.
+  Preserve the existing `1..u32::MAX` supported range, valid-order results,
+  and nonfinite-observation precedence; correct the error text's upper bound.
+
+### Acceptance hold
+
+The reviewed 0.2.0 provider tree integrates through PR #101 at
+[accepted main](https://github.com/ryancinsight/horae/commit/ab42e5707a3b9a3cc080cfbbb8aa8e36bd4fc56f); first publication is still pending.
+This separate next-patch draft must not merge or publish until the exact reviewed
+0.2.0 source is accepted on the registry and this changed head receives renewed
+checks and independent review. No registry upload, tag or credentials change
+forms part of this rebase.
+
+## [0.2.0] - Unreleased
 
 ### Breaking
 
@@ -17,6 +35,7 @@ All notable changes to Horae are documented in this file.
   repository resolution no longer depends on an obsolete provider lock.
   Retain the runtime provider updates from #99 and advance required transitive
   provider pins to their current defaults without changing registry records.
+
 
 ### Changed
 
