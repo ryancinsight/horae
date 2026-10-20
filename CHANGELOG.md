@@ -2,6 +2,30 @@
 
 All notable changes to Horae are documented in this file.
 
+## [0.2.3] - Unreleased
+
+### Fixed
+
+- [patch] Reject positive steps whose rounded endpoint does not advance time,
+  reporting `TimeError::NonAdvancingStep`. Explicit and embedded stepping
+  validate the endpoint before evaluating the system or writing output;
+  implicit stepping and event clipping inherit the same time contract.
+
+### Changed
+
+- Refresh Mnemosyne to the current compatible default and add test-only
+  tracing using already-resolved registry packages. Existing provider ranges,
+  test assertions, timeout limits and workflows remain unchanged.
+- Record two independently reproduced, unfixed implicit stopping defects:
+  nonfinite residuals can report convergence, and the final permitted Newton
+  correction is not checked. Neither is fixed by the time-progress patch.
+
+### Acceptance hold
+
+This private review candidate does not authorize a push, merge, publication,
+tag, workflow dispatch or deployment. Existing provider and publication holds
+remain in force; exact-head independent review is required before public work.
+
 ## [0.2.2] - Unreleased
 
 ### Changed

@@ -1,5 +1,7 @@
 # Horae backlog
 
+- [Time progress](backlog/h-time-progress-20261020.md), [NaN convergence](backlog/h-implicit-nonfinite-20261020.md), [final Newton correction](backlog/h-implicit-last-20261020.md) [patch] — private review / open
+
 <a id="h-provider-range-20261019"></a>
 ## H-PROVIDER-RANGE-20261019 — Current and next provider admission [patch] — blocked
 
@@ -10,7 +12,6 @@
 - [ ] Complete standard-package,exact-head independent review and hosted gates.
 - [ ] Coordinate final canonical provider ordering;retain actual publication/auth holds.
 - Basis:`docs/verification/provider-range-bridge.md`;no older source pin or policy exception.
-
 
 ## Integration renewal — 2026-10-17 [patch]
 

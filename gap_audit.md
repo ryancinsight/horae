@@ -1,5 +1,22 @@
 # Horae ownership gap audit
 
+## Correctness review — 2026-10-20 [patch]
+
+`H-TIME-PROGRESS-20261020` reproduces successful non-progress at finite
+`start = 2/epsilon`, `h = 1`. The private correction rejects the rounded
+endpoint and validates explicit/embedded end times before state work; five
+boundary regressions cover native and wrapped scalar instantiations. Existing
+oracle leaves and policy gates are preserved. Exact-head receipts and review
+are delivered separately; no public acceptance is claimed.
+
+Two other public-API reproductions remain open and unfixed:
+`H-IMPLICIT-NONFINITE-20261020` returns a successful NaN solution for finite
+linear-decay inputs, and `H-IMPLICIT-LAST-20261020` rejects an iterate satisfying
+the exact dyadic residual tolerance after correction 16. Their backlog entries
+record the equations, values, causes and acceptance conditions. Passing the
+time-progress suite does not certify either implicit stopping condition.
+
+
 ## Integration renewal — 2026-10-17 [patch]
 
 PR #101 integrates the coherent 0.2.0 provider tree at

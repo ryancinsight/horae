@@ -8,6 +8,8 @@ pub enum TimeError {
     NonFinite,
     /// A step size is zero or negative.
     NonPositiveStep,
+    /// A positive step rounds to an instant no later than its start.
+    NonAdvancingStep,
 }
 
 impl fmt::Display for TimeError {
@@ -15,6 +17,9 @@ impl fmt::Display for TimeError {
         match self {
             Self::NonFinite => formatter.write_str("simulation time must be finite"),
             Self::NonPositiveStep => formatter.write_str("step size must be greater than zero"),
+            Self::NonAdvancingStep => {
+                formatter.write_str("positive step does not advance simulation time")
+            }
         }
     }
 }

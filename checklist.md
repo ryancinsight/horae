@@ -1,6 +1,19 @@
 # Horae checklist
 
-Active sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
+Active sprint target: **0.2.3** private time-progress correction [patch];
+preserve provider-range ownership and all existing publication holds.
+
+## H-TIME-PROGRESS-20261020 [patch]
+
+- [x] Inspect fresh instructions, PRs, ownership, workflow triggers and deployment settings.
+- [x] Preserve the owned stage-time oracle and all existing test leaves/gates.
+- [x] Reproduce stalled time and false successful stepping with unchanged regression tests.
+- [x] Require strictly later finite endpoints and validate before explicit state work.
+- [x] Cover native/wrapped scalars, all methods, event clipping and valid rounding boundaries.
+- [x] Reproduce and record separate implicit nonfinite/final-iteration defects as open.
+- [ ] Complete exact-head native, lint, documentation, boundary and API checks.
+- [ ] Obtain independent review and return the private diff/evidence receipt.
+- [ ] Renew public-action authorization and deployment/release scope before any later push.
 
 
 ## H-PROVIDER-RANGE-20261019 [patch] — target0.2.2

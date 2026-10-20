@@ -88,6 +88,12 @@ The clipped result contains:
 
 ### Semantics
 
+- **Representable progress**: `clip_step` returns
+  `TimeError::NonAdvancingStep` if adding the proposed duration rounds back to
+  the current time. A positive duration alone does not guarantee progress;
+  retrying an unchanged proposal would leave a time-based stopping condition
+  unchanged. This also applies to an empty schedule.
+
 - **No clip without crossing**: If no event lies *strictly* between `current`
   and `current + proposed`, the step is returned unchanged with `event = None`.
 - **Exact endpoint hit**: If an event lies *exactly* at `current + proposed`,
