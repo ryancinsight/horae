@@ -2,12 +2,12 @@
 
 All notable changes to Horae are documented in this file.
 
-## [0.2.3] - Unreleased
+## [0.3.0] - Unreleased
 
 ### Fixed
 
-- [patch] Reject positive steps whose rounded endpoint does not advance time,
-  reporting `TimeError::NonAdvancingStep`. Explicit and embedded stepping
+- [minor] Add `TimeError::NonAdvancingStep` and reject positive steps whose rounded endpoint does not advance time,
+  while preserving representable advances. Explicit and embedded stepping
   validate the endpoint before evaluating the system or writing output;
   implicit stepping and event clipping inherit the same time contract.
 

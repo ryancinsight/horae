@@ -1,6 +1,6 @@
 # Horae ownership gap audit
 
-## Correctness review — 2026-10-20 [patch]
+## Correctness review — 2026-10-20 [minor] [patch]
 
 `H-TIME-PROGRESS-20261020` reproduces successful non-progress at finite
 `start = 2/epsilon`, `h = 1`. The private correction rejects the rounded

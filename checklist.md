@@ -1,9 +1,9 @@
 # Horae checklist
 
-Active sprint target: **0.2.3** private time-progress correction [patch];
+Active sprint target: **0.3.0** private time-progress correction [minor];
 preserve provider-range ownership and all existing publication holds.
 
-## H-TIME-PROGRESS-20261020 [patch]
+## H-TIME-PROGRESS-20261020 [minor]
 
 - [x] Inspect fresh instructions, PRs, ownership, workflow triggers and deployment settings.
 - [x] Preserve the owned stage-time oracle and all existing test leaves/gates.

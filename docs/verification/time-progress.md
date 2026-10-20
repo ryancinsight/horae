@@ -15,7 +15,9 @@ advance state while reporting `start == end`; a loop stopping on time then
 has no progress guarantee. Event clipping also returns the stalled proposal.
 
 The correction validates the represented endpoint without widening, tolerance
-adjustments or changing step sizes. It reports `TimeError::NonAdvancingStep`.
+adjustments or changing step sizes. It reports `TimeError::NonAdvancingStep`. This new public variant is an additive
+[minor] change, so the private candidate targets 0.3.0; the existing enum is
+non-exhaustive.
 Explicit and embedded stepping validate the end after dimension checks and
 before evaluating the system, preparing stages or writing output. Existing
 implicit stepping and event clipping already use the shared time advancement.
