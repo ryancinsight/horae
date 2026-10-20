@@ -1,5 +1,20 @@
 # Horae ownership gap audit
 
+## Nonfinite implicit residual review — 2026-10-20 [patch]
+
+The private 0.3.1 correction on reviewed baseline `bc52f7d` rejects nonfinite
+residual magnitudes before the maximum reduction. NaN comparisons cannot leave
+a false zero norm and return success. Existing `NonConvergence` represents the
+diverged iterate; the public error surface and Newton/tolerance policies stay
+unchanged. Four new real-equation regressions fail before the fix and pass
+afterward, including finite-input matrix overflow and native/wrapped scalars.
+The full native suite passes 55/55. Exact-head receipts and independent review
+are separate acceptance evidence; no public action is performed by this lane.
+
+`H-IMPLICIT-LAST-20261020` remains open and is not changed by the finite-residual
+guard. The final permitted Newton correction still lacks its own residual
+check. The preceding time-progress review below records the earlier state.
+
 ## Correctness review — 2026-10-20 [minor] [patch]
 
 `H-TIME-PROGRESS-20261020` reproduces successful non-progress at finite

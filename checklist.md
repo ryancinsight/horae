@@ -1,7 +1,17 @@
 # Horae checklist
 
-Active sprint target: **0.3.0** private time-progress correction [minor];
-preserve provider-range ownership and all existing publication holds.
+Active sprint target: **0.3.1** private nonfinite-residual correction [patch],
+stacked on reviewed 0.3.0. Preserve provider ownership and publication holds.
+
+## H-IMPLICIT-NONFINITE-20261020 [patch]
+
+- [x] Isolate the reviewed `bc52f7d` source without editing the time-progress branch.
+- [x] Reproduce false NaN success through real decay/exchange equations before production edits.
+- [x] Require all residual components finite before the norm can certify convergence.
+- [x] Preserve the existing error surface, tolerance policy, dense solve and iteration bound.
+- [x] Pass the 55-test native suite, strict Clippy, no-default all-targets and Rustdoc.
+- [x] Preserve every old test leaf and keep the unchecked final correction separately open.
+- [ ] Complete independent exact-head review and any later public acceptance; local receipts accompany the private artifact.
 
 ## H-TIME-PROGRESS-20261020 [minor]
 
