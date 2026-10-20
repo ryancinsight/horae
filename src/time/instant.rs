@@ -42,15 +42,24 @@ where
         self.0
     }
 
-    /// Advance this instant by a positive step.
+    /// Advance this instant by a positive step with representable progress.
+    ///
+    /// A finite positive duration can round away when added to a larger
+    /// instant. Success requires the rounded endpoint to be strictly later
+    /// than the start, so a stepping loop cannot silently keep the same time.
     ///
     /// # Errors
     ///
     /// Returns [`TimeError::NonFinite`] when addition overflows the scalar's
-    /// finite range.
+    /// finite range, or [`TimeError::NonAdvancingStep`] when the rounded
+    /// endpoint is not strictly later than this instant.
     #[inline]
     pub fn advance(self, step: StepSize<T>) -> Result<Self, TimeError> {
-        Self::new(self.0 + step.into_time())
+        let end = Self::new(self.0 + step.into_time())?;
+        if end <= self {
+            return Err(TimeError::NonAdvancingStep);
+        }
+        Ok(end)
     }
 
     /// Return the positive distance from `earlier` to this instant.

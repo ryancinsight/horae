@@ -162,7 +162,8 @@ where
 ///
 /// Returns [`ImplicitStepError::DimensionMismatch`] when the output or
 /// workspace disagrees with the state, [`ImplicitStepError::Time`] when the end
-/// instant is not finite, [`ImplicitStepError::System`] when the system rejects
+/// instant is not finite or does not advance beyond `start`,
+/// [`ImplicitStepError::System`] when the system rejects
 /// an evaluation or Jacobian, and [`ImplicitStepError::Solve`] when Newton does
 /// not converge or the Newton matrix is singular.
 #[expect(

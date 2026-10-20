@@ -152,6 +152,12 @@ The crate is `no_std + alloc` in both feature configurations. Its default
 Eunomia; `--no-default-features` keeps the same numerical and orchestration
 contracts without a standard-library dependency.
 
+`Instant::advance` requires the rounded endpoint to be strictly later than the
+start. A finite positive step can round away at a large time magnitude; that
+case returns `TimeError::NonAdvancingStep`. Steppers propagate the error and
+validate their endpoint before system evaluation or output writes. Callers
+must handle it instead of repeating a step at unchanged simulation time.
+
 The explicit recurrence follows the Butcher tableau formulation in
 Hairer, Nørsett, and Wanner,
 [*Solving Ordinary Differential Equations I*, Chapter II](https://doi.org/10.1007/978-3-662-12607-3).

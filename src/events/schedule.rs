@@ -75,8 +75,9 @@ where
     /// # Errors
     ///
     /// Returns [`TimeError::NonFinite`] when computing the proposed endpoint
-    /// overflows. Valid schedule ordering makes the clipped difference
-    /// positive.
+    /// overflows or [`TimeError::NonAdvancingStep`] when its rounded value
+    /// does not advance beyond `start`. Valid schedule ordering makes the
+    /// clipped difference positive.
     pub fn clip_step(
         &self,
         start: Instant<T>,

@@ -39,8 +39,9 @@ impl<'output, T> EmbeddedOutputs<'output, T> {
 ///
 /// Returns [`StepError::DimensionMismatch`] before evaluation when caller
 /// slices and workspace disagree, [`StepError::Time`] when a stage or end
-/// instant overflows to a non-finite value, or [`StepError::System`] when the
-/// system rejects a stage evaluation.
+/// instant overflows to a non-finite value or the rounded end does not advance
+/// beyond `start`, or [`StepError::System`] when the system rejects a stage
+/// evaluation. End-time validation precedes all evaluations and output writes.
 pub fn step_into<T, System, Method, const STAGES: usize>(
     system: &System,
     _method: Method,
@@ -59,6 +60,8 @@ where
     ensure_dimension(SliceRole::Output, dimension, output.len())?;
     ensure_dimension(SliceRole::Workspace, dimension, workspace.dimension())?;
 
+    let end = start.advance(step).map_err(StepError::Time)?;
+
     workspace.prepare::<Method>();
     evaluate_stages::<T, System, STAGES>(system, start, step, state, workspace)?;
     let mut results = [output];
@@ -70,7 +73,6 @@ where
         &[&workspace.coefficients.b],
     );
 
-    let end = start.advance(step).map_err(StepError::Time)?;
     Ok(StepReport::new(start, end, step, STAGES))
 }
 
@@ -87,7 +89,9 @@ where
 /// Returns [`StepError::DimensionMismatch`] before evaluation when the state,
 /// output, error-estimate slice, or workspace dimensions disagree,
 /// [`StepError::Time`] when a stage or end instant overflows to a non-finite
-/// value, or [`StepError::System`] when the system rejects a stage evaluation.
+/// value or the rounded end does not advance beyond `start`, or
+/// [`StepError::System`] when the system rejects a stage evaluation. End-time
+/// validation precedes all evaluations and output writes.
 pub fn step_embedded_into<T, System, Method, const STAGES: usize>(
     system: &System,
     _method: Method,
@@ -111,6 +115,8 @@ where
     ensure_dimension(SliceRole::ErrorEstimate, dimension, error_estimate.len())?;
     ensure_dimension(SliceRole::Workspace, dimension, workspace.dimension())?;
 
+    let end = start.advance(step).map_err(StepError::Time)?;
+
     workspace.prepare::<Method>();
     workspace.prepare_embedded::<Method>();
     evaluate_stages::<T, System, STAGES>(system, start, step, state, workspace)?;
@@ -127,7 +133,6 @@ where
         *estimate = *result - *estimate;
     }
 
-    let end = start.advance(step).map_err(StepError::Time)?;
     Ok(StepReport::new(start, end, step, STAGES))
 }
 
