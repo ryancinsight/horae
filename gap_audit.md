@@ -7,7 +7,9 @@
 endpoint and validates explicit/embedded end times before state work; five
 boundary regressions cover native and wrapped scalar instantiations. Existing
 oracle leaves and policy gates are preserved. Exact-head receipts and review
-are delivered separately; no public acceptance is claimed.
+are delivered separately; independent review accepts the corrected 0.3.0
+additive API class. The 51-test suite and local gates pass; no public acceptance
+is claimed.
 
 Two other public-API reproductions remain open and unfixed:
 `H-IMPLICIT-NONFINITE-20261020` returns a successful NaN solution for finite

@@ -43,6 +43,21 @@ Run the regression with:
 cargo nextest run --locked --all-features -E 'test(time_progress::)'
 ```
 
+## Local verification
+
+The complete suite passes 51/51 with zero skips. Strict Clippy, warning-denied
+Rustdoc, two doctests, all nine book chapters, no-default all-targets and MSRV
+1.95 checks pass. API comparison passes 196 applicable checks (57 inapplicable).
+`cargo package --locked` verifies the normalized package with registry Aequitas
+0.3.1 and Eunomia 0.10. Supply-chain, committed lock, cast, artifact-budget and
+exact-revision conformance controls pass. Existing duplicate Syn versions are
+reported by cargo-deny without a policy failure. The conformance result does
+not certify 38 cross-repository references whose provider stores are absent.
+
+Independent review resolves the initial patch/minor classification finding by
+requiring 0.3.0; production and regression bytes stay unchanged. The private
+evidence receipt includes the final exact-head review and command records.
+
 ## Dependency and ownership boundary
 
 Fresh compatible resolution retains Aequitas

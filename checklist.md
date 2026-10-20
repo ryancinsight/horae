@@ -11,8 +11,8 @@ preserve provider-range ownership and all existing publication holds.
 - [x] Require strictly later finite endpoints and validate before explicit state work.
 - [x] Cover native/wrapped scalars, all methods, event clipping and valid rounding boundaries.
 - [x] Reproduce and record separate implicit nonfinite/final-iteration defects as open.
-- [ ] Complete exact-head native, lint, documentation, boundary and API checks.
-- [ ] Obtain independent review and return the private diff/evidence receipt.
+- [x] Complete native, lint, documentation, boundary, API and package checks; retain exact-head receipts.
+- [x] Obtain independent source/API review and preserve the raw report; deliver exact-head confirmation with the private receipt.
 - [ ] Renew public-action authorization and deployment/release scope before any later push.
 
 
