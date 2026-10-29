@@ -2,6 +2,17 @@
 
 All notable changes to Horae are documented in this file.
 
+## Unreleased
+
+### Fixed
+
+- [patch] Reject nonfinite implicit residuals with the existing
+  `SolveError::NonConvergence` instead of allowing NaN components to disappear
+  from the infinity-norm reduction and falsely certify convergence. Finite
+  residual arithmetic, dense solving, tolerance policy and the Newton bound
+  remain unchanged. The unchecked final Newton correction remains an open,
+  separate defect.
+
 ## [0.2.2] - Unreleased
 
 ### Changed
