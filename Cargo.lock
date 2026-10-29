@@ -280,6 +280,8 @@ dependencies = [
  "eunomia",
  "mnemosyne-memory",
  "proptest",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

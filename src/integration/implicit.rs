@@ -37,8 +37,8 @@ impl ImplicitMethod for BackwardEuler {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum SolveError {
-    /// Newton exhausted its iteration bound without satisfying the
-    /// convergence tolerance.
+    /// Newton encountered a nonfinite residual or exhausted its iteration
+    /// bound without satisfying the convergence tolerance.
     ///
     /// The bound guards against a divergent predictor rather than tuning the
     /// solve, so its value is an implementation detail and not part of this
@@ -153,7 +153,8 @@ where
 /// iteration: from the explicit-Euler predictor, it forms the residual
 /// `g = y − y_n − h·f(t_{n+1}, y)`, assembles the Newton matrix `I − h·∂f/∂y`
 /// from the system Jacobian, and solves the dense system for the correction
-/// until the infinity norm of the Newton step falls within `tolerance`.
+/// until every residual component is finite and the residual infinity norm
+/// falls within `tolerance`.
 ///
 /// All matrix and vector scratch comes from `workspace`; the function performs
 /// no allocation and dispatches neither the system nor the method dynamically.
@@ -163,8 +164,9 @@ where
 /// Returns [`ImplicitStepError::DimensionMismatch`] when the output or
 /// workspace disagrees with the state, [`ImplicitStepError::Time`] when the end
 /// instant is not finite, [`ImplicitStepError::System`] when the system rejects
-/// an evaluation or Jacobian, and [`ImplicitStepError::Solve`] when Newton does
-/// not converge or the Newton matrix is singular.
+/// an evaluation or Jacobian, and [`ImplicitStepError::Solve`] when Newton
+/// encounters a nonfinite residual, does not converge, or the Newton matrix
+/// is singular.
 #[expect(
     clippy::too_many_arguments,
     reason = "the implicit step carries the explicit step's seven roles plus the Newton convergence tolerance"
@@ -215,9 +217,14 @@ where
 
         // Convergence is the residual infinity norm: g -> 0 means the implicit
         // equation y = y_n + h·f is satisfied to the caller's tolerance.
+        // NaN compares false, so an unchecked maximum can discard it and
+        // incorrectly leave a zero norm. Every component must be finite.
         let mut residual_norm = <T as NumericElement>::ZERO;
         for residual in &workspace.residual {
             let magnitude = residual.abs();
+            if !magnitude.is_finite() {
+                return Err(ImplicitStepError::Solve(SolveError::NonConvergence));
+            }
             if magnitude > residual_norm {
                 residual_norm = magnitude;
             }
