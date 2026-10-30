@@ -4,6 +4,11 @@ All notable changes to Horae are documented in this file.
 
 ## Unreleased
 
+### Changed
+
+- [patch] The Eunomia requirement widens to `>=0.10.0, <0.13.0`, admitting the published Eunomia 0.12 provider line while retaining the 0.10 and 0.11 lines. No numeric, dimensional or API behavior changes.
+
+
 ### Fixed
 
 - [patch] Reject nonfinite implicit residuals with the existing
