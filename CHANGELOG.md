@@ -2,7 +2,7 @@
 
 All notable changes to Horae are documented in this file.
 
-## Unreleased
+## [0.2.3] - Unreleased
 
 ### Changed
 
@@ -11,6 +11,10 @@ All notable changes to Horae are documented in this file.
 
 ### Fixed
 
+- [patch] Form subcycle reciprocals directly from the integer ratio in the
+  selected scalar precision. Ratios that overflow a reduced-precision count
+  no longer lose a representable reciprocal, and rounded counts no longer
+  introduce an extra reciprocal rounding error.
 - [patch] Reject nonfinite implicit residuals with the existing
   `SolveError::NonConvergence` instead of allowing NaN components to disappear
   from the infinity-norm reduction and falsely certify convergence. Finite

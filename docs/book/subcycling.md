@@ -46,10 +46,11 @@ assert_eq!(plan.ratio(), 4);
 # }
 ```
 
-The child step is guaranteed:
-- To be finite and positive (if parent is)
-- To use the representable reciprocal of `RATIO` in the chosen scalar type
-- To carry a bounded rounding error when repeated `RATIO` times
+A successful child step is finite and positive. Horae rounds the exact
+reciprocal of `RATIO` to the selected scalar before multiplying the parent;
+it does not first round the integer ratio into that scalar. If either the
+reciprocal or the scaled step rounds to zero, the plan reports a child-step
+error. Repeating the child step incurs the scalar's rounding error.
 
 The repeated child duration is not generally bit-identical to the parent.
 For positive `f64` values with `RATIO = 3`, the reciprocal, scaling

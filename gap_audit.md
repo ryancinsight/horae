@@ -1,5 +1,15 @@
 # Horae ownership gap audit
 
+## Subcycle count reciprocal — November 6, 2026 [patch]
+
+At current main, converting the integer ratio into the selected scalar before
+reciprocation can overflow that scalar or round the count first. Regressions
+show a representable half-precision child rejected at ratio 65,520 and a
+single-precision reciprocal rounded one ULP away at ratio 16,777,217. Horae
+now uses the existing Eunomia count-reciprocal operation and keeps the same
+ratio and child-step validation. Independent review and final delivery gates
+remain pending.
+
 ## Integration renewal — 2026-10-17 [patch]
 
 PR #101 integrates the coherent 0.2.0 provider tree at

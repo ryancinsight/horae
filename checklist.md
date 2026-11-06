@@ -1,6 +1,15 @@
 # Horae checklist
 
-Active sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
+Active subcycle patch target: **0.2.3**; preserve the 0.2.2 provider-range
+bridge and the 0.2.1 local publication hold.
+
+## H-SUBCYCLE-RECIPROCAL-20261106 [patch]
+
+- [x] Reproduce count overflow and reciprocal rounding on current main.
+- [x] Use the existing provider's correctly rounded count reciprocal.
+- [ ] Complete exact-head native, documentation, API and package checks.
+- [ ] Obtain independent source review and applicable hosted checks.
+- [ ] Verify qualified release and documentation effects before delivery.
 
 
 ## H-PROVIDER-RANGE-20261019 [patch] — target0.2.2

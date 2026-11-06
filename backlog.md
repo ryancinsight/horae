@@ -1,5 +1,16 @@
 # Horae backlog
 
+<a id="h-subcycle-reciprocal-20261106"></a>
+## H-SUBCYCLE-RECIPROCAL-20261106 — Round the reciprocal of the exact ratio [patch]
+
+- status: todo; priority: correctness; target: 0.2.3.
+- A valid ratio can overflow or round in a narrow scalar before its reciprocal
+  is taken, rejecting a representable child step or producing the wrong factor.
+- Use Eunomia's correctly rounded count reciprocal, retain the existing ratio
+  limit and scaled-step error, and cover narrow, native and wrapped scalars.
+- Final-head independent review, normal hooks, package/consumer validation,
+  hosted checks and existing provider/release coordination remain required.
+
 <a id="h-provider-range-20261019"></a>
 ## H-PROVIDER-RANGE-20261019 — Current and next provider admission [patch] — blocked
 
