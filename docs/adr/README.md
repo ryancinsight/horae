@@ -12,3 +12,4 @@
 | [0001](0001-time-integration-boundary.md) | Own time-integration policy in Horae | Accepted |
 | [0002](0002-implicit-system-seam.md) | Add an implicit-system seam for stiff kinetics | Proposed |
 | [0003](0003-public-provider-boundary.md) | Version the public quantity and scalar provider boundary | Proposed |
+| [0004](0004-release-scope-1-0.md) | Horae release scope for 1.0 | Accepted |
