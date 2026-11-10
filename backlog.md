@@ -4,6 +4,7 @@
 ## H-PROVIDER-RANGE-20261019 — Current and next provider admission [patch] — blocked
 
 - Priority: correctness;target:0.2.2;scope:requirements,versions,lock and records only.
+- milestone: M-coherence.
 - [x] Preserve current lower bounds and all Rust/test/policy bytes.
 - [x] Verify baseline resolver refusals and four real current/future typed consumer cohorts.
 - [x] Pass current native,strict,docs,MSRV and explicit patch API gates.
@@ -32,6 +33,7 @@ to the original old-provider head and does not certify this rebased head.
 ## H-ADAPT-ORDER-RANGE-001 — Preserve invalid-order error contract [patch] — blocked
 
 - Priority: correctness.
+- milestone: M-coherence.
 - Status: implementation verified locally; exact-head independent review, fresh Git provider coherence and release acceptance remain held.
 - Owner: this bounded adaptive-order repair; H-ORDER-002 fixed-step and provider PRs #96/#98/#99 remain untouched.
 - Baseline: [main snapshot](https://github.com/ryancinsight/horae/commit/6f09a96dbf8de6565eb27591ccd0c76c820b7d93). `assess::<{usize::MAX}>` fails compilation with E0080 because the associated `ORDER + 1` overflows before the error guard executes.
@@ -44,6 +46,7 @@ to the original old-provider head and does not certify this rebased head.
 ## H-PROVIDER-BOUNDARY-001 — Complete current provider compatibility [major] — blocked
 
 - Priority: correctness.
+- milestone: M-coherence.
 - Scope: separate prerequisite stacked on [provider PR #99](https://github.com/ryancinsight/horae/pull/99); preserve that branch and [invalid-order PR #100](https://github.com/ryancinsight/horae/pull/100), its head and current review.
 - Reproduction: fresh #99 root resolution rejects `mnemosyne-memory ^0.9.0` because current provider main declares 0.10.0. An unchanged typed consumer runs with matching old/new providers but fails against #99 with old Aequitas types (E0308) or old Eunomia bounds (E0277).
 - Correction: retain Aequitas 0.3/Eunomia 0.10, admit Mnemosyne 0.10 and its current transitive defaults, and declare Horae 0.2.0 for the public nominal boundary. No numerical kernel, old test leaf, feature, timeout, toolchain or workflow change. ADR 0003 and the shared computed-value consumer record the contract.
@@ -52,6 +55,7 @@ to the original old-provider head and does not certify this rebased head.
 
 ## H-ORDER-002 — Verify stage-time coefficients `verification` `patch` — in progress
 
+- milestone: M-coherence.
 - Owner: Atlas integration; scope is the non-autonomous refinement oracle in
   `tests/fixed_step.rs` and synchronized provider records. No tableau or
   consumer implementation changes are in scope.
