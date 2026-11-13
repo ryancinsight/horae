@@ -28,8 +28,10 @@ Consumers own:
 - **Equations**: The `ExplicitSystem<T>` seam lets each domain implement its
   own right-hand side. Horae never contains physics, chemical kinetics, or
   fluid dynamics.
-- **Stability criteria**: CFL conditions, stiffness limits, and implicit
-  solvers are domain-specific.
+- **Stability criteria**: CFL conditions and other domain stability limits
+  are domain-specific. Horae ships the implicit stepper `BackwardEuler`
+  (ADR 0002), but the consumer supplies the system's right-hand side and
+  Jacobian through `ImplicitSystem<T>` and chooses the step size.
 - **Spatial discretization**: Mesh, finite-element bases, or spectral methods
   are orthogonal to time stepping.
 - **Arrays and storage**: Leto owns CPU arrays and memory layout. Hephaestus
@@ -81,9 +83,11 @@ Harmonia is the live coupling consumer of Horae's typed time and subcycling
 contracts, and Helios uses the validated `StepSize` boundary for delivery
 kinematics. The `ExplicitSystem<T>` and stepping APIs are currently exercised
 by Horae's provider tests and example; no CFDrs or Kwavers production call
-site is yet migrated to them. That migration is consumer-owned. An implicit
-or nonlinear integration policy remains gated on a second concrete
-residual/Jacobian consumer, as recorded in ADR 0001.
+site is yet migrated to them. That migration is consumer-owned. Horae also
+ships one implicit stepper, `BackwardEuler` through `step_implicit_into`, for
+systems that implement `ImplicitSystem<T>` and supply their Jacobian; its
+Robertson stiff-benchmark test is `tests/main/robertson.rs`. ADR 0002 records
+that seam and its status is Proposed.
 
 ## Integration with Other Atlas Components
 
