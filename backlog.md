@@ -53,6 +53,17 @@ to the original old-provider head and does not certify this rebased head.
 - Local verification: 43 native tests pass with zero skips; all configured native/docs/MSRV checks, the public consumer and current supply-chain policy pass. All 74 registry lock records remain unchanged.
 - Acceptance: renew fresh graph and external-consumer, native/docs/MSRV/supply-chain, API and package checks; exact-head independent review and publication-scope acceptance remain held. The absent registry name has no published API baseline. No merge, upload, tag, service deployment or credential change is performed. Existing release and owner/service holds remain separate.
 
+<a id="h-implicit-doc-drift"></a>
+## H-IMPLICIT-DOC-DRIFT — Reconcile documents with the shipped BackwardEuler [patch] — todo
+
+- Priority: verification; needs: none.
+- milestone: M-coherence.
+- Outcome: no document in this repository says Horae omits, defers, or disowns the implicit stepper while `horae::integration::BackwardEuler` ships (`src/integration/implicit.rs`; tests `implicit_step`, `robertson`), and ADR 0002 carries a decided status.
+- Acceptance oracle, each command fails at filing: (1) `git grep -n -i -E "[n]onlinear or implicit solvers|[s]econd concret[e]|[i]mplicit, or IMEX surface|[d]efers implicit|[s]tiff/implicit stepping|[i]mplicit-integration claim|[e]xplicit-policy-only|[d]amped Newton" -- README.md gap_audit.md backlog.md docs` prints nothing; (2) `git grep -n -i "implicit integration" -- docs/adr/0001-time-integration-boundary.md` prints nothing; (3) the ADR 0002 row of `docs/adr/README.md` reads Accepted or Rejected.
+- Scope: `README.md` boundary paragraph; ADR 0001 Consequences (shared with H-ADR-STALE-006, whose "implicit exclusions stand" non-goal this item supersedes); ADR 0002 Decision, which says the Newton solve is damped while `src/integration/implicit.rs` applies the full Newton correction; `gap_audit.md` integrator-set paragraph, the two boundary notes and row H-002; the "Deferred (documented boundary)" audit entry and open implicit-policy checkbox in this file.
+- Next: decide the ADR 0002 status (recommended: Accepted as built, with a dated revision note), then correct each site in one change.
+- Links: [PR 121](https://github.com/ryancinsight/horae/pull/121) fixed the book passages (`docs/book/stack_position.md`, `docs/book/rk4.md`); this item holds the remainder outside the book.
+
 ## H-ORDER-002 — Verify stage-time coefficients `verification` `patch` — in progress
 
 - milestone: M-coherence.
