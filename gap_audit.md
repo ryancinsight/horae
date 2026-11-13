@@ -145,15 +145,14 @@ crossing, and a high-magnitude case (`tests/properties.rs:60`, `:87`;
   `docs/book/rk4.md:38` said "Horae provides three sealed zero-sized method
   markers"; corrected to four with the chapter's scope stated and a link to
   `rk5.md`.
-- Filed, not fixed (each needs a judgement call or a citation):
-  ADR 0001's Consequences section still lists "Adaptive embedded-pair
-  estimation" as absent though `DormandPrince` and `step_embedded_into` ship
-  (H-ADR-STALE-006); `docs/adr/README.md:3` instructs regeneration through
-  `scripts/adr-index.py`, which does not exist in this repository
-  (H-ADRIDX-007);
-  `src/integration/mod.rs:1` still summarizes the module as "Fixed-step
-  explicit integration" while re-exporting the embedded surface
+- Fixed since this pass: `docs/adr/README.md:3` names the atlas generator and
+  its CI check instead of a missing local script (H-ADRIDX-007);
+  `src/integration/mod.rs:1` summarizes the module as fixed-step and embedded
   (H-MODDOC-010).
+- Filed, not fixed (needs a judgement call or a citation): ADR 0001's
+  Consequences section still lists "Adaptive embedded-pair estimation" as
+  absent though `DormandPrince` and `step_embedded_into` ship
+  (H-ADR-STALE-006).
 
 ### CI and supply-chain observations
 

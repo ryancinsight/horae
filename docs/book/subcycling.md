@@ -174,7 +174,7 @@ is `RATIO` system evaluations instead of one.
 ## Use Cases
 
 **Multi-rate coupling**: Different subsystems evolve at different rates. A
-stiff system might take 1 large step while a fast system takes 4 small steps
+slow system might take 1 large step while a fast system takes 4 small steps
 within the same parent interval.
 
 **Adaptive refinement**: An initial coarse step can be repeated at finer
