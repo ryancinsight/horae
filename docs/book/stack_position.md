@@ -12,6 +12,9 @@ Horae is responsible for:
   strictly positive durations) over Aequitas physical units.
 - **Explicit integration**: Runge–Kutta tableaus (Euler, midpoint, RK4, and
   Dormand–Prince 5(4)) with staged evaluation and shared embedded stages.
+- **Implicit integration**: `BackwardEuler` with a Newton solve over a
+  caller-supplied Jacobian (`ImplicitSystem<T>`), stepped by
+  `step_implicit_into` (ADR 0002, status Proposed).
 - **Stage storage**: A reusable, caller-owned `StepWorkspace<T, STAGES>` that
   allocates once and steps many times without further allocation.
 - **Error assessment**: Mixed absolute-relative adaptive control and

@@ -232,15 +232,16 @@ Choose based on the accuracy order and the evaluations per step:
 - **Midpoint**: second order; 2 system evaluations per step
 - **RK4**: Smooth problems where O(h⁴) accuracy justifies 4 system evaluations
 
-On the linear test problem `y' = λy` with `z = hλ`, one step multiplies `y`
-by `1 + z` (Euler) or `1 + z + z²/2` (Midpoint). The first has magnitude at
-most 1 exactly for `z` in `[-2, 0]`. The second equals `((z + 1)² + 1) / 2`,
-which is positive and at most 1 exactly when `(z + 1)² ≤ 1`, the same
-interval. That interval is bounded, so both methods need `h ≤ 2/|λ|` for
-every real decaying mode `λ` and the fastest mode bounds the step; neither
-is the choice for a stiff system. For a stiff system use `BackwardEuler` in `horae::integration`
-(`src/integration/implicit.rs`): it multiplies `y` by `1 / (1 - z)`, and
-`|1 - z| ≥ 1` whenever `Re z ≤ 0`, so no step size makes a decaying mode grow.
+On the linear test problem `y' = λy` with real `λ` and `z = hλ`, one step
+multiplies `y` by `1 + z` (Euler) or `1 + z + z²/2` (Midpoint). The first has
+magnitude at most 1 exactly for `z` in `[-2, 0]`. The second equals
+`((z + 1)² + 1) / 2`, which is positive and at most 1 exactly when
+`(z + 1)² ≤ 1`, the same interval. That interval is bounded, so both methods
+need `h ≤ 2/|λ|` for every real decaying mode `λ` and the fastest mode bounds
+the step; neither is the choice for a stiff system. For a stiff system use
+`BackwardEuler` in `horae::integration` (`src/integration/implicit.rs`): it
+multiplies `y` by `1 / (1 - z)`, and `|1 - z| ≥ 1` whenever `Re z ≤ 0`, so no
+step size makes a decaying mode grow.
 
 The `step_into` function is monomorphic: the method is known at compile time,
 and the recurrence specializes for each method's stage count and coefficients.
