@@ -5,9 +5,10 @@
 //! advances one step with an embedded pair, writing the primary result and the
 //! componentwise local-error estimate into the two slices of an
 //! [`EmbeddedOutputs`], which is what [`crate::adaptive`] assesses.
-//! [`step_implicit_into`] advances one step with an [`ImplicitMethod`] such as
-//! [`BackwardEuler`] for a system that supplies its Jacobian, solving the
-//! step's nonlinear equation by Newton iteration in an [`ImplicitWorkspace`].
+//! [`step_implicit_into`] advances one backward-Euler step for a system that
+//! supplies its Jacobian, solving the step's nonlinear equation by Newton
+//! iteration in an [`ImplicitWorkspace`]. [`BackwardEuler`] is the one shipped
+//! [`ImplicitMethod`]; the method argument does not yet select behaviour.
 
 mod error;
 mod implicit;
