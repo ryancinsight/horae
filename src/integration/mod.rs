@@ -1,9 +1,13 @@
-//! Explicit Runge--Kutta integration, fixed-step and embedded.
+//! One-step time integration: explicit Runge--Kutta, fixed-step and embedded,
+//! and implicit stepping.
 //!
 //! [`step_into`] advances one step with a plain tableau. [`step_embedded_into`]
 //! advances one step with an embedded pair, writing the primary result and the
 //! componentwise local-error estimate into the two slices of an
 //! [`EmbeddedOutputs`], which is what [`crate::adaptive`] assesses.
+//! [`step_implicit_into`] advances one step with an [`ImplicitMethod`] such as
+//! [`BackwardEuler`] for a system that supplies its Jacobian, solving the
+//! step's nonlinear equation by Newton iteration in an [`ImplicitWorkspace`].
 
 mod error;
 mod implicit;
