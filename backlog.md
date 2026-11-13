@@ -356,23 +356,6 @@ verified; each carries its own acceptance oracle.
 - Evidence the clauses bite at both widths: expecting a `2^5` ratio of `31.9`
   instead of `32.0` fails the test.
 
-### H-STAB-DOC-005 — Remove or source the book stability constants [patch] — status: todo
-
-- Outcome: no unsourced numerical stability claim remains in a repository that
-  declares stability and CFL criteria out of scope (`README.md` Boundary,
-  ADR 0001 "Move equations or CFL policy into Horae").
-- Scope: `docs/book/rk4.md`. Non-goals: no stability API.
-- Acceptance oracle: `docs/book/rk4.md:226` ("approximately 2.8 times CFL
-  compared to forward Euler") and `:161` ("moderately larger than Euler") are
-  either deleted or replaced with a cited real-axis stability-interval
-  statement carrying its source; `mdbook test docs/book` still passes.
-- Dependencies: none. Risk/change class: [docs] [patch]. Effort S.
-- Note: the classical RK4 real-axis stability interval is approximately
-  `[-2.785, 0]` and forward Euler's is `[-2, 0]`, so the stated figure is the
-  RK4 boundary itself, not a ratio to Euler, while the sentence asserts a
-  ratio. A correct replacement needs a citation, so this was not fixed in the
-  audit pass.
-
 ### H-ADR-STALE-006 — Revise ADR 0001 for the delivered embedded pair [patch] — status: todo
 
 - Outcome: the one current record of the time-integration boundary decision

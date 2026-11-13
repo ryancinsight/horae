@@ -150,10 +150,7 @@ crossing, and a high-magnitude case (`tests/properties.rs:60`, `:87`;
   estimation" as absent though `DormandPrince` and `step_embedded_into` ship
   (H-ADR-STALE-006); `docs/adr/README.md:3` instructs regeneration through
   `scripts/adr-index.py`, which does not exist in this repository
-  (H-ADRIDX-007); `docs/book/rk4.md:226` asserts RK4 stability is
-  "approximately 2.8 times CFL compared to forward Euler", an unsourced figure
-  that reads as a ratio while approximating RK4's own real-axis boundary,
-  inside a repository that disclaims CFL ownership (H-STAB-DOC-005);
+  (H-ADRIDX-007);
   `src/integration/mod.rs:1` still summarizes the module as "Fixed-step
   explicit integration" while re-exporting the embedded surface
   (H-MODDOC-010).

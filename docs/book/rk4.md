@@ -99,7 +99,6 @@ let report = step_into(
 
 **Cost**: 1 system evaluation per step
 **Accuracy**: O(h) for smooth problems
-**Stability**: limited; suitable for rough, nonlinear dynamics only
 
 ### Explicit Midpoint (2nd order, 2 stages)
 
@@ -160,7 +159,6 @@ let report = step_into(
 
 **Cost**: 2 system evaluations per step
 **Accuracy**: O(h²)
-**Stability**: moderately larger than Euler
 
 ### Classical RK4 (4th order, 4 stages)
 
@@ -225,7 +223,6 @@ let report = step_into(
 
 **Cost**: 4 system evaluations per step
 **Accuracy**: O(h⁴) for smooth problems
-**Stability**: approximately 2.8 times CFL compared to forward Euler
 
 ## Method Selection
 
