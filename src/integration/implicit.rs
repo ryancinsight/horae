@@ -17,29 +17,9 @@ use super::{SliceRole, StepReport, WorkspaceError, error::ensure_dimension};
 const MAX_NEWTON_ITERATIONS: usize = 16;
 
 /// Compile-time marker for an implicit one-step method.
-///
-/// The trait is sealed: [`step_implicit_into`] implements exactly one
-/// recurrence, backward Euler, so [`BackwardEuler`] is the only implementor
-/// and the `method` argument carries [`Self::ORDER`] at compile time without
-/// selecting other behavior. A downstream implementation would run backward
-/// Euler under a different declared order, so none is admitted.
-///
-/// ```compile_fail,E0277
-/// use horae::integration::ImplicitMethod;
-///
-/// struct Downstream;
-///
-/// impl ImplicitMethod for Downstream {
-///     const ORDER: usize = 2;
-/// }
-/// ```
-pub trait ImplicitMethod: private::Sealed {
+pub trait ImplicitMethod {
     /// Formal accuracy order of the method.
     const ORDER: usize;
-}
-
-mod private {
-    pub trait Sealed {}
 }
 
 /// Backward Euler: `y_{n+1} = y_n + h·f(t_{n+1}, y_{n+1})`.
@@ -48,8 +28,6 @@ mod private {
 /// than by the fastest system timescale — the property a stiff problem needs.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct BackwardEuler;
-
-impl private::Sealed for BackwardEuler {}
 
 impl ImplicitMethod for BackwardEuler {
     const ORDER: usize = 1;
@@ -171,7 +149,7 @@ where
 
 /// Advance `state` by one implicit step into `output`.
 ///
-/// Takes one backward-Euler step, the only [`ImplicitMethod`], with a Newton
+/// Uses the method named by `method` (backward Euler first) with a Newton
 /// iteration: from the explicit-Euler predictor, it forms the residual
 /// `g = y − y_n − h·f(t_{n+1}, y)`, assembles the Newton matrix `I − h·∂f/∂y`
 /// from the system Jacobian, and solves the dense system for the correction
@@ -187,12 +165,25 @@ where
 /// `g = −z²·y_n`: an absolute quantity that vanishes with `y_n` however far
 /// the predictor lies from the backward-Euler value `y_n / (1 − z)`. For
 /// `z < −2` the predictor has `|1 + z| > 1` and grows a decaying mode, yet
-/// its residual passes whenever `z²·|y_n| <= tolerance`. Newton's method is
-/// exact in one correction on a linear system (the residual is affine), so
-/// one mandatory correction restores the backward-Euler value to rounding on
-/// every linear component. On a nonlinear system the accepted iterate has
-/// residual within `tolerance` after a correction, so choose `tolerance`
+/// its residual passes whenever `z²·|y_n| <= tolerance`.
+///
+/// Newton's method is exact in one correction on a linear system with an
+/// exact Jacobian (the residual is affine), so one mandatory correction
+/// restores the backward-Euler value up to rounding. The rounding error
+/// scales with the predictor magnitude, not with the result: for a decoupled
+/// decay with `a = −z` it is at most `4·ε·(|1 − a| + 1)·|y_n|`, with `ε` the
+/// machine epsilon of `T`. That bound is below `|y_n|` only while
+/// `a` is well under `1 / (4·ε)` (about `2·10⁶` in `f32`); beyond it an
+/// accepted step can exceed `|y_n|` in magnitude or flip its sign even
+/// though the residual is within `tolerance`, so the non-growth of a
+/// decaying mode is not guaranteed for such stiffness. Coupled systems have
+/// no per-component statement. On a nonlinear system the accepted iterate
+/// has residual within `tolerance` after a correction, so choose `tolerance`
 /// well below the magnitude of the state components it must resolve.
+///
+/// Every step evaluates the Jacobian and factors `I − h·∂f/∂y` at least
+/// once, so a Jacobian error or an exactly singular matrix fails the step
+/// even when the predictor already satisfies the residual test.
 ///
 /// All matrix and vector scratch comes from `workspace`; the function performs
 /// no allocation and dispatches neither the system nor the method dynamically.
