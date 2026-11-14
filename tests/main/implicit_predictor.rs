@@ -1,7 +1,7 @@
 //! The explicit-Euler predictor seeds Newton and is never the accepted step.
 //!
 //! For `y' = -r·y` with `a = h·r` the predictor is `(1 - a)·y_n` and its
-//! residual is `a²·y_n`, which an absolute tolerance accepts for a small
+//! residual is `-a²·y_n`, which an absolute tolerance accepts for a small
 //! `y_n` although `|1 - a| > 1` grows the decaying mode. The accepted step
 //! must be the backward-Euler value `y_n / (1 + a)`.
 
