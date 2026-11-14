@@ -389,20 +389,31 @@ verified; each carries its own acceptance oracle.
   then run this oracle.
 
 <a id="h-implicit-predictor-accept"></a>
-### H-IMPLICIT-PREDICTOR-ACCEPT — Stop accepting an uncorrected predictor [patch] — status: todo
+### H-IMPLICIT-PREDICTOR-ACCEPT — Bound stiff f32 growth after the correction [patch] — status: todo
 
-- Priority: correctness; milestone: M-coherence; needs: none; basis: `82e483cb6c`.
-- Outcome: `step_implicit_into` never grows a decaying linear mode, and its `Method`
-  argument either selects behaviour or is not an open extension point.
-- Evidence: `src/integration/implicit.rs:196-235` tests the absolute residual at the
-  explicit-Euler predictor before any Newton correction: y' = λy, λ = -1e4, h = 0.01,
-  y_n = 1e-12, tol 1e-6 gives y_(n+1) = -9.9e-11 (backward Euler 9.9e-15) after 2
-  evaluations. `_method` (:176) is unread while `ImplicitMethod` is exported and unsealed.
-- Oracle: a test on that case asserts |y_(n+1)| <= |y_n| and the backward-Euler value within
-  a derived bound; the acceptance rule is documented with its derivation; `ImplicitMethod`
-  is sealed or dispatched on.
-- Scope: `src/integration/implicit.rs`, `src/system/implicit.rs`, `tests/main/`.
-- Next: add the failing test, derive a scale-relative acceptance rule, seal the trait.
+- Priority: correctness; milestone: M-coherence; needs: none; basis: `e70b02b72d`.
+- Outcome: `step_implicit_into` never grows a decaying linear mode at any stiffness. The
+  mandatory correction is delivered; the accepted error still scales with the predictor,
+  `4*eps*(|1-a|+1)*|y_n|`.
+- Oracle: f32, `y' = -r*y`, `BackwardEuler`, h = 0.01, tol 1e-6, r in {1e8, 3e8, 1e9, 3e9,
+  1e10, 3e10}, y_n in {1e-16, 3e-16, 1e-15, 1e-14}: `|y_(n+1)| <= |y_n|` in all 24 cases
+  (4 grow at base, worst ratio 7.1054273 at r = 1e10, y_n = 1e-15).
+- Scope: `src/integration/implicit.rs`, `tests/main/implicit_predictor.rs`.
+- Next: derive an iterate-scaled Newton-increment acceptance test (Hairer-Wanner IV.8), add
+  the probe as a value-semantic test.
+
+<a id="h-implicit-seal"></a>
+### H-IMPLICIT-SEAL — Seal ImplicitMethod [major] — status: todo
+
+- Priority: architecture; milestone: M-stability; needs: none; basis: `e70b02b72d`.
+- Outcome: `ImplicitMethod` is sealed, since `BackwardEuler` is the only implementor and
+  `step_implicit_into` reads no method behaviour.
+- Oracle: a `compile_fail` doctest rejects a downstream impl; the delivering commit subject
+  carries `!` with a `BREAKING CHANGE:` footer; an ADR record states the migration note;
+  `cargo semver-checks` against `horae-time` 0.2.2 reports major (`trait_newly_sealed`,
+  `trait_added_supertrait`).
+- Scope: `src/integration/implicit.rs`, `docs/adr/`.
+- Next: reuse the crate seal in `src/integration/tableau/model.rs` rather than add a second.
 
 <a id="h-rk5-cost-claim"></a>
 ### H-RK5-COST-CLAIM — Source or drop the rk5 cost generalization [patch] — status: todo

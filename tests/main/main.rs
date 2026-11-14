@@ -13,6 +13,7 @@ mod allocation;
 mod embedded;
 mod fixed_step;
 mod implicit_nonfinite;
+mod implicit_predictor;
 mod implicit_step;
 mod implicit_system;
 mod layout;
