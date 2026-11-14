@@ -171,13 +171,29 @@ where
 /// exact Jacobian (the residual is affine), so one mandatory correction
 /// restores the backward-Euler value up to rounding. The rounding error
 /// scales with the predictor magnitude, not with the result: for a decoupled
-/// decay with `a = −z` it is at most `4·ε·(|1 − a| + 1)·|y_n|`, with `ε` the
-/// machine epsilon of `T`. That bound is below `|y_n|` only while
+/// decay with `a = −z`, and without underflow (`y_n` and every intermediate
+/// in the normal range of `T`), it is at most `4·ε·(|1 − a| + 1)·|y_n|`, with
+/// `ε` the machine epsilon of `T`. That bound is below `|y_n|` only while
 /// `a` is well under `1 / (4·ε)` (about `2·10⁶` in `f32`); beyond it an
 /// accepted step can exceed `|y_n|` in magnitude or flip its sign even
 /// though the residual is within `tolerance`, so the non-growth of a
 /// decaying mode is not guaranteed for such stiffness. Coupled systems have
-/// no per-component statement. On a nonlinear system the accepted iterate
+/// no per-component statement.
+///
+/// Subnormal contract: the routine relies on IEEE 754 gradual underflow and
+/// states nothing under flush-to-zero. A result below the smallest positive
+/// normal value `m` of `T` rounds to the subnormal spacing `δ = ε·m` (`2⁻¹⁴⁹`
+/// in `f32`, `2⁻¹⁰⁷⁴` in `f64`), so it carries an absolute error of at most
+/// `δ/2` in place of a relative one, while a sum or difference with a
+/// subnormal result is exact. For a decoupled decay three roundings after the
+/// predictor can fall there: the product `r·y`, its scaling by the step `h`,
+/// and the division by `1 + a`. With `h` in base units the bound therefore
+/// becomes, to first order in `ε`,
+/// `4·ε·(|1 − a| + 1)·|y_n| + (2 + h)·δ/2`. For `y_n` of the order of `δ`
+/// the absolute term dominates, so an accepted step can differ from
+/// `y_n / (1 + a)` by a spacing or more however small `y_n` is.
+///
+/// On a nonlinear system the accepted iterate
 /// has residual within `tolerance` after a correction, so choose `tolerance`
 /// well below the magnitude of the state components it must resolve.
 ///
