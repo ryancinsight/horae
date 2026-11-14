@@ -383,7 +383,8 @@ verified; each carries its own acceptance oracle.
   prints nothing (7 hits at filing); explicit stability text gives derived real-λ intervals
   (RK4 `[-2.785, 0]`, Euler and Midpoint `[-2, 0]`); BackwardEuler text claims only the residual
   bound the code tests, `|(1-z)y_(n+1) - y_n| <= tol` up to rounding, with no `1/(1-z)` multiplier
-  or non-growth until H-IMPLICIT-PREDICTOR-ACCEPT lands; `stack_position.md` names `ImplicitWorkspace::new` beside `StepWorkspace` as allocating; `mdbook test docs/book` passes.
+  or non-growth until H-IMPLICIT-PREDICTOR-ACCEPT lands; `stack_position.md` names
+  `ImplicitWorkspace::new` beside `StepWorkspace` as allocating; `mdbook test docs/book` passes.
 - Next: port the four book commits on `refs/pull/121/head`, cure their verdict-3 GATING 1 and 2,
   then run this oracle.
 
@@ -391,9 +392,9 @@ verified; each carries its own acceptance oracle.
 ### H-IMPLICIT-PREDICTOR-ACCEPT — Bound stiff f32 growth after the correction [patch] — status: todo
 
 - Priority: correctness; milestone: M-coherence; needs: none; basis: `e70b02b72d`.
-- Outcome: `step_implicit_into` never grows a decaying linear mode at any stiffness, or its
-  Rustdoc states the validity range. The mandatory correction is delivered; the accepted
-  error still scales with the predictor, `4*eps*(|1-a|+1)*|y_n|`.
+- Outcome: `step_implicit_into` never grows a decaying linear mode at any stiffness. The
+  mandatory correction is delivered; the accepted error still scales with the predictor,
+  `4*eps*(|1-a|+1)*|y_n|`.
 - Oracle: f32, `y' = -r*y`, `BackwardEuler`, h = 0.01, tol 1e-6, r in {1e8, 3e8, 1e9, 3e9,
   1e10, 3e10}, y_n in {1e-16, 3e-16, 1e-15, 1e-14}: `|y_(n+1)| <= |y_n|` in all 24 cases
   (4 grow at base, worst ratio 7.1054273 at r = 1e10, y_n = 1e-15).
@@ -405,11 +406,12 @@ verified; each carries its own acceptance oracle.
 ### H-IMPLICIT-SEAL — Seal ImplicitMethod [major] — status: todo
 
 - Priority: architecture; milestone: M-stability; needs: none; basis: `e70b02b72d`.
-- Outcome: `ImplicitMethod` is sealed or dispatched on, since `BackwardEuler` is the only
-  implementor and `step_implicit_into` reads no method behaviour.
+- Outcome: `ImplicitMethod` is sealed, since `BackwardEuler` is the only implementor and
+  `step_implicit_into` reads no method behaviour.
 - Oracle: a `compile_fail` doctest rejects a downstream impl; the delivering commit subject
   carries `!` with a `BREAKING CHANGE:` footer; an ADR record states the migration note;
-  `cargo semver-checks` against `horae-time` 0.2.2 reports the class.
+  `cargo semver-checks` against `horae-time` 0.2.2 reports major (`trait_newly_sealed`,
+  `trait_added_supertrait`).
 - Scope: `src/integration/implicit.rs`, `docs/adr/`.
 - Next: reuse the crate seal in `src/integration/tableau/model.rs` rather than add a second.
 
