@@ -382,27 +382,10 @@ verified; each carries its own acceptance oracle.
 - Oracle: `git grep -n -i -E "[2].8 times CFL|[m]oderately larger|[r]ough, nonlinear dynamics only|[o]r stiff dynamics|[m]oderately stiff|[s]tiff system might take|[s]tiffness limits, and implicit" -- docs/book`
   prints nothing (7 hits at filing); explicit stability text gives derived real-λ intervals
   (RK4 `[-2.785, 0]`, Euler and Midpoint `[-2, 0]`); BackwardEuler text claims only the residual
-  bound the code tests, `|(1-z)y_(n+1) - y_n| <= tol` up to rounding, with no `1/(1-z)` multiplier
-  or non-growth until H-IMPLICIT-PREDICTOR-ACCEPT lands; `stack_position.md` names
-  `ImplicitWorkspace::new` beside `StepWorkspace` as allocating; `mdbook test docs/book` passes.
+  bound the code tests, `|(1-z)y_(n+1) - y_n| <= tol` up to rounding, with no `1/(1-z)` multiplier;
+  `stack_position.md` names `ImplicitWorkspace::new` beside `StepWorkspace` as allocating; `mdbook test docs/book` passes.
 - Next: port the four book commits on `refs/pull/121/head`, cure their verdict-3 GATING 1 and 2,
   then run this oracle.
-
-<a id="h-implicit-predictor-accept"></a>
-### H-IMPLICIT-PREDICTOR-ACCEPT — Stop accepting an uncorrected predictor [patch] — status: todo
-
-- Priority: correctness; milestone: M-coherence; needs: none; basis: `82e483cb6c`.
-- Outcome: `step_implicit_into` never grows a decaying linear mode, and its `Method`
-  argument either selects behaviour or is not an open extension point.
-- Evidence: `src/integration/implicit.rs:196-235` tests the absolute residual at the
-  explicit-Euler predictor before any Newton correction: y' = λy, λ = -1e4, h = 0.01,
-  y_n = 1e-12, tol 1e-6 gives y_(n+1) = -9.9e-11 (backward Euler 9.9e-15) after 2
-  evaluations. `_method` (:176) is unread while `ImplicitMethod` is exported and unsealed.
-- Oracle: a test on that case asserts |y_(n+1)| <= |y_n| and the backward-Euler value within
-  a derived bound; the acceptance rule is documented with its derivation; `ImplicitMethod`
-  is sealed or dispatched on.
-- Scope: `src/integration/implicit.rs`, `src/system/implicit.rs`, `tests/main/`.
-- Next: add the failing test, derive a scale-relative acceptance rule, seal the trait.
 
 <a id="h-rk5-cost-claim"></a>
 ### H-RK5-COST-CLAIM — Source or drop the rk5 cost generalization [patch] — status: todo
