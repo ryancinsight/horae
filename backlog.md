@@ -53,6 +53,22 @@ to the original old-provider head and does not certify this rebased head.
 - Local verification: 43 native tests pass with zero skips; all configured native/docs/MSRV checks, the public consumer and current supply-chain policy pass. All 74 registry lock records remain unchanged.
 - Acceptance: renew fresh graph and external-consumer, native/docs/MSRV/supply-chain, API and package checks; exact-head independent review and publication-scope acceptance remain held. The absent registry name has no published API baseline. No merge, upload, tag, service deployment or credential change is performed. Existing release and owner/service holds remain separate.
 
+<a id="h-implicit-doc-drift"></a>
+## H-IMPLICIT-DOC-DRIFT — Reconcile documents with the shipped BackwardEuler [patch] — todo
+
+- Priority: verification; milestone: M-coherence; needs: none; basis: `82e483cb6c`.
+- Outcome: no document disowns the shipped `BackwardEuler` (`src/integration/implicit.rs`;
+  tests `implicit_step`, `robertson`), and ADR 0002 carries a decided status.
+- Oracle, each failing at filing: (1) `git grep -n -i -E "[n]onlinear or implicit solvers|[s]econd concret[e]|[i]mplicit, or IMEX surface|[d]efers implicit|[s]tiff/implicit stepping|[i]mplicit-integration claim|[e]xplicit-policy-only|[d]amped Newton|[n]o speculative implicit" -- README.md checklist.md gap_audit.md backlog.md docs`
+  prints nothing; (2) ADR 0001 Consequences no longer lists implicit integration as
+  absent (its dated revision note may name it); (3) the ADR 0002 row of `docs/adr/README.md`
+  reads Accepted or Rejected.
+- Scope: `README.md` boundary; `checklist.md` implicit entries; ADR 0001 Consequences (shared
+  with H-ADR-STALE-006); ADR 0002 Decision (calls the full Newton correction damped);
+  `gap_audit.md` integrator set, notes, row H-002; this file's deferred entry; `stack_position.md:84-86`.
+- Next: decide the ADR 0002 status (recommended: Accepted as built, with a dated revision
+  note), then correct every site in one change. Prior work: PR 121's head, `refs/pull/121/head`.
+
 ## H-ORDER-002 — Verify stage-time coefficients `verification` `patch` — in progress
 
 - milestone: M-coherence.
@@ -356,30 +372,65 @@ verified; each carries its own acceptance oracle.
 - Evidence the clauses bite at both widths: expecting a `2^5` ratio of `31.9`
   instead of `32.0` fails the test.
 
-### H-STAB-DOC-005 — Remove or source the book stability constants [patch] — status: todo
+<a id="h-stab-doc-005"></a>
+### H-STAB-DOC-005 — Derive the book stability statements [patch] — status: todo
 
-- Outcome: no unsourced numerical stability claim remains in a repository that
-  declares stability and CFL criteria out of scope (`README.md` Boundary,
-  ADR 0001 "Move equations or CFL policy into Horae").
-- Scope: `docs/book/rk4.md`. Non-goals: no stability API.
-- Acceptance oracle: `docs/book/rk4.md:226` ("approximately 2.8 times CFL
-  compared to forward Euler") and `:161` ("moderately larger than Euler") are
-  either deleted or replaced with a cited real-axis stability-interval
-  statement carrying its source; `mdbook test docs/book` still passes.
-- Dependencies: none. Risk/change class: [docs] [patch]. Effort S.
-- Note: the classical RK4 real-axis stability interval is approximately
-  `[-2.785, 0]` and forward Euler's is `[-2, 0]`, so the stated figure is the
-  RK4 boundary itself, not a ratio to Euler, while the sentence asserts a
-  ratio. A correct replacement needs a citation, so this was not fixed in the
-  audit pass.
+- Priority: verification; milestone: M-coherence; needs: none; basis: `82e483cb6c`.
+- Outcome: the book's stability and stiffness text is derived and true against the code.
+- Scope: `docs/book/rk4.md` (stability lines, Method Selection); `subcycling.md` multi-rate
+  paragraph; `stack_position.md:31` and its allocation paragraph. Non-goal: no stability API.
+- Oracle: `git grep -n -i -E "[2].8 times CFL|[m]oderately larger|[r]ough, nonlinear dynamics only|[o]r stiff dynamics|[m]oderately stiff|[s]tiff system might take|[s]tiffness limits, and implicit" -- docs/book`
+  prints nothing (7 hits at filing); explicit stability text gives derived real-λ intervals
+  (RK4 `[-2.785, 0]`, Euler and Midpoint `[-2, 0]`); BackwardEuler text claims only the residual
+  bound the code tests, `|(1-z)y_(n+1) - y_n| <= tol` up to rounding, with no `1/(1-z)` multiplier
+  or non-growth until H-IMPLICIT-PREDICTOR-ACCEPT lands; `stack_position.md` names
+  `ImplicitWorkspace::new` beside `StepWorkspace` as allocating; `mdbook test docs/book` passes.
+- Next: port the four book commits on `refs/pull/121/head`, cure their verdict-3 GATING 1 and 2,
+  then run this oracle.
+
+<a id="h-implicit-predictor-accept"></a>
+### H-IMPLICIT-PREDICTOR-ACCEPT — Stop accepting an uncorrected predictor [patch] — status: todo
+
+- Priority: correctness; milestone: M-coherence; needs: none; basis: `82e483cb6c`.
+- Outcome: `step_implicit_into` never grows a decaying linear mode, and its `Method`
+  argument either selects behaviour or is not an open extension point.
+- Evidence: `src/integration/implicit.rs:196-235` tests the absolute residual at the
+  explicit-Euler predictor before any Newton correction: y' = λy, λ = -1e4, h = 0.01,
+  y_n = 1e-12, tol 1e-6 gives y_(n+1) = -9.9e-11 (backward Euler 9.9e-15) after 2
+  evaluations. `_method` (:176) is unread while `ImplicitMethod` is exported and unsealed.
+- Oracle: a test on that case asserts |y_(n+1)| <= |y_n| and the backward-Euler value within
+  a derived bound; the acceptance rule is documented with its derivation; `ImplicitMethod`
+  is sealed or dispatched on.
+- Scope: `src/integration/implicit.rs`, `src/system/implicit.rs`, `tests/main/`.
+- Next: add the failing test, derive a scale-relative acceptance rule, seal the trait.
+
+<a id="h-rk5-cost-claim"></a>
+### H-RK5-COST-CLAIM — Source or drop the rk5 cost generalization [patch] — status: todo
+
+- Priority: verification; milestone: M-coherence; needs: none; basis: `82e483cb6c`.
+- Outcome: `docs/book/rk5.md:103-104` no longer asserts that stiff or expensive right-hand
+  sides usually make the seventh evaluation a material cost without a source.
+- Oracle: the clause is removed or cites a measurement; `mdbook test docs/book` passes.
+- Scope: `docs/book/rk5.md`.
+- Next: delete the clause; the following sentence already says nothing measures it.
+
+<a id="h-nonfinite-dangling-id"></a>
+### H-NONFINITE-DANGLING-ID — Resolve the verification note's item reference [patch] — status: todo
+
+- Priority: verification; milestone: M-coherence; needs: none; basis: `82e483cb6c`.
+- Outcome: `docs/verification/implicit-nonfinite.md:51` cites an item that exists on this
+  board, or states its open dyadic final-correction defect without an ID.
+- Oracle: every board ID cited under `docs/verification/` resolves to a heading in this file.
+- Scope: `docs/verification/implicit-nonfinite.md`, this file.
+- Next: reproduce the cited fixture; file it as an item or close it with evidence.
 
 ### H-ADR-STALE-006 — Revise ADR 0001 for the delivered embedded pair [patch] — status: todo
 
 - Outcome: the one current record of the time-integration boundary decision
   matches the delivered surface.
 - Scope: `docs/adr/0001-time-integration-boundary.md`, `docs/adr/README.md`.
-  Non-goals: no boundary change; the implicit and dense-output exclusions
-  stand.
+  Non-goals: no boundary change; the dense-output exclusion stands. The
+  implicit exclusion is retired by H-IMPLICIT-DOC-DRIFT.
 - Acceptance oracle: the Consequences sentence listing "Adaptive embedded-pair
   estimation, dense output, implicit integration, and device-resident stage
   storage" as absent is rewritten in place to record the delivered embedded
