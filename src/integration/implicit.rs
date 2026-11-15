@@ -10,11 +10,43 @@ use crate::time::{Instant, StepSize, TimeError};
 
 use super::{SliceRole, StepReport, WorkspaceError, error::ensure_dimension};
 
-/// Nominal bound on Newton iterations before the step is declared
-/// non-convergent. Backward Euler's Newton is contractive once the iterate is
-/// near the solution, so the bound is a guard against a divergent predictor,
-/// not a tuning knob.
+/// Bound on the Newton iterations of one step before it is declared
+/// non-convergent.
+///
+/// Corrections and the repetitions of a correction rejected below its rounding
+/// floor (see [`CORRECTION_FLOOR_UNITS`]) share this one budget. Backward
+/// Euler's Newton is contractive once the iterate is near the solution, so the
+/// bound is a guard against a divergent predictor, not a tuning knob. The
+/// correction made in the last iteration is not tested against the residual;
+/// that gap is tracked as `H-IMPLICIT-LAST-20261020`
+/// (`docs/verification/implicit-nonfinite.md`).
 const MAX_NEWTON_ITERATIONS: usize = 16;
+
+/// Twice the rounding multiple `3·ε` of one Newton correction.
+///
+/// For a decoupled decay `y' = −r·y` with `a = h·r`, unit roundoff `u = ε/2`,
+/// start `x`, increment `Δ`, result `y = x + Δ` and step start `y_n`, to
+/// first order in `u` and in the normal range:
+///
+/// - the residual `g = y − y_n − h·f(y)` evaluated at `x` carries at most
+///   `u·((3a + 2)·|x| + 2·|y_n|)` of rounding: `2a·|x|` from the product
+///   `r·x` and its scaling by `h`, `|x| + |y_n|` from the difference
+///   `x − y_n`, and `(1 + a)·|x| + |y_n|` from the final subtraction;
+/// - the correction `Δ = −g/(1 + a)` inherits `u·(3·|x| + 2·|y_n|)` of that,
+///   since `(3a + 2)/(1 + a) <= 3`, and adds `3u·|Δ|` for the rounded matrix
+///   entry `1 − h·(−r)` (two roundings) and the division (one);
+/// - the sum `x + Δ` adds `u·|y|`.
+///
+/// With `|x| <= |Δ| + |y|` the total is at most
+/// `u·(6·|Δ| + 4·|y| + 2·|y_n|)`, which is below `6u·(|Δ| + |y| + |y_n|)`,
+/// that is `3ε` times the sum `S = |Δ| + |y| + |y_n|`. Requiring `3ε·S` to be
+/// at most half the component's scale makes the test `6ε·S <= scale`, whose
+/// left side is this constant times `ε` times `S`.
+///
+/// Each term is scaled by `6·ε`, which is below one, before the three are
+/// summed: no term exceeds its operand, so the floor is finite whenever the
+/// operands are, including near the largest finite value of `T`.
+const CORRECTION_FLOOR_UNITS: f64 = 6.0;
 
 /// Compile-time marker for an implicit one-step method.
 pub trait ImplicitMethod {
@@ -170,15 +202,38 @@ where
 /// Newton's method is exact in one correction on a linear system with an
 /// exact Jacobian (the residual is affine), so one mandatory correction
 /// restores the backward-Euler value up to rounding. The rounding error
-/// scales with the predictor magnitude, not with the result: for a decoupled
-/// decay with `a = −z`, and without underflow (`y_n` and every intermediate
-/// in the normal range of `T`), it is at most `4·ε·(|1 − a| + 1)·|y_n|`, with
-/// `ε` the machine epsilon of `T`. That bound is below `|y_n|` only while
-/// `a` is well under `1 / (4·ε)` (about `2·10⁶` in `f32`); beyond it an
-/// accepted step can exceed `|y_n|` in magnitude or flip its sign even
-/// though the residual is within `tolerance`, so the non-growth of a
-/// decaying mode is not guaranteed for such stiffness. Coupled systems have
-/// no per-component statement.
+/// scales with the magnitude of the iterate `x` the correction starts from,
+/// not with the result: for a decoupled decay with `a = −z`, and without
+/// underflow (`y_n` and every intermediate in the normal range of `T`), one
+/// correction with increment `Δ` and result `y` leaves at most
+/// `3·ε·(|Δ| + |y| + |y_n|)` of error against the backward-Euler value
+/// `y_n / (1 + a)`, to first order in `ε`, with `ε` the machine epsilon of
+/// `T` (the derivation is at `CORRECTION_FLOOR_UNITS`). From the predictor
+/// `|Δ|` is `|1 − a|·|y_n|` up to rounding, so the error reaches `|y_n|` once
+/// `a` is of order `1 / (3·ε)` (about `3·10⁶` in `f32`): the correction
+/// cancels a predictor far larger than the result.
+///
+/// A correction is therefore accepted only above its own rounding floor.
+/// After each correction, with `Δ` the increment and `y` the new iterate, the
+/// routine requires in every component
+/// `6·ε·(|Δ| + |y| + |y_n|) <= max(|y_n|, |y|)`, with each term scaled before
+/// the sum so that the test does not overflow for finite operands. The left
+/// side is twice the rounding bound `3·ε·(|Δ| + |y| + |y_n|)` of the
+/// correction, so the accepted error is at most half the component's scale.
+/// Half is the margin a decaying mode needs: for `a >= 1` the exact value is
+/// at most `|y_n| / 2`, and an error of at most half of `max(|y_n|, |y|)`
+/// forces `|y| <= |y_n|` (if `|y| > |y_n|` then `|y| <= |y_n| / 2 + |y| / 2`
+/// gives `|y| <= |y_n|`, a contradiction). A rejected correction is repeated
+/// from the new, much smaller iterate, whose rounding floor is `ε` times
+/// smaller; each repetition costs one residual evaluation, one Jacobian and
+/// one factorization. Components with `a < 1` keep the error bound but are
+/// not covered by the non-growth statement, since their exact value exceeds
+/// half of `|y_n|`.
+///
+/// The statement holds for a decoupled decay, first order in `ε` and in the
+/// normal range. Coupled systems have no per-component bound: the
+/// increment test is an estimate of the rounding floor and the Newton
+/// matrix's conditioning is not part of it.
 ///
 /// Subnormal contract: the routine relies on IEEE 754 gradual underflow and
 /// states nothing under flush-to-zero. A result below the smallest positive
@@ -186,10 +241,10 @@ where
 /// in `f32`, `2⁻¹⁰⁷⁴` in `f64`), so it carries an absolute error of at most
 /// `δ/2` in place of a relative one, while a sum or difference with a
 /// subnormal result is exact. For a decoupled decay three roundings after the
-/// predictor can fall there: the product `r·y`, its scaling by the step `h`,
+/// iterate can fall there: the product `r·y`, its scaling by the step `h`,
 /// and the division by `1 + a`. With `h` in base units the bound therefore
 /// becomes, to first order in `ε`,
-/// `4·ε·(|1 − a| + 1)·|y_n| + (2 + h)·δ/2`. For `y_n` of the order of `δ`
+/// `3·ε·(|Δ| + |y| + |y_n|) + (2 + h)·δ/2`. For `y_n` of the order of `δ`
 /// the absolute term dominates, so an accepted step can differ from
 /// `y_n / (1 + a)` by a spacing or more however small `y_n` is.
 ///
@@ -249,6 +304,9 @@ where
     let mut evaluations = 1usize;
     let mut converged = false;
     let mut corrected = false;
+    // Whether the last correction lies above its own rounding floor.
+    let mut resolved = false;
+    let floor_unit = T::from_f64(CORRECTION_FLOOR_UNITS) * T::EPSILON;
     for _ in 0..MAX_NEWTON_ITERATIONS {
         evaluations += 1;
 
@@ -275,8 +333,9 @@ where
                 residual_norm = magnitude;
             }
         }
-        // The predictor is never accepted: see the acceptance rule above.
-        if corrected && residual_norm <= tolerance {
+        // Neither the predictor nor a correction below its rounding floor is
+        // accepted: see the acceptance rule above.
+        if corrected && resolved && residual_norm <= tolerance {
             converged = true;
             break;
         }
@@ -304,9 +363,18 @@ where
         solve_dense(&mut workspace.jacobian, &mut workspace.residual)
             .map_err(ImplicitStepError::Solve)?;
 
-        // Apply the correction, now held in the residual buffer as Δy.
-        for (prediction, correction) in output.iter_mut().zip(&workspace.residual) {
+        // Apply the correction, now held in the residual buffer as Δy, and
+        // test it against the rounding floor of its own computation.
+        resolved = true;
+        for ((prediction, correction), initial) in
+            output.iter_mut().zip(&workspace.residual).zip(state)
+        {
             *prediction += *correction;
+            let scale = initial.abs().max(prediction.abs());
+            let floor = floor_unit * correction.abs()
+                + floor_unit * prediction.abs()
+                + floor_unit * initial.abs();
+            resolved &= floor <= scale;
         }
         corrected = true;
     }
