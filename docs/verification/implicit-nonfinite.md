@@ -51,14 +51,22 @@ oracle, remain byte-identical.
 The final-correction defect remains open and is tracked as
 `H-IMPLICIT-LAST-CORRECTION` on the backlog: the sixteenth Newton correction
 is applied but its iterate is never tested against the residual tolerance, and
-this guard does not change iteration placement or budget. A public-API
-reproducer runs `y' = -50·y` in `f64` with the Jacobian reported as zero,
-`h = 0.01` and `y_n = 1`. The residual after `k` corrections is `2^-(k+2)`.
-Tolerance `1e-5` returns `Ok` after 17 evaluations; tolerance `5e-6` returns
-`NonConvergence` although the output left in the buffer has residual
-magnitude `2^-18`, below that tolerance. The earlier dyadic fixture, with
-output `2^-18`, residual `2^-36` and tolerance `2^-36`, comes from a private
-evidence receipt and is not reproduced here.
+this guard does not change iteration placement or budget. Two fixtures show
+the defect through the public API; neither is committed as a test, and the
+oracle of the item describes the first.
+
+- `y' = -50·y` in `f64` with the Jacobian reported as zero, `h = 0.01` and
+  `y_n = 1`. The residual after `k` corrections is `2^-(k+2)`. Tolerance
+  `1e-5` returns `Ok` after 17 evaluations; tolerance `5e-6` returns
+  `NonConvergence` although the output left in the buffer has residual
+  magnitude `2^-18`, below that tolerance.
+- `y_n = 1/2`, `h = 1`, `f(y) = y - 1/2 - y²` with Jacobian `1 - 2y`, in
+  `f64`. The residual is `g(y) = y²` and the Newton matrix is `2y`, so each
+  correction halves the iterate from the predictor `1/4`: after `k`
+  corrections `y = 2^-(k+2)` and `g = 2^-(2k+4)`, exactly in binary
+  arithmetic. Tolerance `2^-34` returns `Ok` after 17 evaluations; tolerance
+  `2^-36` returns `NonConvergence` with output `2^-18`, whose residual
+  `2^-36` meets the tolerance.
 
 Exact baseline/candidate identities, regression hashes, native/lint/docs,
 MSRV/API/package and preservation controls are recorded with the private

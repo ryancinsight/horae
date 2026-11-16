@@ -198,8 +198,13 @@ fn verify_scalar<T: RealField>() {
 /// correction is accepted at `a·ε = 1/32` (`6ε·a = 0.19`) and `1/8` (`0.75`)
 /// and rejected from `a·ε = 1/4` (`1.5`), where a rule with factor 3 would
 /// accept at `0.75` and a rule with factor 12 would reject at `1.5` already
-/// at `1/8`. From `a·ε = 1` (`6ε·a = 6`) onward `|y| <= 4·|y_n|`; the second
-/// correction starts at a magnitude `ε·a·|y_n|` and meets the rule up to the
+/// at `1/8`. From `a·ε = 1` (`6ε·a = 6`) the first iterate satisfies
+/// `|y| <= |y_n|/(1 + a) + 3ε·|y_n|·(a + 2/(1 + a))`, which is at most
+/// `4ε·a·|y_n|` there since `(1 + 6ε)/(1 + a) <= ε·a`. That bound exceeds
+/// `|y_n|` beyond about `a·ε = 1/3` and grows with `a`. The second correction
+/// starts from the iterate, with `|Δ| <= |x| + |y|`, so the left side of the
+/// rule is at most about `6ε·(4ε·a + 1)·|y_n|`, below the scale `|y_n|` while
+/// `a·ε` stays under `1/(24ε)` (about `3.5·10⁵` in `f32`). That covers the
 /// largest multiple of the grid, `a·ε = 2^10`.
 ///
 /// The states are `s·ε` for `s` in `1e-8..1e-9`, so that the residual left by
