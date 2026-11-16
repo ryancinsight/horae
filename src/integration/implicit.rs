@@ -17,9 +17,9 @@ use super::{SliceRole, StepReport, WorkspaceError, error::ensure_dimension};
 /// floor (see [`CORRECTION_FLOOR_UNITS`]) share this one budget. Backward
 /// Euler's Newton is contractive once the iterate is near the solution, so the
 /// bound is a guard against a divergent predictor, not a tuning knob. The
-/// correction made in the last iteration is not tested against the residual;
-/// that gap is tracked as `H-IMPLICIT-LAST-20261020`
-/// (`docs/verification/implicit-nonfinite.md`).
+/// correction made in the last iteration is not tested against the residual,
+/// so a step that satisfies the tolerance only after that correction is
+/// reported as non-convergent (`docs/verification/implicit-nonfinite.md`).
 const MAX_NEWTON_ITERATIONS: usize = 16;
 
 /// Twice the rounding multiple `3·ε` of one Newton correction.
@@ -43,9 +43,12 @@ const MAX_NEWTON_ITERATIONS: usize = 16;
 /// at most half the component's scale makes the test `6ε·S <= scale`, whose
 /// left side is this constant times `ε` times `S`.
 ///
-/// Each term is scaled by `6·ε`, which is below one, before the three are
-/// summed: no term exceeds its operand, so the floor is finite whenever the
-/// operands are, including near the largest finite value of `T`.
+/// Each term is scaled by `6·ε` before the three are summed. With `MAX` the
+/// largest finite value of `T`, every scaled term of a finite operand is at
+/// most `6·ε·MAX`, so the sum is at most `18·ε·MAX`, which is below `MAX`
+/// because `18·ε < 1`. The floor is therefore finite for finite operands,
+/// including near `MAX`, where summing the three operands first would
+/// overflow.
 const CORRECTION_FLOOR_UNITS: f64 = 6.0;
 
 /// Compile-time marker for an implicit one-step method.
@@ -209,9 +212,13 @@ where
 /// `3·ε·(|Δ| + |y| + |y_n|)` of error against the backward-Euler value
 /// `y_n / (1 + a)`, to first order in `ε`, with `ε` the machine epsilon of
 /// `T` (the derivation is at `CORRECTION_FLOOR_UNITS`). From the predictor
-/// `|Δ|` is `|1 − a|·|y_n|` up to rounding, so the error reaches `|y_n|` once
-/// `a` is of order `1 / (3·ε)` (about `3·10⁶` in `f32`): the correction
-/// cancels a predictor far larger than the result.
+/// `(1 − a)·y_n`, whose residual is `−a²·y_n`, the first increment is, in
+/// exact arithmetic, `|Δ| = a²·|y_n| / (1 + a)` (the residual divided by the
+/// Newton matrix `1 + a`), and `|y| = |y_n| / (1 + a)`. The bound is then
+/// `3·ε·|y_n|·(a + 2 / (1 + a))`, which is about `3·ε·a·|y_n|` for large
+/// `a`, so the error reaches `|y_n|` once `a` is of order `1 / (3·ε)` (about
+/// `3·10⁶` in `f32`): the correction cancels a predictor far larger than the
+/// result.
 ///
 /// A correction is therefore accepted only above its own rounding floor.
 /// After each correction, with `Δ` the increment and `y` the new iterate, the

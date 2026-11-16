@@ -412,15 +412,20 @@ verified; each carries its own acceptance oracle.
 - Scope: `docs/book/rk5.md`.
 - Next: delete the clause; the following sentence already says nothing measures it.
 
-<a id="h-nonfinite-dangling-id"></a>
-### H-NONFINITE-DANGLING-ID — Resolve the verification note's item reference [patch] — status: todo
+<a id="h-implicit-last-correction"></a>
+### H-IMPLICIT-LAST-CORRECTION — Test the final Newton correction against the tolerance [patch] — status: todo
 
-- Priority: verification; milestone: M-coherence; needs: none; basis: `82e483cb6c`.
-- Outcome: `docs/verification/implicit-nonfinite.md:51` cites an item that exists on this
-  board, or states its open dyadic final-correction defect without an ID.
-- Oracle: every board ID cited under `docs/verification/` resolves to a heading in this file.
-- Scope: `docs/verification/implicit-nonfinite.md`, this file.
-- Next: reproduce the cited fixture; file it as an item or close it with evidence.
+- Priority: correctness; milestone: M-coherence; needs: none; basis: `41c72e840b`.
+- Outcome: a step whose iterate after the sixteenth Newton correction meets the tolerance and
+  the rounding floor returns `Ok`; `step_implicit_into` applies that correction untested and
+  returns `NonConvergence` (`MAX_NEWTON_ITERATIONS` loop, `src/integration/implicit.rs`).
+- Oracle: `y' = -50·y`, `f64`, Jacobian reported as zero (Newton matrix `I`, error factor
+  `1/2` per correction), `h = 0.01`, `y_n = 1`, tolerance `5e-6`. The residual after `k`
+  corrections is `2^-(k+2)`: `2^-17` after the fifteenth, `2^-18` after the sixteenth. The
+  step returns `Ok` and fails at `41c72e840b` with `NonConvergence`; the 53 tests pass.
+- Scope: `src/integration/implicit.rs`, `tests/main/implicit_step.rs`,
+  `docs/verification/implicit-nonfinite.md`.
+- Next: test the iterate after the last correction before returning `NonConvergence`.
 
 ### H-ADR-STALE-006 — Revise ADR 0001 for the delivered embedded pair [patch] — status: todo
 

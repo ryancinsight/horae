@@ -5,9 +5,10 @@
 //! residual is `-a²·y_n`, which an absolute tolerance accepts for a small
 //! `y_n` although `|1 - a| > 1` grows the decaying mode. The accepted step
 //! must be the backward-Euler value `y_n / (1 + a)`. Once `a` is of order
-//! `1/(3·ε)` the correction itself cancels a predictor of magnitude `a·|y_n|`
-//! and its rounding error exceeds `|y_n|`, so a further correction from the
-//! now small iterate is required. The acceptance threshold `6·ε·a = 1` lies at
+//! `1/(3·ε)` the correction itself cancels a predictor of magnitude about
+//! `a·|y_n|` and its rounding error exceeds `|y_n|`, so a further correction
+//! from the now small iterate is required. The acceptance threshold `6·ε·a = 1`
+//! lies, for large `a`, at
 //! `a·ε = 1/6`: the cases below pin one correction at `a·ε = 1/8` and two at
 //! `a·ε = 1/4`.
 
@@ -96,8 +97,10 @@ fn accepted_error_bound<T: RealField>(a: T, initial: T, corrections: usize) -> T
     let units = T::from_f64(ROUNDING_UNITS) * T::EPSILON;
     let exact = (initial / (T::ONE + a)).abs();
     let mut start = (T::ONE - a).abs() * initial.abs();
-    // Each term is scaled by `units`, which is below one, before the sum, so
-    // that the bound is finite near the largest finite value of `T`.
+    // Each term is scaled by `units = 4·ε` before the sum. With `MAX` the
+    // largest finite value of `T`, a finite `start` and `initial` give terms of
+    // at most `4·ε·MAX` each, so the first bound is at most `8·ε·MAX`, below
+    // `MAX` because `8·ε < 1`; summing the operands first would overflow.
     let mut bound = units * start + units * initial.abs();
     for _ in 1..corrections {
         start = exact + bound;
@@ -186,11 +189,12 @@ fn verify_scalar<T: RealField>() {
 
 /// Stiffness `a = h·r` at multiples of `1/ε`, with `h = 0.01`.
 ///
-/// The first correction cancels a predictor of magnitude `a·|y_n|`, so its
-/// rounding error is `3ε·a·|y_n|` and exceeds `|y_n|` once `a` is of order
-/// `1/(3ε)`. The acceptance rule requires
-/// `6ε·(|Δ| + |y| + |y_n|) <= max(|y_n|, |y|)`, whose left side is `6ε·a·|y_n|`
-/// after the first correction. The threshold is `a·ε = 1/6`: the first
+/// The first correction has increment `|Δ| = a²·|y_n|/(1 + a)`, about
+/// `a·|y_n|`, and result `|y| = |y_n|/(1 + a)`, so its rounding error is at
+/// most `3ε·|y_n|·(a + 2/(1 + a))`, about `3ε·a·|y_n|` for large `a`, and
+/// reaches `|y_n|` once `a` is of order `1/(3ε)`. The acceptance rule requires
+/// `6ε·(|Δ| + |y| + |y_n|) <= max(|y_n|, |y|)`, whose left side is about
+/// `6ε·a·|y_n|` after the first correction. The threshold is `a·ε = 1/6`: the first
 /// correction is accepted at `a·ε = 1/32` (`6ε·a = 0.19`) and `1/8` (`0.75`)
 /// and rejected from `a·ε = 1/4` (`1.5`), where a rule with factor 3 would
 /// accept at `0.75` and a rule with factor 12 would reject at `1.5` already
@@ -199,8 +203,10 @@ fn verify_scalar<T: RealField>() {
 /// largest multiple of the grid, `a·ε = 2^10`.
 ///
 /// The states are `s·ε` for `s` in `1e-8..1e-9`, so that the residual left by
-/// one correction, `ε·a²·|y_n|`, stays below the tolerance `1e-6` at
-/// `a·ε = 1/4` and the residual test does not add a correction.
+/// one correction stays below the tolerance `1e-6` at `a·ε = 1/4` and the
+/// residual test does not add a correction. That residual is `1 + a` times the
+/// iterate error, so at most `3ε·(a² + a + 2)·|y_n|`, about `3ε·a²·|y_n|` for
+/// large `a`: `3·s·(a·ε)² = 3·1e-8/16 < 1.9e-9` at `s = 1e-8`.
 ///
 /// The stiff component is placed both first and last beside a quiescent
 /// one: the rule must hold in every component, so the component order does
