@@ -1,3 +1,7 @@
+[workspace]
+members = ["crates/horae-civil-time"]
+resolver = "3"
+
 [package]
 name = "horae-time"
 version = "0.2.2"
@@ -32,11 +36,14 @@ tracing-subscriber = { version = "0.3.23", default-features = false, features = 
 default = ["std"]
 std = ["aequitas/std", "eunomia/std"]
 
-[lints.rust]
+[lints]
+workspace = true
+
+[workspace.lints.rust]
 missing_docs = "deny"
 unsafe_code = "forbid"
 
-[lints.clippy]
+[workspace.lints.clippy]
 pedantic = { level = "deny", priority = -1 }
 
 # Pedantic floor: this crate is pedantic-clean. The census that established

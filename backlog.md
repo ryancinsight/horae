@@ -1,5 +1,17 @@
 # Horae backlog
 
+<a id="h-civil-time-001"></a>
+## H-CIVIL-TIME-001 — Supply Atlas dates and wall-clock timestamps [minor] — in progress
+
+- priority: architecture; milestone: M-coherence; scope: horae-civil-time 0.1.0 and first-party report consumers.
+- outcome: reuse Gregorian rules, exact UTC timestamps, and RFC 3339 records across RITK, Kwavers, CFDrs, and Hermes.
+- evidence: all six calendar and timestamp contract tests pass, including the
+  146,097-day Gregorian cycle and existing UTC JSON. Warning-denied all-feature
+  Clippy and the Rust 1.95 no-std serde build pass.
+- next: verify the isolated consumers and confirm fresh Git source resolution
+  when the provider commit is available to those consumers.
+
+
 <a id="h-provider-range-20261019"></a>
 ## H-PROVIDER-RANGE-20261019 — Current and next provider admission [patch] — blocked
 

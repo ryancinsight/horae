@@ -98,17 +98,17 @@ jobs:
           EOF
           rustup run "$toolchain" mdbook test docs/book -L target/booklibs
       - name: Feature check
-        run: cargo check --locked --no-default-features
+        run: cargo check --workspace --locked --no-default-features
       - name: Clippy
-        run: cargo clippy --locked --all-targets --all-features -- -D warnings
+        run: cargo clippy --workspace --locked --all-targets --all-features -- -D warnings
       - name: Native tests
-        run: cargo nextest run --locked --all-features
+        run: cargo nextest run --workspace --locked --all-features
       - name: Documentation tests
-        run: cargo test --locked --doc --all-features
+        run: cargo test --workspace --locked --doc --all-features
       - name: Documentation
         env:
           RUSTDOCFLAGS: -D warnings
-        run: cargo doc --locked --no-deps --all-features
+        run: cargo doc --workspace --locked --no-deps --all-features
       - name: Example
         run: cargo run --locked --example ordered_decay
 
@@ -143,7 +143,7 @@ jobs:
           rustc --version
           rustc --version | grep -q "${MSRV}" || { echo "::error::MSRV job is not running ${MSRV}"; exit 1; }
       - name: Build at the declared floor
-        run: cargo check --locked --all-features --all-targets
+        run: cargo check --workspace --locked --all-features --all-targets
 
   supply-chain:
     runs-on: ubuntu-latest
