@@ -1,5 +1,13 @@
 # Horae ownership gap audit
 
+## horae-time 0.3.0 registry verification
+
+The crates.io archive matches source `db90f6a7a6c27632692223ac1ca14c7fe26210d1`
+at tag `horae-time-v0.3.0`. Its SHA-256 matches the registry index.
+An independent consumer doubles a 0.125 s Aequitas time step to
+exactly 0.25 s and rejects a negative step.
+
+
 ## Registry provider release 0.3.0
 
 - Step sizes use Aequitas 0.4 quantities. The integration traits use Eunomia 0.12. Consumers upgrade the two providers together when they implement a system or construct a step size.
