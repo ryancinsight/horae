@@ -1,5 +1,10 @@
 # Horae checklist
 
+## Current release target horae-time 0.3.0
+
+- [ ] [major] Verify the API and normalized package for [ADR 0005](docs/adr/0005-registry-provider-release.md).
+- [ ] [major] Publish and verify an independent registry consumer.
+
 Active sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
 
 

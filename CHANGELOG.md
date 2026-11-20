@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+### Breaking
+
+- [major] Step sizes use Aequitas 0.4 quantities. The integration traits use Eunomia 0.12. Consumers upgrade the two providers together when they implement a system or construct a step size.
+
 All notable changes to Horae are documented in this file.
 
 ## Unreleased

@@ -1,5 +1,10 @@
 # Horae ownership gap audit
 
+## Registry provider release 0.3.0
+
+- Step sizes use Aequitas 0.4 quantities. The integration traits use Eunomia 0.12. Consumers upgrade the two providers together when they implement a system or construct a step size.
+- The release gate verifies the typed API, archived dependency baseline, and fresh consumer graph.
+
 ## Integration renewal — 2026-10-17 [patch]
 
 PR #101 integrates the coherent 0.2.0 provider tree at
