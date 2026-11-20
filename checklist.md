@@ -1,5 +1,11 @@
 # Horae checklist
 
+## Current release target horae-time 0.4.0
+
+- [x] [major] Select the published Aequitas 0.5 and Eunomia 0.12.1 provider identities.
+- [ ] [major] Verify the feature matrix, exact release API and normalized archive.
+- [ ] [major] Publish and verify the archive and fresh registry consumer.
+
 Active sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
 
 

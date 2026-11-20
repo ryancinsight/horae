@@ -1,5 +1,12 @@
 # Horae ownership gap audit
 
+## horae-time 0.4.0 provider release [major]
+
+The published 0.3.0 archive selects Aequitas 0.4. Release 0.4.0 uses
+Aequitas 0.5. Its Cargo package and consumer must agree on that source and
+version for the shared Rust types. The registry check covers the archive
+checksum, its Git revision, and the typed boundary.
+
 ## Integration renewal — 2026-10-17 [patch]
 
 PR #101 integrates the coherent 0.2.0 provider tree at
