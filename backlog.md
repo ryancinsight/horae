@@ -1,5 +1,11 @@
 # Horae backlog
 
+<a id="horae-stable-qualification"></a>
+## HORAE-STABLE-QUALIFICATION — horae stable-release qualification [patch] — todo
+- priority: verification; milestone: M-coherence; basis: `40196ff641c4`.
+- Outcome: Close the time-integration order and rejection evidence. Follow the [release scope](docs/adr/0004-release-scope-1-0.md) and [milestone exits](backlog/milestones.md).
+- Acceptance and sequence: [stable-release checklist](checklist.md#stable-release-checklist).
+
 <a id="h-provider-range-20261019"></a>
 ## H-PROVIDER-RANGE-20261019 — Current and next provider admission [patch] — blocked
 

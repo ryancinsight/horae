@@ -1,5 +1,14 @@
 # Horae checklist
 
+## Stable release checklist
+
+Basis `40196ff641c4`, representative manifest `horae-time 0.2.2`. Target 1.0.0. [Backlog item](backlog.md#horae-stable-qualification).
+
+- [ ] [patch] Replay H-ORDER-002 on a non-autonomous problem with an analytical solution. Check the order under timestep refinement and the actual stage times.
+- [ ] [patch] Re-run H-ADAPT-ORDER-RANGE-001 with supported orders, adjacent invalid orders and the maximum usize input. Compare computed error classes and the valid-order coefficients.
+- [ ] [major] Qualify the released provider-range contract and M-stability examples using a real consuming integrator. Record exactly which MSRV, feature and SemVer checks ran.
+- [ ] [patch] Run the [release scope](docs/adr/0004-release-scope-1-0.md) exits and attach reviewed, exact-revision evidence for this member’s [Atlas qualification criteria](https://github.com/ryancinsight/atlas/blob/17b0124a7548ad81e817284afc5cb115c1d1bc78/docs/parity/repositories.json).
+
 Active sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
 
 
