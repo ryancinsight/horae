@@ -16,7 +16,7 @@ Basis `935bea71a799`, representative manifest `horae-time 0.4.0`. Target 1.0.0. 
 
 - [x] [major] Select the published Aequitas 0.5 and Eunomia 0.12.1 provider identities.
 - [ ] [major] Complete the release feature and API matrix. [Reconciled archive and executed tests](gap_audit.md#incremental-release-baseline).
-- [x] [major] Verify the published archive and fresh registry consumer against the released provider graph.
+- [x] [major] Verify the published archive and fresh registry consumer against the released provider graph. Fresh resolution also passes from the merged downstream revisions in the [audit](gap_audit.md#incremental-release-baseline).
 
 Historical sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
 

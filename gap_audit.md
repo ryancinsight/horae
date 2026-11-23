@@ -10,7 +10,7 @@ The reconciled tree includes [the published source](https://github.com/ryancinsi
 
 53 all-feature tests passed. Helios Domain verified helical angle and couch displacement against the closed form in both precisions. [Consumer test at the reviewed revision](https://github.com/ryancinsight/helios/blob/b7bda4cd62296a3b11869f03405cab7e6d62dffa/crates/helios-domain/src/helical.rs). A new external Cargo project resolved all five released provider crates from crates.io, with one Aequitas 0.5.0, Eunomia 0.12.1 and Leto 0.52.0. It checked typed time admission, both elastic moduli and FFT axis products, including invalid inputs.
 
-Harmonia and the optional Prometheus integration require the older 0.2 Git line. The newer archive is outside that dependency range. The existing locks identify the old commits. Fresh unpinned Git consumers need a compatible, explicitly selected source before switching the default provider.
+Migrated consumers resolve the published provider from clean external Cargo projects pinned to their merged Git revisions. [harmonia #107](https://github.com/ryancinsight/harmonia/pull/107) (`66f93f57d11c`, horae-time 0.4.0), [prometheus #101](https://github.com/ryancinsight/prometheus/pull/101) (`d190167170c3`, horae-time 0.4.0), [ares #100](https://github.com/ryancinsight/ares/pull/100) (`26b32a05efa3`, horae-time 0.4.0).
 
 The next [patch] checkpoint uses [adaptive order contract](tests/main/adaptive_order_contract.rs). [Target version and acceptance criteria](checklist.md#stable-release-checklist).
 
