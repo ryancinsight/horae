@@ -2,12 +2,14 @@
 
 ## Stable release checklist
 
-Basis `40196ff641c4`, representative manifest `horae-time 0.2.2`. Target 1.0.0. [Backlog item](backlog.md#horae-stable-qualification).
+Basis `935bea71a799`, representative manifest `horae-time 0.2.2`. Target 1.0.0. [Backlog item](backlog.md#horae-stable-qualification).
 
 - [ ] [patch] Replay H-ORDER-002 on a non-autonomous problem with an analytical solution. Check the order under timestep refinement and the actual stage times.
 - [ ] [patch] Re-run H-ADAPT-ORDER-RANGE-001 with supported orders, adjacent invalid orders and the maximum usize input. Compare computed error classes and the valid-order coefficients.
 - [ ] [major] Qualify the released provider-range contract and M-stability examples using a real consuming integrator. Record exactly which MSRV, feature and SemVer checks ran.
-- [ ] [patch] Run the [release scope](docs/adr/0004-release-scope-1-0.md) exits and attach reviewed, exact-revision evidence for this member’s [Atlas qualification criteria](https://github.com/ryancinsight/atlas/blob/17b0124a7548ad81e817284afc5cb115c1d1bc78/docs/parity/repositories.json).
+- [ ] [patch] **0.4.1 after source reconciliation.** Compare the indexed 0.4.0 source with the 0.2.2 manifest. Replay the non-autonomous order test against its analytic solution and check stage times across timestep refinements. [Source and baseline](gap_audit.md#incremental-release-baseline).
+- [ ] [minor] **0.5.0 only for additive integration contracts.** Exercise rejected and accepted steps in one consumer. Record solution, time and step history after rejection. Credit the historical coherence and stability milestones only against the reconciled release source.
+- [ ] [major] **1.0.0-beta.1 → 1.0.0-rc.1 → 1.0.0.** Freeze the supported surface at beta. The packaged integrator reproduces the declared order and leaves caller-visible state consistent after a rejected step. Repeat the applicable exits on the exact RC before stable promotion. Run the [release scope](docs/adr/0004-release-scope-1-0.md) exits and attach reviewed, exact-revision evidence for this member’s [Atlas qualification criteria](https://github.com/ryancinsight/atlas/blob/17b0124a7548ad81e817284afc5cb115c1d1bc78/docs/parity/repositories.json).
 
 Active sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
 

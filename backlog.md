@@ -2,8 +2,8 @@
 
 <a id="horae-stable-qualification"></a>
 ## HORAE-STABLE-QUALIFICATION — horae stable-release qualification [patch] — todo
-- priority: verification; milestone: M-coherence; basis: `40196ff641c4`.
-- Outcome: Close the time-integration order and rejection evidence. Follow the [release scope](docs/adr/0004-release-scope-1-0.md) and [milestone exits](backlog/milestones.md).
+- priority: verification; milestone: M-coherence; basis: `935bea71a799`.
+- Outcome: Close the time-integration order and rejection evidence. Follow the [release scope](docs/adr/0004-release-scope-1-0.md) and [milestone exits](backlog/milestones.md). Planning targets for `horae-time` are 0.4.1 after source reconciliation, then 0.5.0 only for additive integration contracts, then 1.0.0. Verification alone can advance the current version.
 - Acceptance and sequence: [stable-release checklist](checklist.md#stable-release-checklist).
 
 <a id="h-provider-range-20261019"></a>

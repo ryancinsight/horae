@@ -1,5 +1,13 @@
 # Horae ownership gap audit
 
+## Incremental release baseline
+
+Reviewed [horae-time 0.2.2](Cargo.toml) at [935bea71a799](https://github.com/ryancinsight/horae/tree/935bea71a7996fa799750929efd94c43723e356d). The exact version appears in the [registry](https://crates.io/crates/horae-time/0.2.2). The newer [0.4.0](https://crates.io/crates/horae-time/0.4.0) archive identifies source `ea2bd8527180a076f41d04ea6d0ec7b3bd17cdf8`. Its SHA-256 `fbe6cf53dba3b6524581c792ef625e83960986af6a532cee2242da2764e8e32f` matches the index. The release source and reviewed branch diverge. The archive side has 1 unique commit and the default branch has two. Reconcile both sides and replay the consumer before allocating another version. [Compare revisions](https://github.com/ryancinsight/horae/compare/935bea71a7996fa799750929efd94c43723e356d...ea2bd8527180a076f41d04ea6d0ec7b3bd17cdf8).
+
+The next [patch] checkpoint uses [adaptive order contract](tests/main/adaptive_order_contract.rs). [Target version and acceptance criteria](checklist.md#stable-release-checklist).
+
+The Atlas board check reports 14 existing schema findings, including `H-ORDER-002`. Verify each item against its delivery evidence, archive completed work and rerun the board check before the freeze.
+
 ## Integration renewal — 2026-10-17 [patch]
 
 PR #101 integrates the coherent 0.2.0 provider tree at
