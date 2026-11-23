@@ -2,11 +2,26 @@
 
 ## Incremental release baseline
 
-Reviewed [horae-time 0.2.2](Cargo.toml) at [935bea71a799](https://github.com/ryancinsight/horae/tree/935bea71a7996fa799750929efd94c43723e356d). The exact version appears in the [registry](https://crates.io/crates/horae-time/0.2.2). The newer [0.4.0](https://crates.io/crates/horae-time/0.4.0) archive identifies source `ea2bd8527180a076f41d04ea6d0ec7b3bd17cdf8`. Its SHA-256 `fbe6cf53dba3b6524581c792ef625e83960986af6a532cee2242da2764e8e32f` matches the index. The release source and reviewed branch diverge. The archive side has 1 unique commit and the default branch has two. Reconcile both sides and replay the consumer before allocating another version. [Compare revisions](https://github.com/ryancinsight/horae/compare/935bea71a7996fa799750929efd94c43723e356d...ea2bd8527180a076f41d04ea6d0ec7b3bd17cdf8).
+The reconciled tree includes [the published source](https://github.com/ryancinsight/horae/commit/ea2bd8527180a076f41d04ea6d0ec7b3bd17cdf8) and the default-branch planning history. Each archive’s embedded source revision equals `ea2bd8527180a076f41d04ea6d0ec7b3bd17cdf8`. Each checksum below matches its non-yanked registry entry. Compared file counts cover package-authored files, including the original manifest. Cargo-generated metadata, normalized manifests and generated package lockfiles are excluded from the byte count.
+
+| Package | SHA-256 | Files matching release source |
+| --- | --- | ---: |
+| [horae-time 0.4.0](https://crates.io/crates/horae-time/0.4.0) | `fbe6cf53dba3b6524581c792ef625e83960986af6a532cee2242da2764e8e32f` | 90 |
+
+53 all-feature tests passed. Helios Domain verified helical angle and couch displacement against the closed form in both precisions. [Consumer test at the reviewed revision](https://github.com/ryancinsight/helios/blob/b7bda4cd62296a3b11869f03405cab7e6d62dffa/crates/helios-domain/src/helical.rs). A new external Cargo project resolved all five released provider crates from crates.io, with one Aequitas 0.5.0, Eunomia 0.12.1 and Leto 0.52.0. It checked typed time admission, both elastic moduli and FFT axis products, including invalid inputs.
+
+Harmonia and the optional Prometheus integration require the older 0.2 Git line. The newer archive is outside that dependency range. The existing locks identify the old commits. Fresh unpinned Git consumers need a compatible, explicitly selected source before switching the default provider.
 
 The next [patch] checkpoint uses [adaptive order contract](tests/main/adaptive_order_contract.rs). [Target version and acceptance criteria](checklist.md#stable-release-checklist).
 
 The Atlas board check reports 14 existing schema findings, including `H-ORDER-002`. Verify each item against its delivery evidence, archive completed work and rerun the board check before the freeze.
+
+## horae-time 0.4.0 provider release [major]
+
+The published 0.3.0 archive selects Aequitas 0.4. Release 0.4.0 uses
+Aequitas 0.5. Its Cargo package and consumer must agree on that source and
+version for the shared Rust types. The registry check covers the archive
+checksum, its Git revision, and the typed boundary.
 
 ## Integration renewal — 2026-10-17 [patch]
 
