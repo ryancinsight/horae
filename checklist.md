@@ -2,16 +2,23 @@
 
 ## Stable release checklist
 
-Basis `935bea71a799`, representative manifest `horae-time 0.2.2`. Target 1.0.0. [Backlog item](backlog.md#horae-stable-qualification).
+Basis `935bea71a799`, representative manifest `horae-time 0.4.0`. Target 1.0.0. [Backlog item](backlog.md#horae-stable-qualification).
 
 - [ ] [patch] Replay H-ORDER-002 on a non-autonomous problem with an analytical solution. Check the order under timestep refinement and the actual stage times.
 - [ ] [patch] Re-run H-ADAPT-ORDER-RANGE-001 with supported orders, adjacent invalid orders and the maximum usize input. Compare computed error classes and the valid-order coefficients.
 - [ ] [major] Qualify the released provider-range contract and M-stability examples using a real consuming integrator. Record exactly which MSRV, feature and SemVer checks ran.
-- [ ] [patch] **0.4.1 after source reconciliation.** Compare the indexed 0.4.0 source with the 0.2.2 manifest. Replay the non-autonomous order test against its analytic solution and check stage times across timestep refinements. [Source and baseline](gap_audit.md#incremental-release-baseline).
+- [ ] [patch] **0.4.1.** Replay the non-autonomous order test against its analytic solution and check stage times across timestep refinements. [Source and baseline](gap_audit.md#incremental-release-baseline).
 - [ ] [minor] **0.5.0 only for additive integration contracts.** Exercise rejected and accepted steps in one consumer. Record solution, time and step history after rejection. Credit the historical coherence and stability milestones only against the reconciled release source.
+- [ ] [major] Block 1.0 until every critical feature is fully implemented through the supported product path. Map each critical requirement, including time advancement, integration order and rejected-step recovery, to implementation and passing acceptance evidence on the release candidate. Any missing implementation or required result keeps this item open.
 - [ ] [major] **1.0.0-beta.1 → 1.0.0-rc.1 → 1.0.0.** Freeze the supported surface at beta. The packaged integrator reproduces the declared order and leaves caller-visible state consistent after a rejected step. Repeat the applicable exits on the exact RC before stable promotion. Run the [release scope](docs/adr/0004-release-scope-1-0.md) exits and attach reviewed, exact-revision evidence for this member’s [Atlas qualification criteria](https://github.com/ryancinsight/atlas/blob/17b0124a7548ad81e817284afc5cb115c1d1bc78/docs/parity/repositories.json).
 
-Active sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
+## Published release horae-time 0.4.0
+
+- [x] [major] Select the published Aequitas 0.5 and Eunomia 0.12.1 provider identities.
+- [ ] [major] Complete the release feature and API matrix. [Reconciled archive and executed tests](gap_audit.md#incremental-release-baseline).
+- [x] [major] Verify the published archive and fresh registry consumer against the released provider graph. Fresh resolution also passes from the merged downstream revisions in the [audit](gap_audit.md#incremental-release-baseline).
+
+Historical sprint target: **0.2.2** provider-range bridge [patch]; preserve the0.2.1 local publication hold.
 
 
 ## H-PROVIDER-RANGE-20261019 [patch] — target0.2.2
