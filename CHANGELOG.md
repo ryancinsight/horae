@@ -2,6 +2,20 @@
 
 All notable changes to Horae are documented in this file.
 
+## [0.4.0] - 2026-11-20
+
+### Breaking
+
+- [major] Upgrade the public Aequitas provider from 0.4 to 0.5.
+  Pass the Aequitas 0.5 time quantities to StepSize and Instant.
+  See [ADR 0005](docs/adr/0005-registry-provider-release.md).
+
+## [0.3.0] - 2026-11-20
+
+### Breaking
+
+- [major] Release the previous public quantity boundary against Aequitas 0.4.
+
 ## Unreleased
 
 ### Added

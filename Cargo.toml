@@ -4,7 +4,7 @@ resolver = "3"
 
 [package]
 name = "horae-time"
-version = "0.2.2"
+version = "0.4.0"
 edition = "2024"
 rust-version = "1.95"
 authors = ["Ryan Clanton <ryanclanton@outlook.com>"]
@@ -23,8 +23,8 @@ publish = true
 name = "horae"
 
 [dependencies]
-aequitas = { version = ">=0.3.0, <0.5.0", git = "https://github.com/ryancinsight/aequitas", default-features = false }
-eunomia = { version = ">=0.10.0, <0.13.0", git = "https://github.com/ryancinsight/eunomia", default-features = false }
+aequitas = { version = "0.5.0", default-features = false }
+eunomia = { version = "0.12.1", default-features = false }
 
 [dev-dependencies]
 mnemosyne = { package = "mnemosyne-memory", version = "0.10.0", git = "https://github.com/ryancinsight/Mnemosyne", default-features = false }

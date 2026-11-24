@@ -1,4 +1,4 @@
-# ADR 0005: Own civil dates and wall-clock timestamps in Horae
+# ADR 0006: Own civil dates and wall-clock timestamps in Horae
 
 - Status: Proposed
 - Class: [minor] [arch]
