@@ -28,6 +28,11 @@ use horae::time::Instant;
 
 ## Boundary
 
+The workspace also provides horae-civil-time for Gregorian calendar dates and
+UTC timestamps. It offers RFC 3339 parsing and display, an optional system-clock
+adapter, and optional string serialization for existing records. DICOM value
+representation and repair remain in RITK.
+
 Horae owns:
 
 - finite `Instant<T>` and positive `StepSize<T>` values over

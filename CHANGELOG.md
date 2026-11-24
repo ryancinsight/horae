@@ -18,6 +18,13 @@ All notable changes to Horae are documented in this file.
 
 ## Unreleased
 
+### Added
+
+- [minor] Add horae-civil-time 0.1.0 for Gregorian date validation, UTC
+  timestamps, and RFC 3339 records. The new package offers independent clock
+  and serialization features.
+
+
 ### Changed
 
 - [patch] The Eunomia requirement widens to `>=0.10.0, <0.13.0`, admitting the published Eunomia 0.12 provider line while retaining the 0.10 and 0.11 lines. No numeric, dimensional or API behavior changes.

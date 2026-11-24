@@ -14,3 +14,4 @@
 | [0003](0003-public-provider-boundary.md) | Version the public quantity and scalar provider boundary | Proposed |
 | [0004](0004-release-scope-1-0.md) | Horae release scope for 1.0 | Accepted |
 | [0005](0005-registry-provider-release.md) | Publish the Aequitas 0.4 time boundary | Accepted |
+| [0006](0006-civil-time-boundary.md) | Own civil dates and wall-clock timestamps in Horae | Proposed |
