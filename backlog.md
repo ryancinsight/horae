@@ -1,12 +1,36 @@
 # Horae backlog
 
-<a id="horae-stable-qualification"></a>
-## HORAE-STABLE-QUALIFICATION — horae stable-release qualification [patch] — todo
-- priority: verification; milestone: M-coherence; basis: `935bea71a799`.
-- Outcome: Close the time-integration order and rejection evidence. Follow the [release scope](docs/adr/0004-release-scope-1-0.md) and [milestone exits](backlog/milestones.md). Planning targets for `horae-time` are 0.4.1, then 0.5.0 only for additive integration contracts, then 1.0.0. Verification alone can advance the current version.
-- Acceptance and sequence: [stable-release checklist](checklist.md#stable-release-checklist).
+<a id="horae-stable-provider-consumer"></a>
+## HORAE-STABLE-PROVIDER-CONSUMER — Qualify the released provider range with a consuming integrator [major] — todo
+- priority: verification; milestone: M-stability; needs: none; scope: `gap_audit.md`, `examples/provider_boundary.rs`, `tests/main/provider_boundary.rs`; basis: `6dbe9a1cdb73`.
+- Outcome: "Qualify the released provider-range contract and M-stability examples using a real consuming integrator. Record exactly which MSRV, feature and SemVer checks ran." ([checklist](checklist.md#stable-release-checklist))
+- Oracle: a clean external Cargo project pinned to a merged consumer revision steps through released `horae-time` with typed values and passes its own value assertions; the record names each MSRV (1.95), feature (`--no-default-features`, `--all-features`) and `cargo semver-checks` run, and each that could not run with its reason.
+- Existing evidence: resolution-only consumers in [the baseline](gap_audit.md#incremental-release-baseline); no stepping consumer is recorded beyond the Helios helical value test.
+- Also: exercise rejected and accepted steps in that consumer and record solution, time and step history after a rejection (checklist 0.5.0 entry; the in-crate slice is `tests/main/adaptive_march.rs`).
+- Next: run the matrix against the released archive and append the record to the baseline section.
 
-- [x] [patch] Verify the published horae-time 0.4.0 source and run a downstream value test. [Archive and consumer evidence](gap_audit.md#incremental-release-baseline).
+<a id="horae-stable-step-atomicity"></a>
+## HORAE-STABLE-STEP-ATOMICITY — Decide and test the output contract of a failed step [patch] — todo
+- priority: verification; milestone: M-stability; needs: none; scope: `src/integration/stepper.rs`, `tests/main/fixed_step.rs`, ADR 0001; basis: `6dbe9a1cdb73`.
+- Outcome: the Rustdoc of `step_into` and `step_embedded_into` states what `output` holds after `Err`, and a test asserts it; serves the 1.0 exit "leaves caller-visible state consistent after a rejected step".
+- Finding (unreproduced): `combine` writes `output` (`src/integration/stepper.rs:65`, `:118`) before `start.advance(step)` can return `StepError::Time` (`:73`, `:130`), so a method whose last stage time is below the end instant (Euler, Midpoint) may leave `output` written on `Err`; stage failures and dimension errors leave it untouched.
+- Decision needed: recommended is "untouched on every `Err`" (compute `end` before `combine`; no signature change); the alternative documents `output` as unspecified on `Err`.
+- Oracle: Euler step with a finite start and step whose sum overflows returns `StepError::Time` and leaves a sentinel `output` bitwise unchanged.
+
+<a id="horae-stable-critical-features"></a>
+## HORAE-STABLE-CRITICAL-FEATURES — Map every critical requirement to passing evidence [major] — todo
+- priority: verification; milestone: M-1.0; needs: horae-stable-provider-consumer, horae-stable-step-atomicity; basis: `6dbe9a1cdb73`.
+- Outcome: "Block 1.0 until every critical feature is fully implemented through the supported product path. Map each critical requirement, including time advancement, integration order and rejected-step recovery, to implementation and passing acceptance evidence on the release candidate. Any missing implementation or required result keeps this item open." ([checklist](checklist.md#stable-release-checklist))
+- Oracle: a requirement-to-test table in the book or `gap_audit.md`, each row naming an existing test that passes at the release candidate; a requirement without one is a filed item.
+- Existing evidence: order refinement `tests/main/fixed_step.rs` and `tests/main/order_of_accuracy.rs`; rejected-step recovery `tests/main/adaptive_march.rs`; invalid order `tests/main/adaptive_order_contract.rs`.
+- Next: enumerate the critical requirements from [ADR 0004](docs/adr/0004-release-scope-1-0.md) and the README.
+
+<a id="horae-stable-freeze"></a>
+## HORAE-STABLE-FREEZE — Freeze, release-candidate and stable promotion [major] — blocked
+- priority: verification; milestone: M-1.0; needs: horae-stable-critical-features; basis: `6dbe9a1cdb73`.
+- Outcome: "**1.0.0-beta.1 → 1.0.0-rc.1 → 1.0.0.** Freeze the supported surface at beta. The packaged integrator reproduces the declared order and leaves caller-visible state consistent after a rejected step. Repeat the applicable exits on the exact RC before stable promotion. Run the [release scope](docs/adr/0004-release-scope-1-0.md) exits and attach reviewed, exact-revision evidence for this member’s [Atlas qualification criteria](https://github.com/ryancinsight/atlas/blob/17b0124a7548ad81e817284afc5cb115c1d1bc78/docs/parity/repositories.json)." ([checklist](checklist.md#stable-release-checklist))
+- Oracle: ADR 0004 exits and the SemVer and package gates pass at the exact beta, RC and stable revisions.
+- Blocker: release authority for each version and publication; re-open trigger: `horae-stable-critical-features` merged and M-stability closed.
 
 <a id="h-provider-range-20261019"></a>
 ## H-PROVIDER-RANGE-20261019 — Current and next provider admission [patch] — blocked
