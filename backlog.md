@@ -32,6 +32,20 @@
 - Oracle: ADR 0004 exits and the SemVer and package gates pass at the exact beta, RC and stable revisions.
 - Blocker: release authority for each version and publication; re-open trigger: `horae-stable-critical-features` merged and M-stability closed.
 
+<a id="horae-march-generic-instantiation"></a>
+## HORAE-MARCH-GENERIC-INSTANTIATION — Instantiate the reject-accept march at `f32` [patch] — todo
+- priority: verification; milestone: M-coherence; needs: none; scope: `tests/main/adaptive_march.rs`; basis: `6dbe9a1cdb73`.
+- Outcome: the march of `tests/main/adaptive_march.rs` runs once generically over the shipped scalars, so `f32` is covered as `f64` is.
+- Oracle: the test body is one generic function instantiated at `f32` and `f64`; each instance asserts the rejection after an accept and the end-instant landing, with the `f32` tolerances above `f32::EPSILON` (the `f64` relative tolerance `1e-8` is below it) and a per-step roundoff term in units of `T::EPSILON` in the deviation bound. The Sterbenz range and the exact end constants carry over.
+- Note: the fifth-order truncation signal in `f32` is roundoff-limited (H-DP-SCALAR-004 and `tests/main/fixed_step.rs`); the scenario must be re-established at the `f32` tolerances.
+
+<a id="horae-embedded-step-multicomponent"></a>
+## HORAE-EMBEDDED-STEP-MULTICOMPONENT — Test the error estimate on a multi-component state [patch] — todo
+- priority: verification; milestone: M-coherence; needs: none; scope: `tests/main/embedded.rs`; basis: `6dbe9a1cdb73`.
+- Outcome: `step_embedded_into` is asserted against a closed form on a state of two or more components, so an estimate that skips a component fails.
+- Oracle: a linear system with distinct decay rates per component; each component of the error estimate is nonzero and equals the primary minus embedded result computed independently; a mutant that leaves one estimate component unwritten fails.
+- Existing evidence: every `step_embedded_into` call site in `tests/` and the book is one-dimensional (`embedded.rs`, `adaptive_loop.rs`).
+
 <a id="h-provider-range-20261019"></a>
 ## H-PROVIDER-RANGE-20261019 — Current and next provider admission [patch] — blocked
 
