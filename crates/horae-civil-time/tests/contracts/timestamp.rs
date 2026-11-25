@@ -74,12 +74,24 @@ fn timestamp_validation_rejects_impossible_fields_and_unrepresentable_precision(
     });
     let actual = tracing::info_span!("act").in_scope(|| cases.map(str::parse::<UtcTimestamp>));
     let _assert = tracing::info_span!("assert").entered();
-    for (result, input) in actual.into_iter().zip(cases) {
-        assert!(result.is_err(), "{input}");
+    // Each refusal names its own reason, so a case that starts failing for a
+    // different reason than the one it is cited for fails here.
+    let expected = [
+        CivilTimeError::InvalidDate,
+        CivilTimeError::InvalidDate,
+        CivilTimeError::InvalidTimestamp,
+        CivilTimeError::InvalidTimestamp,
+        CivilTimeError::InvalidTimestamp,
+        CivilTimeError::InvalidFraction,
+        CivilTimeError::InvalidFraction,
+        CivilTimeError::InvalidTimestamp,
+        CivilTimeError::OutOfRange,
+        CivilTimeError::OutOfRange,
+        CivilTimeError::InvalidFraction,
+    ];
+    for ((result, input), expected) in actual.into_iter().zip(cases).zip(expected) {
+        assert_eq!(result, Err(expected), "{input}");
     }
-    assert_eq!(actual[0], Err(CivilTimeError::InvalidDate));
-    assert_eq!(actual[6], Err(CivilTimeError::InvalidFraction));
-    assert_eq!(actual[8], Err(CivilTimeError::OutOfRange));
     assert_eq!(
         UtcTimestamp::from_unix_parts(0, 1_000_000_000),
         Err(CivilTimeError::InvalidFraction)
