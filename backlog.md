@@ -40,21 +40,21 @@
 - Existing evidence: every `step_embedded_into` call site in `tests/` and the book is one-dimensional (`embedded.rs`, `adaptive_loop.rs`).
 
 <a id="horae-scalar-scope-reduced-precision"></a>
-## HORAE-SCALAR-SCOPE-REDUCED-PRECISION — Decide the scalar set the public bounds admit [minor] — todo
+## HORAE-SCALAR-SCOPE-REDUCED-PRECISION — Decide the scalar set the public bounds admit [major] — todo
 - priority: verification; milestone: M-coherence; needs: none; scope: `src/integration`, `src/adaptive`, `docs/book`, `docs/adr/0003-public-provider-boundary.md`; basis: `6e517ccf77f0`.
 - Outcome: the public scalar bounds and the tests name one scalar set; the book states it once.
-- Finding: `step_embedded_into` (`src/integration/stepper.rs:101`) and `AdaptiveController` (`src/adaptive/controller.rs:62`) bound on `FloatElement`; Eunomia 0.12.1 implements it for six reduced-precision formats (F16, Bf16, Bf8, Bf4, F8, F4) beyond f32, f64, F32, F64 (reviewer reading of `eunomia` `src/impls`, unverified here), and the march test instantiates only f32, F32, f64, F64. `docs/book/explicit_systems.md:80` and `docs/book/adaptive.md:169` say "currently `f64` and `f32`"; ADR 0003 says "native and wrapped f32/f64".
-- Oracle: either the bounds narrow to `RealField` and a `compile_fail` doctest instantiating `step_embedded_into` at `eunomia::F16` fails to compile, or the march and controller tests instantiate every admitted format with tolerances derived per format; the book and ADR 0003 state the same set.
+- Finding: `step_embedded_into` (`src/integration/stepper.rs:101`) and `AdaptiveController` (`src/adaptive/controller.rs:62`) bound on `FloatElement`; Eunomia 0.12.1 implements it for six reduced-precision formats (F16, Bf16, Bf8, Bf4, F8, F4) beyond f32, f64, F32, F64 (reviewer reading of `eunomia` `src/impls`, unverified here), and the march test instantiates only f32, F32, f64, F64. `docs/book/explicit_systems.md:80` reads "Horae is generic over any `FloatElement` scalar: currently `f64` and `f32`."; `docs/book/adaptive.md:169` reads "The adaptive controller is generic over `FloatElement`, supporting both `f64` and `f32`."; ADR 0003 says "native and wrapped f32/f64".
+- Oracle: either [major] (recommended): the bounds narrow to `RealField` and a `compile_fail` doctest instantiating `step_embedded_into` at `eunomia::F16` fails to compile; or [patch]: the march and controller tests instantiate every admitted format with tolerances derived per format. Either way the book and ADR 0003 state the same set.
 - Next: read the resolved Eunomia `RealField` and `FloatElement` impl lists, then take the narrowing option unless a consumer needs a reduced format.
 
 <a id="horae-march-tableau-mutants"></a>
 ## HORAE-MARCH-TABLEAU-MUTANTS — Make the adaptive march kill tableau coefficient mutants [patch] — todo
 - priority: verification; milestone: M-coherence; needs: none; scope: `tests/main/adaptive_march.rs`; basis: `6e517ccf77f0`.
 - Outcome: the adaptive march fails when a Dormand-Prince coefficient is wrong at every scalar it runs, and its f32 absolute tolerance has a derivation.
-- Finding (reviewer mutation runs at `6e517cc`, not rerun here): `a[5][4]` `-5103.0 / 18656.0` to `5103.0 / 18656.0` (`src/integration/tableau/methods.rs:81`) and `B[0]` `35.0 / 384.0` to `35.0 / 385.0` (`:96`) pass `adaptive_march` at all four scalars, and `a[2][1]` `9.0 / 40.0` to `9.0 / 41.0` (`:65`) passes at f32 and F32 (deviation 1.483e-6 against bound 5.576e-6); other test binaries kill the first two.
-- Finding (read): `single.absolute_tolerance = 1.0e-6` (`tests/main/adaptive_march.rs`, `a_rejected_trial_...`) has no derivation, and the comment at `:343-345` ("close enough to the deviation to expose a stage-coupling defect") is contradicted by those survivors.
-- Oracle: each of the three mutants fails `adaptive_march` at f32, F32, f64 and F64, with the f32 absolute tolerance derived from the end-of-march roundoff floor and the march still rejecting after an accept.
-- Next: derive the f32 absolute tolerance, tighten the f32 instance, re-run the three mutants; otherwise reword the comment to the defect classes the march kills.
+- Finding (reviewer mutation runs at `6e517cc`, not rerun here): `a[5][4]` `-5103.0 / 18656.0` to `5103.0 / 18656.0` (`src/integration/tableau/methods.rs:81`) and `B[0]` `35.0 / 384.0` to `35.0 / 385.0` (`:96`) pass `adaptive_march` at all four scalars, and `a[2][1]` `9.0 / 40.0` to `9.0 / 41.0` (`:65`) passes at f32 and F32 (deviation 1.483e-6 against bound 5.576e-6); other tests in the `main` harness (adaptive_loop, embedded, fixed_step, order_of_accuracy) kill the first two.
+- Finding (read): `single.absolute_tolerance = 1.0e-6` (`tests/main/adaptive_march.rs`, `a_rejected_trial_...`) has no derivation, and the comment at `:345-347` once #146 merges ("close enough to the deviation to expose a stage-coupling defect") is contradicted by those survivors.
+- Oracle: either each of the three mutants fails `adaptive_march` at f32, F32, f64 and F64 through a named added assertion or a derived f32 absolute tolerance, with the march still rejecting after an accept (a tolerance change alone may not kill the `B[0]` mutant, which the error estimate also sees; underived); or the comment at `:345-347` names only the defect classes the march kills and records which `main` tests kill the survivors.
+- Next: derive the f32 absolute tolerance, then run the three mutants to choose the path.
 
 <a id="h-civil-time-001"></a>
 ## H-CIVIL-TIME-001 — Supply Atlas dates and wall-clock timestamps [minor] — todo
