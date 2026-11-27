@@ -41,7 +41,8 @@
 
 <a id="horae-scalar-scope-reduced-precision"></a>
 ## HORAE-SCALAR-SCOPE-REDUCED-PRECISION — Decide the scalar set the public bounds admit [major] — todo
-- priority: verification; milestone: M-coherence; needs: none; scope: `src/integration`, `src/adaptive`, `docs/book`, `docs/adr/0003-public-provider-boundary.md`; basis: `6e517ccf77f0`.
+- priority: verification; milestone: M-coherence; needs: none; scope: `src/integration`, `src/adaptive`, `docs/book`, `docs/adr/0003-public-provider-boundary.md`; basis: `056714220c0a798de5281bafcd38fb34fe988df3`.
+- Milestone: the [major] path is not admitted by M-coherence's planned version; see `horae-ladder-planned-versions`.
 - Outcome: the public scalar bounds and the tests name one scalar set; the book states it once.
 - Finding: `step_embedded_into` (`src/integration/stepper.rs:101`) and `AdaptiveController` (`src/adaptive/controller.rs:62`) bound on `FloatElement`; Eunomia 0.12.1 implements it for six reduced-precision formats (F16, Bf16, Bf8, Bf4, F8, F4) beyond f32, f64, F32, F64 (reviewer reading of `eunomia` `src/impls`, unverified here), and the march test instantiates only f32, F32, f64, F64. `docs/book/explicit_systems.md:80` reads "Horae is generic over any `FloatElement` scalar: currently `f64` and `f32`."; `docs/book/adaptive.md:169` reads "The adaptive controller is generic over `FloatElement`, supporting both `f64` and `f32`."; ADR 0003 says "native and wrapped f32/f64".
 - Oracle: either [major] (recommended): the bounds narrow to `RealField` and a `compile_fail` doctest instantiating `step_embedded_into` at `eunomia::F16` fails to compile; or [patch]: the march and controller tests instantiate every admitted format with tolerances derived per format. Either way the book and ADR 0003 state the same set.
@@ -49,12 +50,39 @@
 
 <a id="horae-march-tableau-mutants"></a>
 ## HORAE-MARCH-TABLEAU-MUTANTS — Make the adaptive march kill tableau coefficient mutants [patch] — todo
-- priority: verification; milestone: M-coherence; needs: none; scope: `tests/main/adaptive_march.rs`; basis: `6e517ccf77f0`.
-- Outcome: the adaptive march fails when a Dormand-Prince coefficient is wrong at every scalar it runs, and its f32 absolute tolerance has a derivation.
+- priority: verification; milestone: M-coherence; needs: none; scope: `tests/main/adaptive_march.rs`; basis: `056714220c0a798de5281bafcd38fb34fe988df3`.
+- Outcome: the adaptive march and its comment agree: it either kills a wrong Dormand-Prince coefficient at every scalar it runs, with a derived f32 absolute tolerance, or its comment names only the defect classes it kills.
 - Finding (reviewer mutation runs at `6e517cc`, not rerun here): `a[5][4]` `-5103.0 / 18656.0` to `5103.0 / 18656.0` (`src/integration/tableau/methods.rs:81`) and `B[0]` `35.0 / 384.0` to `35.0 / 385.0` (`:96`) pass `adaptive_march` at all four scalars, and `a[2][1]` `9.0 / 40.0` to `9.0 / 41.0` (`:65`) passes at f32 and F32 (deviation 1.483e-6 against bound 5.576e-6); other tests in the `main` harness (adaptive_loop, embedded, fixed_step, order_of_accuracy) kill the first two.
-- Finding (read): `single.absolute_tolerance = 1.0e-6` (`tests/main/adaptive_march.rs`, `a_rejected_trial_...`) has no derivation, and the comment at `:345-347` once #146 merges ("close enough to the deviation to expose a stage-coupling defect") is contradicted by those survivors.
+- Finding (read): `single.absolute_tolerance = 1.0e-6` (`tests/main/adaptive_march.rs`, `a_rejected_trial_...`) has no derivation, and the comment at `:345-347` ("close enough to the deviation to expose a stage-coupling defect") is contradicted by those survivors.
 - Oracle: either each of the three mutants fails `adaptive_march` at f32, F32, f64 and F64 through a named added assertion or a derived f32 absolute tolerance, with the march still rejecting after an accept (a tolerance change alone may not kill the `B[0]` mutant, which the error estimate also sees; underived); or the comment at `:345-347` names only the defect classes the march kills and records which `main` tests kill the survivors.
 - Next: derive the f32 absolute tolerance, then run the three mutants to choose the path.
+
+<a id="horae-ladder-planned-versions"></a>
+## HORAE-LADDER-PLANNED-VERSIONS — Plan milestone versions above the latest release [patch] — todo
+- priority: verification; milestone: M-coherence; needs: none; scope: `backlog/milestones.md`, `docs/adr/0004-release-scope-1-0.md`; basis: `056714220c0a798de5281bafcd38fb34fe988df3`.
+- Outcome: each milestone's planned version is above the latest release tag, and a [major] item sits on a milestone whose version admits a break.
+- Finding (read, `git tag`, `Cargo.toml`): the tags are `horae-time-v0.2.2`, `horae-time-v0.3.0` and `v0.4.0`, and the manifest reads `0.4.0`; `backlog/milestones.md:2` plans M-coherence at 0.2.3 and `:4` M-stability at 0.3.0, and ADR 0004 lines 20 and 22 repeat both. Only M-1.0 (1.0.0) is above the manifest. `horae-scalar-scope-reduced-precision` is [major] on M-coherence; under Cargo's leftmost-nonzero rule a 0.x break needs the next minor above 0.4.0.
+- Decision needed: recommended is successive minors above 0.4.0 for M-coherence and M-stability, with the [major] item on the first; a ladder rewrite needs a judge verdict (sprint: roadmap).
+- Oracle: `git grep -n -E "M-(coherence|stability)\*\* \(" -- backlog/milestones.md docs/adr/0004-release-scope-1-0.md` prints versions all above 0.4.0 (today four lines: 0.2.3 and 0.3.0 in each file), and `horae-scalar-scope-reduced-precision` names a milestone planned above 0.4.0 or is `[patch]`.
+- Next: choose the versions, edit both files in one change, then move the item's `milestone:`.
+
+<a id="horae-march-bound-derivation"></a>
+## HORAE-MARCH-BOUND-DERIVATION — Derive the march bound's operation count and factors [patch] — todo
+- priority: verification; milestone: M-coherence; needs: none; scope: `tests/main/adaptive_march.rs`; basis: `056714220c0a798de5281bafcd38fb34fe988df3`.
+- Outcome: the rounded-operation count of the deviation bound matches the arithmetic in `step_embedded_into`, and the bound's literal factors are named constants whose docs carry their derivations.
+- Finding (read; counts derived, not run): `STAGE_OPERATIONS` (`:44`) documents six fused accumulations, the fused stage time and "the two products of `-2ty`". `src/integration/stepper.rs:155` also rounds `step_value * a[stage][previous]` before each accumulation, and the fixture `-(t + t) * y` doubles exactly and rounds once. Per stage `i` that is `i` products, `i` accumulations, the stage time and one product, so `2i + 2` and 56 over seven stages against the 63 counted. The roundings of the tableau coefficients from `f64` to `T` are in neither count (reviewer reading of the tableau, unverified here: 35 of its 37 nonzero entries are inexact in binary). Measured slack keeps the bound conservative (reviewer runs at `6e517cc`, not rerun here: f32 deviation 1.597e-7 against 4.715e-6, f64 1.976e-11 against 1.546e-9).
+- Finding (read): the factors `3.0 * epsilon` (`:238`) and `2.0`, `1.0 + 2.0 * epsilon`, `5.0` (`:258`) are derived in comments (`:230-234`, `:338-341`) but are inline float literals, the counted float-literal class.
+- Oracle: `git grep -n -E "(3|2|5)\.0 \* (epsilon|tolerance|roundoff)" -- tests/main/adaptive_march.rs` prints lines 238 and 258 today and nothing after; the `STAGE_OPERATIONS` doc lists the products and the coefficient roundings and the constants equal the derived count; `cargo nextest run --workspace -E "test(adaptive_march)"` passes at f32, F32, f64 and F64.
+- Next: count the roundings per stage from `stepper.rs`, add the coefficient term, name the factors.
+
+<a id="horae-controller-exponent-conversion"></a>
+## HORAE-CONTROLLER-EXPONENT-CONVERSION — Convert the order exponent once [patch] — todo
+- priority: tightening; milestone: M-coherence; needs: none; scope: `src/adaptive/controller.rs`; basis: `056714220c0a798de5281bafcd38fb34fe988df3`.
+- Outcome: `AdaptiveController::assess` converts no loop-invariant constant into `T` on each call, or the item records the codegen evidence that the conversion folds.
+- Finding (read): `src/adaptive/controller.rs:161` evaluates `normalized_error.powf(T::from_f64(exponent_reciprocal))` on every call; `exponent_reciprocal` is the `f64` constant `OrderParameters::<ORDER>::EXPONENT_RECIPROCAL` (`:20`) fixed by the const `ORDER`, and the controller stores no `T` value for it. Pre-existing; found in the post-merge review of the march test.
+- Hypothesis (unverified): at a monomorphized call the constant folds to a `T` immediate, so the runtime cost is nil; no assembly was inspected.
+- Oracle: `git grep -n "from_f64" -- src/adaptive/controller.rs` prints line 161 today and nothing after, or the closing commit records the `--emit=asm` listing of `assess::<5>` at f32 and f64 showing the exponent as an immediate and then deletes the item.
+- Next: inspect the codegen first; only a listing that shows a runtime conversion calls for a design change (the stored `T` value cannot depend on the call's `ORDER`).
 
 <a id="h-civil-time-001"></a>
 ## H-CIVIL-TIME-001 — Supply Atlas dates and wall-clock timestamps [minor] — todo
