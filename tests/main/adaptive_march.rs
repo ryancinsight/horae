@@ -70,7 +70,8 @@ impl<T: RealField> ExplicitSystem<T> for GaussianDecay {
         state: &[T],
         derivative: &mut [T],
     ) -> Result<(), Self::Error> {
-        derivative[0] = -T::from_f64(2.0) * *time.as_time().as_base() * state[0];
+        let time = *time.as_time().as_base();
+        derivative[0] = -(time + time) * state[0];
         Ok(())
     }
 }
@@ -194,6 +195,7 @@ fn march<T: RealField>(parameters: Parameters) -> March<T> {
     let stall_limit = stall_limit(safety.to_f64(), parameters.smallest_normal);
 
     let end_time = T::from_f64(END_TIME);
+    let clip_floor = T::from_f64(END_TIME / 2.0);
     let mut time = <T as NumericElement>::ZERO;
     let mut state = [<T as NumericElement>::ONE];
     let mut proposed = T::from_f64(FIRST_STEP);
@@ -215,7 +217,7 @@ fn march<T: RealField>(parameters: Parameters) -> March<T> {
             proposed
         } else {
             assert!(
-                time >= end_time / T::from_f64(2.0),
+                time >= clip_floor,
                 "the clipped step starts at t = {time:?}, below END_TIME / 2"
             );
             remaining
