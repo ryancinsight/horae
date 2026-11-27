@@ -1,4 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![deny(missing_docs)]
 //! Gregorian dates and UTC timestamps for reports and calendar validation.
 //!
 //! Dates cover the four-digit Gregorian years. Timestamp formatting uses

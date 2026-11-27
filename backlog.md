@@ -40,7 +40,7 @@
 - Existing evidence: every `step_embedded_into` call site in `tests/` and the book is one-dimensional (`embedded.rs`, `adaptive_loop.rs`).
 
 <a id="h-civil-time-001"></a>
-## H-CIVIL-TIME-001 — Supply Atlas dates and wall-clock timestamps [minor] — in progress
+## H-CIVIL-TIME-001 — Supply Atlas dates and wall-clock timestamps [minor] — todo
 
 - priority: architecture; milestone: M-coherence; scope: horae-civil-time 0.1.0 and first-party report consumers.
 - outcome: reuse Gregorian rules, exact UTC timestamps, and RFC 3339 records across RITK, Kwavers, CFDrs, and Hermes.
