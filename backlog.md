@@ -39,6 +39,13 @@
 - Oracle: a linear system with distinct decay rates per component; each component of the error estimate is nonzero and equals the primary minus embedded result computed independently; a mutant that leaves one estimate component unwritten fails.
 - Existing evidence: every `step_embedded_into` call site in `tests/` and the book is one-dimensional (`embedded.rs`, `adaptive_loop.rs`).
 
+<a id="horae-implicit-final-correction-fixtures"></a>
+## HORAE-IMPLICIT-FINAL-CORRECTION-FIXTURES — Pin the final correction on the remaining fixtures [patch] — todo
+- priority: verification; milestone: M-coherence; needs: none; scope: `tests/main/implicit_last_correction.rs`, `docs/verification/implicit-nonfinite.md`; basis: `88ec56ab535c`.
+- Outcome: the leaf pins the loop that tests the iterate after the last Newton correction (`git log --grep='^Item: H-IMPLICIT-LAST-CORRECTION'`) on three more cases: the board decay (`h = 0.01`, `r = 50`, tolerance `5e-6`, `f64`) asserts its output within a derived bound; the squared-residual fixture (`f(y) = y - 1/2 - y²`, exact Jacobian, residual `2^-(2k+4)`) returns `Ok` after 18 evaluations at tolerance `2^-36` at `f64` and `F64`; a system failing on the 18th `evaluate` call returns `ImplicitStepError::System`.
+- Oracle: `cargo nextest run -p horae-time -E 'test(last_correction)'` lists the added tests and passes; with the loop `0..MAX_NEWTON_CORRECTIONS` and no final test each fails.
+- Finding (reviewer emulation, not run): at `f32` the squared-residual fixture ends `Ok` after 13 evaluations and 11 Jacobians, since `y - 1/2 - y²` spans `2^-1` to `2^-36` and rounds; `y²` itself is exact. Either run it at `f32` with counts derived and checked by a run, or state this limit in the fixture.
+
 <a id="horae-scalar-scope-reduced-precision"></a>
 ## HORAE-SCALAR-SCOPE-REDUCED-PRECISION — Decide the scalar set the public bounds admit [major] — todo
 - priority: verification; milestone: M-coherence; needs: none; scope: `src/integration`, `src/adaptive`, `docs/book`, `docs/adr/0003-public-provider-boundary.md`; basis: `056714220c0a798de5281bafcd38fb34fe988df3`.
@@ -526,21 +533,6 @@ verified; each carries its own acceptance oracle.
 - Oracle: the clause is removed or cites a measurement; `mdbook test docs/book` passes.
 - Scope: `docs/book/rk5.md`.
 - Next: delete the clause; the following sentence already says nothing measures it.
-
-<a id="h-implicit-last-correction"></a>
-### H-IMPLICIT-LAST-CORRECTION — Test the final Newton correction against the tolerance [patch] — status: todo
-
-- Priority: correctness; milestone: M-coherence; needs: none; basis: `41c72e840b`.
-- Outcome: a step whose iterate after the sixteenth Newton correction meets the tolerance and
-  the rounding floor returns `Ok`; `step_implicit_into` applies that correction untested and
-  returns `NonConvergence` (`MAX_NEWTON_ITERATIONS` loop, `src/integration/implicit.rs`).
-- Oracle: `y' = -50·y`, `f64`, Jacobian reported as zero (Newton matrix `I`, error factor
-  `1/2` per correction), `h = 0.01`, `y_n = 1`, tolerance `5e-6`. The residual after `k`
-  corrections is `2^-(k+2)`: `2^-17` after the fifteenth, `2^-18` after the sixteenth. The
-  step returns `Ok` and fails at `41c72e840b` with `NonConvergence`; the 53 tests pass.
-- Scope: `src/integration/implicit.rs`, `tests/main/implicit_step.rs`,
-  `docs/verification/implicit-nonfinite.md`.
-- Next: test the iterate after the last correction before returning `NonConvergence`.
 
 ### H-ADR-STALE-006 — Revise ADR 0001 for the delivered embedded pair [patch] — status: todo
 

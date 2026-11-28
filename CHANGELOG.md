@@ -36,8 +36,13 @@ All notable changes to Horae are documented in this file.
   `SolveError::NonConvergence` instead of allowing NaN components to disappear
   from the infinity-norm reduction and falsely certify convergence. Finite
   residual arithmetic, dense solving, tolerance policy and the Newton bound
-  remain unchanged. The unchecked final Newton correction remains an open,
-  separate defect.
+  remain unchanged.
+- [patch] Test the iterate left by the sixteenth Newton correction of
+  `step_implicit_into` against the tolerance and the rounding floor. A step
+  that meets both only there returns `Ok` where it returned
+  `NonConvergence`. A step that spends the whole correction budget makes one
+  more `evaluate` call, and a system that fails there yields
+  `ImplicitStepError::System` where the step ended in `NonConvergence`.
 
 ## [0.2.2] - Unreleased
 
