@@ -46,27 +46,33 @@ guard. On the current default branch the full suite passes 50/50 (46 existing
 leaves plus the 4 new ones); the existing leaves, including the stage-time
 oracle, remain byte-identical.
 
-## Remaining defect and acceptance
+## Final correction and acceptance
 
-The final-correction defect remains open and is tracked as
-`H-IMPLICIT-LAST-CORRECTION` on the backlog: the sixteenth Newton correction
-is applied but its iterate is never tested against the residual tolerance, and
-this guard does not change iteration placement or budget. Two fixtures show
-the defect through the public API; neither is committed as a test, and the
-oracle of the item describes the first.
+The sixteenth Newton correction was once applied without testing its iterate
+against the tolerance, so a step that met the tolerance only there returned
+`NonConvergence`. The loop now makes at most sixteen corrections and tests
+the residual before each and once after the last: a step that exhausts the
+budget costs one more residual evaluation, and the budget and the acceptance
+rule are unchanged (horae#150). `tests/main/implicit_last_correction.rs`
+asserts the output, residual evaluations and Jacobian evaluations of two
+fixtures.
 
-- `y' = -50·y` in `f64` with the Jacobian reported as zero, `h = 0.01` and
-  `y_n = 1`. The residual after `k` corrections is `2^-(k+2)`. Tolerance
-  `1e-5` returns `Ok` after 17 evaluations; tolerance `5e-6` returns
-  `NonConvergence` although the output left in the buffer has residual
-  magnitude `2^-18`, below that tolerance.
-- `y_n = 1/2`, `h = 1`, `f(y) = y - 1/2 - y²` with Jacobian `1 - 2y`, in
-  `f64`. The residual is `g(y) = y²` and the Newton matrix is `2y`, so each
-  correction halves the iterate from the predictor `1/4`: after `k`
-  corrections `y = 2^-(k+2)` and `g = 2^-(2k+4)`, exactly in binary
-  arithmetic. Tolerance `2^-34` returns `Ok` after 17 evaluations; tolerance
-  `2^-36` returns `NonConvergence` with output `2^-18`, whose residual
-  `2^-36` meets the tolerance.
+- `y' = -r·y` with the Jacobian reported as zero and `a = h·r = 1/2`: the
+  Newton matrix is `I` and each correction multiplies the error by `-1/2`.
+  For `y_n = 1` the residual after `k` corrections is `2^-(k+2)`. With
+  `h = 2^-7` and `r = 64` every operation is exact in every shipped scalar,
+  so the iterate is asserted bitwise. Tolerance `5e-6` or `2^-18` returns
+  `Ok` after 18 evaluations and 16 Jacobians (before: `NonConvergence` after
+  17); `2^-17` returns `Ok` after 17; `2^-19` returns `NonConvergence` after
+  18. The board parameters `h = 0.01`, `r = 50` are asserted at `f64`.
+- `y_n = 1/2`, `h = 1`, `f(y) = y - 1/2 - y²` with Jacobian `1 - 2y`, at
+  `f64` and the wrapped `f64`. The residual is `g(y) = y²` and the Newton
+  matrix is `2y`, so each correction halves the iterate from the predictor
+  `1/4`: `y = 2^-(k+2)` and `g = 2^-(2k+4)` after `k` corrections, exactly in
+  binary arithmetic. Tolerance `2^-34` returns `Ok` after 17 evaluations,
+  `2^-36` returns `Ok` after 18 and `2^-37` returns `NonConvergence` after
+  18. A 24-bit mantissa cannot hold `y²` down to `2^-36`, so `f32` is
+  excluded.
 
 Exact baseline/candidate identities, regression hashes, native/lint/docs,
 MSRV/API/package and preservation controls are recorded with the private

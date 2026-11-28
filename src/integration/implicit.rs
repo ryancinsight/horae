@@ -10,16 +10,16 @@ use crate::time::{Instant, StepSize, TimeError};
 
 use super::{SliceRole, StepReport, WorkspaceError, error::ensure_dimension};
 
-/// Bound on the Newton iterations of one step before it is declared
+/// Bound on the Newton corrections of one step before it is declared
 /// non-convergent.
 ///
 /// Corrections and the repetitions of a correction rejected below its rounding
 /// floor (see [`CORRECTION_FLOOR_UNITS`]) share this one budget. Backward
 /// Euler's Newton is contractive once the iterate is near the solution, so the
 /// bound is a guard against a divergent predictor, not a tuning knob. The
-/// correction made in the last iteration is not tested against the residual,
-/// so a step that satisfies the tolerance only after that correction is
-/// reported as non-convergent (`docs/verification/implicit-nonfinite.md`).
+/// residual is tested before each correction and once after the last, so a
+/// step that makes all of them evaluates the residual one more time than the
+/// bound.
 const MAX_NEWTON_ITERATIONS: usize = 16;
 
 /// Twice the rounding multiple `3·ε` of one Newton correction.
@@ -314,7 +314,7 @@ where
     // Whether the last correction lies above its own rounding floor.
     let mut resolved = false;
     let floor_unit = T::from_f64(CORRECTION_FLOOR_UNITS) * T::EPSILON;
-    for _ in 0..MAX_NEWTON_ITERATIONS {
+    for corrections_made in 0..=MAX_NEWTON_ITERATIONS {
         evaluations += 1;
 
         // Residual g = y - y_n - h·f(t_{n+1}, y). The derivative is evaluated
@@ -344,6 +344,10 @@ where
         // accepted: see the acceptance rule above.
         if corrected && resolved && residual_norm <= tolerance {
             converged = true;
+            break;
+        }
+        // The residual after the last allowed correction was just tested.
+        if corrections_made == MAX_NEWTON_ITERATIONS {
             break;
         }
 

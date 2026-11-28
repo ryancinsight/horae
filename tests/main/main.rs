@@ -13,6 +13,7 @@ mod adaptive_order_contract;
 mod allocation;
 mod embedded;
 mod fixed_step;
+mod implicit_last_correction;
 mod implicit_nonfinite;
 mod implicit_predictor;
 mod implicit_step;
