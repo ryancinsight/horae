@@ -385,7 +385,7 @@ fn step_squared_residual<T: RealField>(tolerance: f64) -> Outcome<T, Infallible>
 fn squared_iterate<T: RealField>(corrections: usize) -> T {
     let mut iterate = T::from_f64(0.25);
     for _ in 0..corrections {
-        iterate = iterate * T::from_f64(0.5);
+        iterate *= T::from_f64(0.5);
     }
     iterate
 }
