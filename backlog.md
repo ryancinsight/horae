@@ -39,6 +39,13 @@
 - Oracle: a linear system with distinct decay rates per component; each component of the error estimate is nonzero and equals the primary minus embedded result computed independently; a mutant that leaves one estimate component unwritten fails.
 - Existing evidence: every `step_embedded_into` call site in `tests/` and the book is one-dimensional (`embedded.rs`, `adaptive_loop.rs`).
 
+<a id="horae-implicit-final-correction-fixtures"></a>
+## HORAE-IMPLICIT-FINAL-CORRECTION-FIXTURES — Pin the final correction on the remaining fixtures [patch] — todo
+- priority: verification; milestone: M-coherence; needs: none; scope: `tests/main/implicit_last_correction.rs`, `docs/verification/implicit-nonfinite.md`; basis: `88ec56ab535c`.
+- Outcome: the leaf pins the loop that tests the iterate after the last Newton correction (`git log --grep='^Item: H-IMPLICIT-LAST-CORRECTION'`) on three more cases: the board decay (`h = 0.01`, `r = 50`, tolerance `5e-6`, `f64`) asserts its output within a derived bound; the squared-residual fixture (`f(y) = y - 1/2 - y²`, exact Jacobian, residual `2^-(2k+4)`) returns `Ok` after 18 evaluations at tolerance `2^-36` at `f64` and `F64`; a system failing on the 18th `evaluate` call returns `ImplicitStepError::System`.
+- Oracle: `cargo nextest run -p horae-time -E 'test(last_correction)'` lists the added tests and passes; with the loop `0..MAX_NEWTON_CORRECTIONS` and no final test each fails.
+- Finding (reviewer emulation, not run): at `f32` the squared-residual fixture ends `Ok` after 13 evaluations and 11 Jacobians, since `y - 1/2 - y²` spans `2^-1` to `2^-36` and rounds; `y²` itself is exact. Either run it at `f32` with counts derived and checked by a run, or state this limit in the fixture.
+
 <a id="horae-scalar-scope-reduced-precision"></a>
 ## HORAE-SCALAR-SCOPE-REDUCED-PRECISION — Decide the scalar set the public bounds admit [major] — todo
 - priority: verification; milestone: M-coherence; needs: none; scope: `src/integration`, `src/adaptive`, `docs/book`, `docs/adr/0003-public-provider-boundary.md`; basis: `056714220c0a798de5281bafcd38fb34fe988df3`.

@@ -2,9 +2,9 @@
 //! residual tolerance like every earlier one.
 //!
 //! A budget of `n` corrections allows `n + 1` residual tests after the
-//! predictor. The fixtures have a closed-form residual sequence, so the
-//! tolerance sits between the residuals after the fifteenth and sixteenth
-//! correction.
+//! predictor. The fixtures have closed-form residuals, so the tolerance, the
+//! finiteness guard and the rounding floor are each exercised at the test
+//! that follows the last correction.
 
 use core::{cell::Cell, convert::Infallible};
 
@@ -28,28 +28,23 @@ const fn evaluations_after(corrections: usize) -> usize {
     corrections + 2
 }
 
-/// Residual `2^-18` after the sixteenth correction of the halving fixtures.
+/// The halving decay's residual after the sixteenth correction, `2^-18`.
 const RESIDUAL_AFTER_SIXTEENTH: f64 = 1.0 / 262_144.0;
 
-/// Residual `2^-17` after the fifteenth correction of the halving fixtures.
+/// The halving decay's residual after the fifteenth correction, `2^-17`.
 const RESIDUAL_AFTER_FIFTEENTH: f64 = 1.0 / 131_072.0;
 
-/// Tolerance of the board oracle, `5e-6`: above `2^-18 = 3.81e-6`, so the
-/// sixteenth correction satisfies it, and below `2^-17 = 7.63e-6`, so the
-/// fifteenth does not.
+/// Tolerance `5e-6` of the board oracle, between `2^-18 = 3.81e-6` and
+/// `2^-17 = 7.63e-6`.
 const BOARD_TOLERANCE: f64 = 5.0e-6;
 
 /// Tolerance `2^-19`, half the residual after the sixteenth correction.
 const TOLERANCE_BELOW_SIXTEENTH: f64 = 1.0 / 524_288.0;
 
-/// Squared-residual fixture: residual `2^-34` after the fifteenth correction.
-const SQUARE_RESIDUAL_AFTER_FIFTEENTH: f64 = 1.0 / 17_179_869_184.0;
-
-/// Squared-residual fixture: residual `2^-36` after the sixteenth correction.
-const SQUARE_RESIDUAL_AFTER_SIXTEENTH: f64 = 1.0 / 68_719_476_736.0;
-
-/// Squared-residual fixture: `2^-37`, below the residual after the sixteenth.
-const SQUARE_TOLERANCE_BELOW_SIXTEENTH: f64 = 1.0 / 137_438_953_472.0;
+/// Tolerance of the cancelling-kick fixture: above the residual `1` of each
+/// cancelling correction, below the residual `2^(p + 1) - 1` of each kick
+/// (`p >= 23` mantissa bits).
+const CANCELLING_TOLERANCE: f64 = 4.0;
 
 /// Calls made on a fixture.
 #[derive(Default)]
@@ -58,19 +53,51 @@ struct Calls {
     jacobians: Cell<usize>,
 }
 
-/// Decay `y' = -r·y` whose Jacobian is reported as zero, so the Newton matrix
-/// is the identity and the iteration is `y <- y - g(y)`.
+impl Calls {
+    fn count_evaluation(&self) -> usize {
+        self.evaluations.set(self.evaluations.get() + 1);
+        self.evaluations.get()
+    }
+
+    fn count_jacobian(&self) -> usize {
+        self.jacobians.set(self.jacobians.get() + 1);
+        self.jacobians.get()
+    }
+}
+
+/// What the fixture reports as its Jacobian.
 ///
-/// With `a = h·r` the residual is `g = (1 + a)·y - y_n` and the iteration
-/// multiplies the error by `-a` per correction. For `a = 1/2` the residual
-/// after `k` corrections from the predictor `(1 - a)·y_n` is `2^-(k + 2)`
-/// when `y_n = 1`.
-struct ZeroJacobianDecay<T> {
+/// `Zero` makes the Newton matrix the identity, so for the decay `y' = -r·y`
+/// with `a = h·r` the residual is `g = (1 + a)·y - y_n` and the iteration
+/// `y <- y - g(y)` multiplies the error by `-a` per correction. For `a = 1/2`
+/// and `y_n = 1` the residual after `k` corrections from the predictor
+/// `(1 - a)·y_n` is `2^-(k + 2)`.
+///
+/// `Alternating` takes `h = 1`, `r = 1`, `y_n = 1`: the residual is
+/// `g(y) = 2y - 1` and the predictor `0`. Let `ε = 2^-p` be the machine
+/// epsilon of `T`. Odd Jacobian calls report `1 - ε`: the Newton matrix is
+/// `1 - (1 - ε) = ε`, the increment `1/ε = 2^p`, the iterate `2^p` and its
+/// residual `2^(p + 1) - 1`, which has `p + 1` bits. Even calls report
+/// `-(1 - ε)`: the Newton matrix is `2 - ε = 2·(1 - 2^-(p + 1))`, the
+/// increment `-(2^(p + 1) - 1)/(2 - ε) = -2^p` exactly, the iterate returns to
+/// `0` and the residual to `-1`. The rounding floor of an even correction is
+/// `6ε·(2^p + 0 + 1) = 6 + 6ε`, above the scale `max(|y_n|, |y|) = 1`, so it
+/// is never accepted, though its residual `1` is within the tolerance. The
+/// sixteenth correction is even; the backward-Euler value is `1/2`.
+enum JacobianReport {
+    Zero,
+    Alternating,
+}
+
+/// Decay `y' = -r·y`; `evaluate` returns NaN on call `nan_on_call`.
+struct Decay<T> {
     rate: T,
+    jacobian: JacobianReport,
+    nan_on_call: Option<usize>,
     calls: Calls,
 }
 
-impl<T: RealField> ExplicitSystem<T> for ZeroJacobianDecay<T> {
+impl<T: RealField> ExplicitSystem<T> for Decay<T> {
     type Error = Infallible;
 
     fn evaluate(
@@ -79,68 +106,44 @@ impl<T: RealField> ExplicitSystem<T> for ZeroJacobianDecay<T> {
         state: &[T],
         derivative: &mut [T],
     ) -> Result<(), Self::Error> {
-        self.calls.evaluations.set(self.calls.evaluations.get() + 1);
-        derivative[0] = -self.rate * state[0];
+        let call = self.calls.count_evaluation();
+        derivative[0] = if self.nan_on_call == Some(call) {
+            T::NAN
+        } else {
+            -self.rate * state[0]
+        };
         Ok(())
     }
 }
 
-impl<T: RealField> ImplicitSystem<T> for ZeroJacobianDecay<T> {
+impl<T: RealField> ImplicitSystem<T> for Decay<T> {
     fn jacobian(
         &self,
         _time: Instant<T>,
         _state: &[T],
         jacobian: &mut [T],
     ) -> Result<(), Self::Error> {
-        self.calls.jacobians.set(self.calls.jacobians.get() + 1);
-        jacobian[0] = T::ZERO;
+        let call = self.calls.count_jacobian();
+        let kick = T::ONE - T::EPSILON;
+        jacobian[0] = match self.jacobian {
+            JacobianReport::Zero => T::ZERO,
+            JacobianReport::Alternating if call % 2 == 1 => kick,
+            JacobianReport::Alternating => -kick,
+        };
         Ok(())
     }
 }
 
-/// `f(y) = y - 1/2 - y²` with its exact Jacobian `1 - 2y`.
-///
-/// For `h = 1` and `y_n = 1/2` the residual is `g(y) = y²` and the Newton
-/// matrix is `2y`, so each correction halves the iterate: the predictor is
-/// `1/4` and after `k` corrections `y = 2^-(k + 2)` and `g = 2^-(2k + 4)`.
-struct SquaredResidual {
-    calls: Calls,
-}
-
-impl<T: RealField> ExplicitSystem<T> for SquaredResidual {
-    type Error = Infallible;
-
-    fn evaluate(
-        &self,
-        _time: Instant<T>,
-        state: &[T],
-        derivative: &mut [T],
-    ) -> Result<(), Self::Error> {
-        self.calls.evaluations.set(self.calls.evaluations.get() + 1);
-        derivative[0] = state[0] - T::from_f64(0.5) - state[0] * state[0];
-        Ok(())
-    }
-}
-
-impl<T: RealField> ImplicitSystem<T> for SquaredResidual {
-    fn jacobian(
-        &self,
-        _time: Instant<T>,
-        state: &[T],
-        jacobian: &mut [T],
-    ) -> Result<(), Self::Error> {
-        self.calls.jacobians.set(self.calls.jacobians.get() + 1);
-        jacobian[0] = T::ONE - T::from_f64(2.0) * state[0];
-        Ok(())
-    }
-}
-
-/// How a step ends and what it cost.
-struct Outcome<T> {
-    converged: bool,
+struct Outcome<T, E> {
+    /// The step's report evaluation count, or its failure.
+    result: Result<usize, ImplicitStepError<E>>,
     output: T,
     evaluations: usize,
     jacobians: usize,
+}
+
+fn non_convergence<E>() -> Result<usize, ImplicitStepError<E>> {
+    Err(ImplicitStepError::Solve(SolveError::NonConvergence))
 }
 
 fn run<T, System>(
@@ -149,10 +152,10 @@ fn run<T, System>(
     duration: T,
     initial: T,
     tolerance: T,
-) -> Outcome<T>
+) -> Outcome<T, System::Error>
 where
     T: RealField,
-    System: ImplicitSystem<T, Error = Infallible>,
+    System: ImplicitSystem<T>,
 {
     let arrange = tracing::info_span!("arrange").entered();
     let start = Instant::new(Time::from_base(T::ZERO)).expect("finite origin");
@@ -175,19 +178,10 @@ where
     drop(act);
 
     let _assert = tracing::info_span!("assert").entered();
-    let evaluations = calls.evaluations.get();
-    let converged = match result {
-        Ok(report) => {
-            assert_eq!(report.evaluations(), evaluations);
-            true
-        }
-        Err(ImplicitStepError::Solve(SolveError::NonConvergence)) => false,
-        Err(other) => panic!("unexpected failure {other:?}"),
-    };
     Outcome {
-        converged,
+        result: result.map(|report| report.evaluations()),
         output: output[0],
-        evaluations,
+        evaluations: calls.evaluations.get(),
         jacobians: calls.jacobians.get(),
     }
 }
@@ -197,9 +191,14 @@ where
 /// `h = 2^-7` and `r = 64` make every product and sum of the iteration exact:
 /// the iterate after `k` corrections is a dyadic rational with `k + 1`
 /// fractional bits, within every shipped mantissa for `k <= 16`.
-fn step_halving_decay<T: RealField>(tolerance: f64) -> Outcome<T> {
-    let system = ZeroJacobianDecay {
+fn step_halving_decay<T: RealField>(
+    tolerance: f64,
+    nan_on_call: Option<usize>,
+) -> Outcome<T, Infallible> {
+    let system = Decay {
         rate: T::from_f64(64.0),
+        jacobian: JacobianReport::Zero,
+        nan_on_call,
         calls: Calls::default(),
     };
     run(
@@ -222,69 +221,56 @@ fn halving_iterate<T: RealField>(corrections: usize) -> T {
 }
 
 fn verify_halving_decay<T: RealField>() {
-    // The sixteenth correction meets the board tolerance: accepted there,
-    // with the residual test that follows it.
-    for tolerance in [BOARD_TOLERANCE, RESIDUAL_AFTER_SIXTEENTH] {
-        let outcome = step_halving_decay::<T>(tolerance);
-        assert!(outcome.converged, "tolerance {tolerance}");
-        assert_eq!(outcome.output, halving_iterate::<T>(CORRECTION_BUDGET));
-        assert_eq!(outcome.evaluations, evaluations_after(CORRECTION_BUDGET));
-        assert_eq!(outcome.jacobians, CORRECTION_BUDGET);
+    // Accepted at the first residual test that meets the tolerance: after
+    // the sixteenth correction for the board tolerance and `2^-18`, after
+    // the fifteenth for `2^-17`, with no further correction.
+    for (tolerance, corrections) in [
+        (BOARD_TOLERANCE, CORRECTION_BUDGET),
+        (RESIDUAL_AFTER_SIXTEENTH, CORRECTION_BUDGET),
+        (RESIDUAL_AFTER_FIFTEENTH, CORRECTION_BUDGET - 1),
+    ] {
+        let outcome = step_halving_decay::<T>(tolerance, None);
+        let evaluations = evaluations_after(corrections);
+        assert_eq!(outcome.result, Ok(evaluations), "tolerance {tolerance}");
+        assert_eq!(outcome.output, halving_iterate::<T>(corrections));
+        assert_eq!(outcome.evaluations, evaluations);
+        assert_eq!(outcome.jacobians, corrections);
     }
-
-    // The fifteenth correction already meets its residual: the step stops
-    // there and makes no sixteenth correction.
-    let outcome = step_halving_decay::<T>(RESIDUAL_AFTER_FIFTEENTH);
-    assert!(outcome.converged);
-    assert_eq!(outcome.output, halving_iterate::<T>(CORRECTION_BUDGET - 1));
-    assert_eq!(
-        outcome.evaluations,
-        evaluations_after(CORRECTION_BUDGET - 1)
-    );
-    assert_eq!(outcome.jacobians, CORRECTION_BUDGET - 1);
 
     // No tolerance reachable within the budget: all corrections are made, the
     // last is tested, and the step still fails; no seventeenth is made.
-    let outcome = step_halving_decay::<T>(TOLERANCE_BELOW_SIXTEENTH);
-    assert!(!outcome.converged);
+    let outcome = step_halving_decay::<T>(TOLERANCE_BELOW_SIXTEENTH, None);
+    assert_eq!(outcome.result, non_convergence());
     assert_eq!(outcome.evaluations, evaluations_after(CORRECTION_BUDGET));
     assert_eq!(outcome.jacobians, CORRECTION_BUDGET);
 }
 
-fn step_squared_residual<T: RealField>(tolerance: f64) -> Outcome<T> {
-    let system = SquaredResidual {
+/// A NaN derivative in the test after the last correction fails the step
+/// although the tolerance would accept the finite iterate: an unguarded
+/// maximum discards NaN and leaves a zero norm.
+fn verify_nonfinite_last_residual<T: RealField>() {
+    let last_test = evaluations_after(CORRECTION_BUDGET);
+    for tolerance in [RESIDUAL_AFTER_SIXTEENTH, TOLERANCE_BELOW_SIXTEENTH] {
+        let outcome = step_halving_decay::<T>(tolerance, Some(last_test));
+        assert_eq!(outcome.result, non_convergence(), "tolerance {tolerance}");
+        assert_eq!(outcome.evaluations, last_test);
+        assert_eq!(outcome.jacobians, CORRECTION_BUDGET);
+    }
+}
+
+/// An iterate below its rounding floor is not accepted at the last test
+/// either, whatever its residual.
+fn verify_unresolved_last_correction<T: RealField>() {
+    let system = Decay {
+        rate: T::ONE,
+        jacobian: JacobianReport::Alternating,
+        nan_on_call: None,
         calls: Calls::default(),
     };
-    run(
-        &system,
-        &system.calls,
-        T::ONE,
-        T::from_f64(0.5),
-        T::from_f64(tolerance),
-    )
-}
-
-/// The squared-residual fixture needs `y²` exact down to `2^-36`, which a
-/// 53-bit mantissa holds and a 24-bit one does not, so it runs at `f64` only.
-fn verify_squared_residual<T: RealField>() {
-    let sixteenth = T::from_f64(1.0 / 262_144.0);
-    let outcome = step_squared_residual::<T>(SQUARE_RESIDUAL_AFTER_SIXTEENTH);
-    assert!(outcome.converged);
-    assert_eq!(outcome.output, sixteenth);
-    assert_eq!(outcome.evaluations, evaluations_after(CORRECTION_BUDGET));
-    assert_eq!(outcome.jacobians, CORRECTION_BUDGET);
-
-    let outcome = step_squared_residual::<T>(SQUARE_RESIDUAL_AFTER_FIFTEENTH);
-    assert!(outcome.converged);
-    assert_eq!(outcome.output, T::from_f64(1.0 / 131_072.0));
-    assert_eq!(
-        outcome.evaluations,
-        evaluations_after(CORRECTION_BUDGET - 1)
-    );
-    assert_eq!(outcome.jacobians, CORRECTION_BUDGET - 1);
-
-    let outcome = step_squared_residual::<T>(SQUARE_TOLERANCE_BELOW_SIXTEENTH);
-    assert!(!outcome.converged);
+    let tolerance = T::from_f64(CANCELLING_TOLERANCE);
+    let outcome = run(&system, &system.calls, T::ONE, T::ONE, tolerance);
+    assert_eq!(outcome.result, non_convergence());
+    assert_eq!(outcome.output, T::ZERO);
     assert_eq!(outcome.evaluations, evaluations_after(CORRECTION_BUDGET));
     assert_eq!(outcome.jacobians, CORRECTION_BUDGET);
 }
@@ -298,23 +284,17 @@ fn the_last_correction_is_tested_against_the_tolerance() {
 }
 
 #[test]
-fn the_last_correction_of_the_board_decay_is_tested() {
-    // `h = 0.01`, `r = 50`: `a = 1/2` as in the halving fixture but with
-    // inexact products. The residual `2^-18` after the sixteenth correction
-    // differs from the tolerance by more than `1e-6`, many orders above the
-    // rounding of its evaluation at `f64`.
-    let system = ZeroJacobianDecay {
-        rate: 50.0_f64,
-        calls: Calls::default(),
-    };
-    let outcome = run(&system, &system.calls, 0.01, 1.0, BOARD_TOLERANCE);
-    assert!(outcome.converged);
-    assert_eq!(outcome.evaluations, evaluations_after(CORRECTION_BUDGET));
-    assert_eq!(outcome.jacobians, CORRECTION_BUDGET);
+fn a_nonfinite_residual_after_the_last_correction_fails_the_step() {
+    verify_nonfinite_last_residual::<f32>();
+    verify_nonfinite_last_residual::<f64>();
+    verify_nonfinite_last_residual::<eunomia::F32>();
+    verify_nonfinite_last_residual::<eunomia::F64>();
 }
 
 #[test]
-fn the_last_correction_of_a_nonlinear_step_is_tested() {
-    verify_squared_residual::<f64>();
-    verify_squared_residual::<eunomia::F64>();
+fn the_last_correction_is_accepted_only_above_its_rounding_floor() {
+    verify_unresolved_last_correction::<f32>();
+    verify_unresolved_last_correction::<f64>();
+    verify_unresolved_last_correction::<eunomia::F32>();
+    verify_unresolved_last_correction::<eunomia::F64>();
 }

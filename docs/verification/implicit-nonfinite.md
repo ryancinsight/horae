@@ -42,37 +42,27 @@ f32/f64. It covers all-NaN and mixed finite/nonfinite components, finite-input
 overflow, matrix/correction failure, and workspace reuse with the exact
 finite vector solution `[4/(1+.5*2), 8/(1+.5*6)] = [2,2]`.
 All four regressions fail on unchanged production source and pass after the
-guard. On the current default branch the full suite passes 50/50 (46 existing
-leaves plus the 4 new ones); the existing leaves, including the stage-time
-oracle, remain byte-identical.
+guard. At that change the full suite passed 50/50 (46 existing leaves plus
+the 4 new ones); the existing leaves, including the stage-time oracle,
+remained byte-identical.
 
 ## Final correction and acceptance
 
-The sixteenth Newton correction was once applied without testing its iterate
-against the tolerance, so a step that met the tolerance only there returned
-`NonConvergence`. The loop now makes at most sixteen corrections and tests
-the residual before each and once after the last: a step that exhausts the
-budget costs one more residual evaluation, and the budget and the acceptance
-rule are unchanged (horae#150). `tests/main/implicit_last_correction.rs`
-asserts the output, residual evaluations and Jacobian evaluations of two
-fixtures.
-
-- `y' = -r·y` with the Jacobian reported as zero and `a = h·r = 1/2`: the
-  Newton matrix is `I` and each correction multiplies the error by `-1/2`.
-  For `y_n = 1` the residual after `k` corrections is `2^-(k+2)`. With
-  `h = 2^-7` and `r = 64` every operation is exact in every shipped scalar,
-  so the iterate is asserted bitwise. Tolerance `5e-6` or `2^-18` returns
-  `Ok` after 18 evaluations and 16 Jacobians (before: `NonConvergence` after
-  17); `2^-17` returns `Ok` after 17; `2^-19` returns `NonConvergence` after
-  18. The board parameters `h = 0.01`, `r = 50` are asserted at `f64`.
-- `y_n = 1/2`, `h = 1`, `f(y) = y - 1/2 - y²` with Jacobian `1 - 2y`, at
-  `f64` and the wrapped `f64`. The residual is `g(y) = y²` and the Newton
-  matrix is `2y`, so each correction halves the iterate from the predictor
-  `1/4`: `y = 2^-(k+2)` and `g = 2^-(2k+4)` after `k` corrections, exactly in
-  binary arithmetic. Tolerance `2^-34` returns `Ok` after 17 evaluations,
-  `2^-36` returns `Ok` after 18 and `2^-37` returns `NonConvergence` after
-  18. A 24-bit mantissa cannot hold `y²` down to `2^-36`, so `f32` is
-  excluded.
+The sixteenth Newton correction was once applied without testing its iterate,
+so a step that met the tolerance only there returned `NonConvergence`. The
+loop now tests the residual before each correction and once after the last
+(horae#150). The correction budget and the acceptance rule are unchanged; a
+step that spends the budget makes one more `evaluate` call, and a system
+failing there yields `System` where the step ended in `NonConvergence`.
+`tests/main/implicit_last_correction.rs` asserts output, evaluation and
+Jacobian counts at f32, f64 and the wrapped scalars, with each fixture's
+derivation in its Rustdoc: a halving decay whose tolerance falls between the
+residuals after the fifteenth and sixteenth correction (`5e-6` returns `Ok`
+after 18 evaluations, where it returned `NonConvergence` after 17); the same
+decay with NaN from the 18th `evaluate` call, which `NonConvergence` covers
+through the finiteness guard; and a Jacobian alternating between a kick and
+its undoing, whose sixteenth correction lies below its rounding floor with
+residual `1` and returns `NonConvergence` at tolerance `4`.
 
 Exact baseline/candidate identities, regression hashes, native/lint/docs,
 MSRV/API/package and preservation controls are recorded with the private
