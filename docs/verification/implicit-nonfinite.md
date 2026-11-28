@@ -56,13 +56,23 @@ step that spends the budget makes one more `evaluate` call, and a system
 failing there yields `System` where the step ended in `NonConvergence`.
 `tests/main/implicit_last_correction.rs` asserts output, evaluation and
 Jacobian counts at f32, f64 and the wrapped scalars, with each fixture's
-derivation in its Rustdoc: a halving decay whose tolerance falls between the
-residuals after the fifteenth and sixteenth correction (`5e-6` returns `Ok`
-after 18 evaluations, where it returned `NonConvergence` after 17); the same
-decay with NaN from the 18th `evaluate` call, which `NonConvergence` covers
-through the finiteness guard; and a Jacobian alternating between a kick and
-its undoing, whose sixteenth correction lies below its rounding floor with
-residual `1` and returns `NonConvergence` at tolerance `4`.
+derivation in its Rustdoc:
+
+- a halving decay whose tolerance falls between the residuals after the
+  fifteenth and sixteenth correction (`5e-6` returns `Ok` after 18
+  evaluations, where it returned `NonConvergence` after 17), and the same
+  decay at `f64` with the board's `h = 0.01`, `r = 50`, whose output stays
+  within `16ε` of the exact iteration;
+- the same decay with NaN from the 18th `evaluate` call, which
+  `NonConvergence` covers through the finiteness guard, and with an error
+  from that call, which the step returns as `System`;
+- a Jacobian alternating between a kick and its undoing, whose sixteenth
+  correction lies below its rounding floor with residual `1` and returns
+  `NonConvergence` at tolerance `4`;
+- `f(y) = y - 1/2 - y²` with its exact Jacobian: at `f64` the residual after
+  `k` corrections is `2^-(2k+4)` and tolerance `2^-36` returns `Ok` after 18
+  evaluations; at `f32` the derivative rounds at `y = 2^-13`, the residual is
+  exactly `0` and the step returns `Ok` after 13 evaluations.
 
 Exact baseline/candidate identities, regression hashes, native/lint/docs,
 MSRV/API/package and preservation controls are recorded with the private
